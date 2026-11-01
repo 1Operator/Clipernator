@@ -987,6 +987,8 @@ const BT_GIFTBOX = new BTSelector(
       }
     } else {
       SFX.syncGiftBoxWindUp(id, false);
+      ai.windupTimer = Math.max(0, ai.windupTimer - 1);
+      if (ai.windupTimer === 0) SFX.stopEntitySound('giftBoxWindUp', id);
     }
 
     return BT.RUNNING;
@@ -998,8 +1000,16 @@ const BT_GIFTBOX = new BTSelector(
 // - single updateHUD after all mutations
 // - waveKills for giftbox only incremented if entity still exists
 function _giftBoxExplode(id, pos, gs) {
+  if (!ECS.has(id, 'pos')) return;
+  const ai = ECS.get(id, 'ai');
+  if (ai && ai.explosionStarted) return;
+  if (ai) {
+    ai.exploded = true;
+    ai.explosionStarted = true;
+  }
   SFX.stopEntitySound('giftBoxWindUp', id);
   SFX.playAt('partyExplosion', pos.x, pos.y, 0.85);
+  triggerGiftBoxChainReaction(pos.x, pos.y, CFG.GIFT_BOX_EXPLOSION_RADIUS, id, gs);
   const vel = ECS.get(id, 'vel');
   if (vel) { vel.vx = 0; vel.vy = 0; }
   spawnPartyParticles(pos.x, pos.y);
@@ -1050,6 +1060,24 @@ function _giftBoxExplode(id, pos, gs) {
 
   updateHUD();
   setTimeout(() => checkWave(), 0);
+}
+
+function triggerGiftBoxChainReaction(x, y, radius, sourceId, gameState = gs) {
+  const chainIds = [];
+  for (const id of ECS.query('enemy', 'pos', 'ai')) {
+    if (id === sourceId || ECS.get(id, 'enemy').type !== 'giftBox') continue;
+    const ai = ECS.get(id, 'ai');
+    const pos = ECS.get(id, 'pos');
+    if (ai.explosionStarted || Math.hypot(pos.x - x, pos.y - y) >= radius) continue;
+    chainIds.push(id);
+  }
+  for (const id of chainIds) {
+    if (!ECS.has(id, 'pos')) continue;
+    const ai = ECS.get(id, 'ai');
+    if (ai.explosionStarted) continue;
+    ai.exploded = true;
+    _giftBoxExplode(id, ECS.get(id, 'pos'), gameState);
+  }
 }
 
 // ── PartyHat: fast + periodic speed dives ──
@@ -1202,6 +1230,7 @@ if (ai.hatState === 'IDLE') {
     }
     ai.hatState = 'RECOVER'; ai.hatTimer = 50;
     ai.hatAnimFrame = 0; ai.hatAnimTimer = 0;
+    ai.recoverSoundPlayed = false;
     vel.vx *= 0.15; vel.vy *= 0.15;
     spawnParticles(pos.x, pos.y, '#ffdd00', 14);
     gs.shakeX = 8; gs.shakeY = 8;
@@ -1209,6 +1238,10 @@ if (ai.hatState === 'IDLE') {
 } else if (ai.hatState === 'RECOVER') {
   vel.vx *= 0.88; vel.vy *= 0.88;
   if (ai.hatAnimTimer >= 12) { ai.hatAnimTimer = 0; ai.hatAnimFrame = Math.min(3, ai.hatAnimFrame + 1); }
+  if (ai.hatAnimFrame >= 1 && !ai.recoverSoundPlayed) {
+    SFX.playAt('partyHatRecover', pos.x, pos.y, 0.5);
+    ai.recoverSoundPlayed = true;
+  }
   ai.hatTimer--;
   if (ai.hatTimer <= 0) {
     ai.hatState = 'IDLE'; ai.hatTimer = 55 + Math.floor(Math.random() * 35);

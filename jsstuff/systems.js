@@ -83,6 +83,8 @@ function detonateExplosiveBullet(b, hitX, hitY, playerCredited = true) {
   spawnPartyParticles(hitX, hitY);
   spawnParticles(hitX, hitY, '#00ff88', 20);
   spawnParticles(hitX, hitY, '#ffffff', 12);
+  SFX.playAt('partyExplosion', hitX, hitY, 0.75);
+  triggerGiftBoxChainReaction(hitX, hitY, EXPLODE_RADIUS);
   gs.shakeX = 18; gs.shakeY = 18;
   gs.glowExplosionX = hitX; gs.glowExplosionY = hitY; gs.glowExplosionTimer = 10;
   const toKill = [];
@@ -120,6 +122,8 @@ function triggerSFPHit() {
   
   if (gs.sfpFull) {
     const ppos = ECS.get(gs.playerId,'pos');
+    SFX.playAt('partyExplosion', ppos.x, ppos.y, 0.75);
+    triggerGiftBoxChainReaction(ppos.x, ppos.y, 400);
     const shockDmg = baseBulletDamage()*5;
     for (const id of ECS.query('enemy','pos','hp','vel')) {
       const epos=ECS.get(id,'pos'), ehp=ECS.get(id,'hp'), evel=ECS.get(id,'vel');

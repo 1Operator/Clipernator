@@ -24,6 +24,7 @@ const SFX = {
     try {
       const clone = src.cloneNode();
       clone.volume = volumeOverride !== undefined ? volumeOverride : 0.6;
+      if (key === 'partyExplosion') clone.playbackRate = 0.96 + Math.random() * 0.08;
       const playback = clone.play();
       const reportPauseFailure = error => {
         if (key === 'pause') console.warn('Unable to play pause sound.', error);
@@ -66,7 +67,9 @@ const SFX = {
     if (key === 'giftBoxWindUp') {
       const giftBoxEntry = this._giftBoxAudio.get(entityId);
       if (giftBoxEntry) {
-        giftBoxEntry.source?.stop();
+        const source = giftBoxEntry.source;
+        giftBoxEntry.source = null;
+        source?.stop();
         giftBoxEntry.gain?.disconnect();
         this._giftBoxAudio.delete(entityId);
       }
@@ -128,6 +131,7 @@ const SFX = {
     entry.direction = direction;
     entry.sourcePosition = position;
     entry.sourceStartedAt = context.currentTime;
+    if (direction === 'forward') entry.hasPlayed = true;
     source.onended = () => {
       if (entry.source !== source) return;
       entry.source = null;
@@ -135,6 +139,9 @@ const SFX = {
       entry.gain = null;
       if (entry.active && direction === 'forward') {
         this._startGiftBoxAudio(entry, buffer, 'forward', buffer.duration / 2);
+      } else if (direction === 'reverse') {
+        entry.direction = 'stopped';
+        entry.sourcePosition = 0;
       }
     };
     source.start(0, offset);
@@ -197,6 +204,7 @@ const SFX = {
         );
       }
       const direction = entry.active ? 'forward' : 'reverse';
+      if (direction === 'reverse' && !entry.hasPlayed) return;
       const position = direction === 'forward' ? buffer.duration / 2 : buffer.duration / 2;
       this._startGiftBoxAudio(entry, buffer, direction, position);
     });
@@ -249,6 +257,7 @@ const SFX = {
     try {
       const clone = src.cloneNode();
       clone.volume = Math.max(0, Math.min(1, base * spatial));
+      if (key === 'partyExplosion') clone.playbackRate = 0.96 + Math.random() * 0.08;
       clone.play().catch(() => {});
     } catch(e) {}
   },
@@ -293,6 +302,7 @@ SFX.load('balloonSpawn',     'sounds/soundeffects/enemies/WaterBalloon/BalloonSp
 SFX.load('frostingLaunch',   'sounds/soundeffects/enemies/CakeBoss/FrostingLaunch.mp3');
 SFX.load('frostingHit',      'sounds/soundeffects/enemies/CakeBoss/FrostingHit.mp3');
 SFX.load('partyHatAttack',   'sounds/soundeffects/enemies/PartyHat/PartyHatAttack.mp3');
+SFX.load('partyHatRecover',  'sounds/soundeffects/enemies/PartyHat/PartyHatRecover.mp3');
 SFX.load('partyHatDie',      'sounds/soundeffects/enemies/PartyHat/PartyHatDie.mp3');
 SFX.load('partyHatDrop',     'sounds/soundeffects/enemies/PartyHat/PartyHatDrop.mp3');
 SFX.load('partyHatRide',     'sounds/soundeffects/enemies/PartyHat/PartyHatRide.mp3');

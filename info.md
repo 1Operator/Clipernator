@@ -157,9 +157,11 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | `Utensil/Spoon/SpoonDamage.mp3` | Wired: a spoon damages the player. |
 | `PartyHat/PartyHatSpawn.mp3` | Wired: a Party Hat spawns. |
 | `PartyHat/PartyHatAttack.mp3` | Wired: a Party Hat begins its dive attack. |
+| `PartyHat/PartyHatRecover.mp3` | Wired: plays as the Party Hat starts its recovery bounce after a dive. |
 | `PartyHat/PartyHatRide.mp3`, `PartyHatRide2.mp3` | Wired: randomized cue when a Party Hat rides an enemy. |
 | `PartyHat/PartyHatDrop.mp3` | Wired: a Party Hat loses its ride target. |
 | `PartyHat/PartyHatDie.mp3` | Wired: a Party Hat entity is destroyed. |
+| `GiftBox/GiftBoxWindUp.mp3` | Wired: winds forward while the player is in range and reverses as its fuse winds down out of range; silence when fully unwound. |
 | `WaterBalloon/BalloonSpawn.mp3` | Wired: a Water Balloon enemy spawns. |
 | `CakeBoss/FrostingLaunch.mp3` | Wired: the Cake Boss launches frosting projectiles. |
 | `CakeBoss/FrostingHit.mp3` | Wired: a frosting projectile lands. |
@@ -176,8 +178,9 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | `Chips/GoldenChipPickup.mp3` | Wired: a golden chip is collected, including from Chippy. |
 | `items/ItemConfirm.mp3` | Wired: confirms an item in the opening draft or in-game choice, and plays when an item is picked up or Glowsticks are unlocked. |
 | `items/BirthdayParty/BirthdayParty.mp3` | Wired: intended to play when the Birthday Party item effect activates and freezes enemy movement. The current file is 1 byte and needs valid audio data to be audible. |
-| `items/ItemReveal.mp3` | Wired: plays at normal speed when in-game item choices appear; cards reveal immediately, at about +0.67 seconds, and at about +1.33 seconds. The fourth Floor 2 card reveals with the third. |
+| `items/ItemReveal.mp3` | Wired: plays at normal speed when in-game item choices appear; cards reveal immediately, at about +0.67 seconds, and at about +1.33 seconds, each with a 1.5-second impact-scale animation. The fourth Floor 2 card reveals with the third. |
 | `misc/CandleLight.mp3` | Wired: plays whenever one of the player's Cursed Candles relights. Reuse this cue for future boss-candle lighting events. |
+| `misc/Explosions/PartyExplosion.mp3` | Wired: plays on explosive projectiles, Gift Box explosions, and the full Shake Fizzle Pop shockwave, with slight randomized pitch variation. |
 
 ### Interface and Opening Sequence
 
