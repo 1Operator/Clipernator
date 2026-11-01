@@ -6,6 +6,9 @@ const SFX = {
   _cache: {},
   _loops: {},
   _entityAudio: new Map(),
+  _giftBoxAudio: new Map(),
+  _decodedAudio: new Map(),
+  _audioContext: null,
   _muted: false,
 
   load(key, src) {
@@ -16,43 +19,19 @@ const SFX = {
 
   play(key, volumeOverride, onStarted) {
     if (this._muted) return;
-    if (key === 'pause') {
-      this.playPauseFallback();
-      return;
-    }
     const src = this._cache[key];
     if (!src) return;
     try {
       const clone = src.cloneNode();
       clone.volume = volumeOverride !== undefined ? volumeOverride : 0.6;
       const playback = clone.play();
-      if (onStarted) playback.then(onStarted).catch(() => {});
-      else playback.catch(() => {});
-    } catch(e) {}
-  },
-
-  playPauseFallback() {
-    if (this._muted) return;
-    try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      const context = new AudioContextClass();
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      const now = context.currentTime;
-      oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(740, now);
-      oscillator.frequency.exponentialRampToValueAtTime(440, now + 0.09);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(now);
-      oscillator.stop(now + 0.13);
-      oscillator.addEventListener('ended', () => context.close());
+      const reportPauseFailure = error => {
+        if (key === 'pause') console.warn('Unable to play pause sound.', error);
+      };
+      if (onStarted) playback.then(onStarted).catch(reportPauseFailure);
+      else playback.catch(reportPauseFailure);
     } catch (error) {
-      console.warn('Unable to play pause sound fallback.', error);
+      if (key === 'pause') console.warn('Unable to play pause sound.', error);
     }
   },
 
@@ -79,10 +58,148 @@ const SFX = {
   stopEntitySound(key, entityId) {
     const soundId = `${key}:${entityId}`;
     const entry = this._entityAudio.get(soundId);
-    if (!entry) return;
-    entry.audio.pause();
-    entry.audio.currentTime = 0;
-    this._entityAudio.delete(soundId);
+    if (entry) {
+      entry.audio.pause();
+      entry.audio.currentTime = 0;
+      this._entityAudio.delete(soundId);
+    }
+    if (key === 'giftBoxWindUp') {
+      const giftBoxEntry = this._giftBoxAudio.get(entityId);
+      if (giftBoxEntry) {
+        giftBoxEntry.source?.stop();
+        giftBoxEntry.gain?.disconnect();
+        this._giftBoxAudio.delete(entityId);
+      }
+    }
+  },
+
+  _getAudioContext() {
+    if (this._audioContext) return this._audioContext;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      console.warn('Web Audio is unavailable; Gift Box wind-up sound cannot play in reverse.');
+      return null;
+    }
+    this._audioContext = new AudioContextClass();
+    return this._audioContext;
+  },
+
+  _getDecodedAudio(key, context) {
+    if (this._decodedAudio.has(key)) return this._decodedAudio.get(key);
+    const audio = this._cache[key];
+    if (!audio) return Promise.resolve(null);
+    const decoded = fetch(audio.src)
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.arrayBuffer();
+      })
+      .then(data => context.decodeAudioData(data))
+      .catch(error => {
+        console.warn(`Unable to decode ${key} audio for reverse playback.`, error);
+        return null;
+      });
+    this._decodedAudio.set(key, decoded);
+    return decoded;
+  },
+
+  _startGiftBoxAudio(entry, buffer, direction, position) {
+    if (entry.source) {
+      const previousSource = entry.source;
+      entry.source = null;
+      previousSource.stop();
+    }
+    const context = this._audioContext;
+    const source = context.createBufferSource();
+    const gain = context.createGain();
+    const reverse = direction === 'reverse';
+    const playbackBuffer = reverse ? entry.reversedBuffer : buffer;
+    const offset = reverse ? buffer.duration - position : position;
+    if (offset >= playbackBuffer.duration) {
+      entry.direction = direction;
+      entry.sourcePosition = position;
+      return;
+    }
+    source.buffer = playbackBuffer;
+    gain.gain.value = 0.7;
+    source.connect(gain);
+    gain.connect(context.destination);
+    entry.source = source;
+    entry.gain = gain;
+    entry.direction = direction;
+    entry.sourcePosition = position;
+    entry.sourceStartedAt = context.currentTime;
+    source.onended = () => {
+      if (entry.source !== source) return;
+      entry.source = null;
+      entry.gain?.disconnect();
+      entry.gain = null;
+      if (entry.active && direction === 'forward') {
+        this._startGiftBoxAudio(entry, buffer, 'forward', buffer.duration / 2);
+      }
+    };
+    source.start(0, offset);
+  },
+
+  _giftBoxAudioPosition(entry, context) {
+    if (!entry.source) return entry.direction === 'reverse' ? 0 : entry.sourcePosition;
+    const elapsed = context.currentTime - entry.sourceStartedAt;
+    return entry.direction === 'reverse'
+      ? Math.max(0, entry.sourcePosition - elapsed)
+      : Math.min(entry.buffer.duration, entry.sourcePosition + elapsed);
+  },
+
+  syncGiftBoxWindUp(entityId, active) {
+    let entry = this._giftBoxAudio.get(entityId);
+    if (!entry) {
+      if (!active) return;
+      entry = { active: true, direction: null, source: null, gain: null, buffer: null, reversedBuffer: null };
+      this._giftBoxAudio.set(entityId, entry);
+    }
+    entry.active = active;
+    if (this._muted) {
+      if (entry.source) {
+        const source = entry.source;
+        entry.source = null;
+        source.stop();
+        entry.gain?.disconnect();
+        entry.gain = null;
+      }
+      entry.direction = null;
+      return;
+    }
+
+    const context = this._getAudioContext();
+    if (!context) return;
+    if (context.state === 'suspended') context.resume().catch(error => {
+      console.warn('Unable to resume Gift Box audio context.', error);
+    });
+    if (entry.buffer) {
+      const direction = active ? 'forward' : 'reverse';
+      if (direction !== entry.direction) {
+        const position = direction === 'forward'
+          ? entry.buffer.duration / 2
+          : this._giftBoxAudioPosition(entry, context);
+        this._startGiftBoxAudio(entry, entry.buffer, direction, position);
+      }
+      return;
+    }
+    this._getDecodedAudio('giftBoxWindUp', context).then(buffer => {
+      if (!buffer || this._giftBoxAudio.get(entityId) !== entry || entry.buffer) return;
+      entry.buffer = buffer;
+      entry.reversedBuffer = context.createBuffer(
+        buffer.numberOfChannels,
+        buffer.length,
+        buffer.sampleRate
+      );
+      for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+        entry.reversedBuffer.getChannelData(channel).set(
+          buffer.getChannelData(channel).slice().reverse()
+        );
+      }
+      const direction = entry.active ? 'forward' : 'reverse';
+      const position = direction === 'forward' ? buffer.duration / 2 : buffer.duration / 2;
+      this._startGiftBoxAudio(entry, buffer, direction, position);
+    });
   },
 
   playRandom(keys, volumeOverride) {
@@ -182,7 +299,7 @@ SFX.load('partyHatRide',     'sounds/soundeffects/enemies/PartyHat/PartyHatRide.
 SFX.load('partyHatRide2',    'sounds/soundeffects/enemies/PartyHat/PartyHatRide2.mp3');
 SFX.load('partyHatSpawn',    'sounds/soundeffects/enemies/PartyHat/PartyHatSpawn.mp3');
 
-SFX.load('pause',            'sounds/soundeffects/misc/PauseSound.mp3');
+SFX.load('pause',            'sounds/soundeffects/UI/PauseSound.mp3');
 SFX.load('partyExplosion',   'sounds/soundeffects/misc/Explosions/PartyExplosion.mp3');
 SFX.load('waveComplete',     'sounds/soundeffects/misc/Waves/WaveComplete.mp3');
 SFX.load('waveOverload',     'sounds/soundeffects/misc/Waves/WaveOverload.mp3');

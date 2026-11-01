@@ -345,16 +345,22 @@ canvas {
     gap: 5px;
     box-shadow: inset 1px 1px 0 #e8e8e0;
     opacity: 0;
-    transform: scale(0.94);
+    transform: scale(0.14);
     pointer-events: none;
-    transition: opacity 0.13s ease-out, transform 0.13s ease-out, border-color 0.1s;
+    transition: opacity 0.13s ease-out, border-color 0.1s;
     min-height: 130px;
    justify-content:center;
   }
   .item-card.revealed {
     opacity: 1;
-    transform: scale(1);
+    animation: item-card-impact 3s cubic-bezier(0.18, 0.75, 0.28, 1) both;
     pointer-events: auto;
+  }
+  @keyframes item-card-impact {
+    0% { transform: scale(0.14); }
+    38% { transform: scale(1.3); }
+    66% { transform: scale(0.96); }
+    100% { transform: scale(1); }
   }
   .item-card:hover {
     border-top: 2px solid #000080;

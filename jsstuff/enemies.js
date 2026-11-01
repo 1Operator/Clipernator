@@ -935,7 +935,7 @@ const BT_JUGGLER = new BTSelector(
 const BT_GIFTBOX = new BTSelector(
   new BTAction((id, gs) => {
     if (gs.frozen) {
-      SFX.syncEntitySound('giftBoxWindUp', id, false);
+      SFX.syncGiftBoxWindUp(id, false);
       return BT.RUNNING;
     }
     const pos = ECS.get(id, 'pos');
@@ -946,7 +946,7 @@ const BT_GIFTBOX = new BTSelector(
     if (!pp || !pos || !vel) return BT.FAILURE;
 
     if (ai.heldByPlayer) {
-      SFX.syncEntitySound('giftBoxWindUp', id, false);
+      SFX.syncGiftBoxWindUp(id, false);
       return BT.RUNNING;
     }
 
@@ -976,7 +976,7 @@ const BT_GIFTBOX = new BTSelector(
     if (spd > phy.speed) { vel.vx = vel.vx/spd*phy.speed; vel.vy = vel.vy/spd*phy.speed; }
 
     if (dist < 140) {
-      SFX.syncEntitySound('giftBoxWindUp', id, true, 0.7);
+      SFX.syncGiftBoxWindUp(id, true);
       ai.windupTimer++;
       if (ai.windupTimer % 12 === 0) spawnParticles(pos.x, pos.y, '#ffaa00', 4);
       if (ai.windupTimer === 30) showMsg('⚠️ GIFT BOX WINDING UP!');
@@ -986,7 +986,7 @@ const BT_GIFTBOX = new BTSelector(
         _giftBoxExplode(id, pos, gs);
       }
     } else {
-      SFX.syncEntitySound('giftBoxWindUp', id, false);
+      SFX.syncGiftBoxWindUp(id, false);
     }
 
     return BT.RUNNING;

@@ -183,7 +183,7 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 
 | File | Intended event / status |
 |---|---|
-| `misc/PauseSound.mp3` | Wired: entering the pause menu. Starts directly from the pause key event; pausing the game loop does not prevent audio playback. |
+| `UI/PauseSound.mp3` | Wired: entering the pause menu. Starts directly from the pause key event; pausing the game loop does not prevent audio playback. |
 | `misc/Waves/WaveComplete.mp3` | Wired: a wave is completed. |
 | `misc/CreepySound.mp3`, `misc/OMINI.mp3` | Unused, as requested; reserved for later. |
 | `opening/bluescreen.mp3` | Wired: opening sequence blue-screen effect. |
