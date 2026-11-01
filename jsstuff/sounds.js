@@ -5,6 +5,7 @@
 const SFX = {
   _cache: {},
   _loops: {},
+  _entityAudio: new Map(),
   _muted: false,
 
   load(key, src) {
@@ -15,6 +16,10 @@ const SFX = {
 
   play(key, volumeOverride, onStarted) {
     if (this._muted) return;
+    if (key === 'pause') {
+      this.playPauseFallback();
+      return;
+    }
     const src = this._cache[key];
     if (!src) return;
     try {
@@ -24,6 +29,60 @@ const SFX = {
       if (onStarted) playback.then(onStarted).catch(() => {});
       else playback.catch(() => {});
     } catch(e) {}
+  },
+
+  playPauseFallback() {
+    if (this._muted) return;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const context = new AudioContextClass();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const now = context.currentTime;
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(740, now);
+      oscillator.frequency.exponentialRampToValueAtTime(440, now + 0.09);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.13);
+      oscillator.addEventListener('ended', () => context.close());
+    } catch (error) {
+      console.warn('Unable to play pause sound fallback.', error);
+    }
+  },
+
+  syncEntitySound(key, entityId, active, volumeOverride) {
+    const soundId = `${key}:${entityId}`;
+    let entry = this._entityAudio.get(soundId);
+    if (!active) {
+      if (entry && !entry.audio.paused) entry.audio.pause();
+      return;
+    }
+    if (this._muted || (entry && entry.finished)) return;
+    if (!entry) {
+      const src = this._cache[key];
+      if (!src) return;
+      const audio = src.cloneNode();
+      entry = { audio, finished: false };
+      this._entityAudio.set(soundId, entry);
+      audio.addEventListener('ended', () => { entry.finished = true; });
+    }
+    entry.audio.volume = volumeOverride !== undefined ? volumeOverride : 0.6;
+    if (entry.audio.paused) entry.audio.play().catch(() => {});
+  },
+
+  stopEntitySound(key, entityId) {
+    const soundId = `${key}:${entityId}`;
+    const entry = this._entityAudio.get(soundId);
+    if (!entry) return;
+    entry.audio.pause();
+    entry.audio.currentTime = 0;
+    this._entityAudio.delete(soundId);
   },
 
   playRandom(keys, volumeOverride) {
@@ -78,7 +137,7 @@ const SFX = {
   },
 };
 
-SFX.load('normalHit1',       'sounds/soundeffects/bullets/NormalHit1.mp3');
+SFX.load('normalHit1',       'sounds/soundeffects/bullets/NormalBulletHit.mp3');
 SFX.load('normalHit2',       'sounds/soundeffects/bullets/NormalBulletHit.mp3');
 SFX.load('hit2x',            'sounds/soundeffects/bullets/2xHit.mp3');
 SFX.load('hit3x',            'sounds/soundeffects/bullets/3xHit.mp3');
@@ -108,7 +167,10 @@ SFX.load('forkGrab',         'sounds/soundeffects/enemies/Utensil/Fork/ForkGrab.
 SFX.load('forkGrab2',        'sounds/soundeffects/enemies/Utensil/Fork/ForkGrab2.mp3');
 SFX.load('forkHit',          'sounds/soundeffects/enemies/Utensil/Fork/ForkHit.mp3');
 SFX.load('forkAttack',       'sounds/soundeffects/enemies/Utensil/Fork/ForkAttack.mp3');
+SFX.load('knifeAttack',      'sounds/soundeffects/enemies/Utensil/Knife/KnifeAttack.mp3');
+SFX.load('utensilDeath',     'sounds/soundeffects/enemies/Utensil/UtensilDeath.mp3');
 SFX.load('spoonDamage',      'sounds/soundeffects/enemies/Utensil/Spoon/SpoonDamage.mp3');
+SFX.load('giftBoxWindUp',    'sounds/soundeffects/enemies/GiftBox/GiftBoxWindUp.mp3');
 SFX.load('balloonSpawn',     'sounds/soundeffects/enemies/WaterBalloon/BalloonSpawn.mp3');
 
 SFX.load('frostingLaunch',   'sounds/soundeffects/enemies/CakeBoss/FrostingLaunch.mp3');
@@ -121,6 +183,7 @@ SFX.load('partyHatRide2',    'sounds/soundeffects/enemies/PartyHat/PartyHatRide2
 SFX.load('partyHatSpawn',    'sounds/soundeffects/enemies/PartyHat/PartyHatSpawn.mp3');
 
 SFX.load('pause',            'sounds/soundeffects/misc/PauseSound.mp3');
+SFX.load('partyExplosion',   'sounds/soundeffects/misc/Explosions/PartyExplosion.mp3');
 SFX.load('waveComplete',     'sounds/soundeffects/misc/Waves/WaveComplete.mp3');
 SFX.load('waveOverload',     'sounds/soundeffects/misc/Waves/WaveOverload.mp3');
 SFX.load('omini',            'sounds/soundeffects/misc/OMINI.mp3');

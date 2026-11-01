@@ -400,6 +400,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
         ai.uTravelTimer = 0;
         ai.uHitTargets = new Set();
         ai.uState = 'LAUNCH';
+        if (subtype === 'knife') SFX.playAt('knifeAttack', pos.x, pos.y, 0.65);
         spawnParticles(pos.x, pos.y, warnColor, 10);
       }
     }
@@ -933,7 +934,10 @@ const BT_JUGGLER = new BTSelector(
 // ── GiftBox: slow wind-up explosion ──
 const BT_GIFTBOX = new BTSelector(
   new BTAction((id, gs) => {
-    if (gs.frozen) return BT.RUNNING;
+    if (gs.frozen) {
+      SFX.syncEntitySound('giftBoxWindUp', id, false);
+      return BT.RUNNING;
+    }
     const pos = ECS.get(id, 'pos');
     const vel = ECS.get(id, 'vel');
     const phy = ECS.get(id, 'physics');
@@ -941,7 +945,10 @@ const BT_GIFTBOX = new BTSelector(
     const pp  = playerPos(gs);
     if (!pp || !pos || !vel) return BT.FAILURE;
 
-    if (ai.heldByPlayer) return BT.RUNNING;
+    if (ai.heldByPlayer) {
+      SFX.syncEntitySound('giftBoxWindUp', id, false);
+      return BT.RUNNING;
+    }
 
     if (ai.thrown) {
       vel.vx *= 0.97;
@@ -969,16 +976,17 @@ const BT_GIFTBOX = new BTSelector(
     if (spd > phy.speed) { vel.vx = vel.vx/spd*phy.speed; vel.vy = vel.vy/spd*phy.speed; }
 
     if (dist < 140) {
+      SFX.syncEntitySound('giftBoxWindUp', id, true, 0.7);
       ai.windupTimer++;
       if (ai.windupTimer % 12 === 0) spawnParticles(pos.x, pos.y, '#ffaa00', 4);
       if (ai.windupTimer === 30) showMsg('⚠️ GIFT BOX WINDING UP!');
 
-      if (ai.windupTimer >= 120) {
+      if (ai.windupTimer >= 180) {
         ai.exploded = true;
         _giftBoxExplode(id, pos, gs);
       }
     } else {
-      if (ai.windupTimer > 0) ai.windupTimer = Math.max(0, ai.windupTimer - 1);
+      SFX.syncEntitySound('giftBoxWindUp', id, false);
     }
 
     return BT.RUNNING;
@@ -990,6 +998,8 @@ const BT_GIFTBOX = new BTSelector(
 // - single updateHUD after all mutations
 // - waveKills for giftbox only incremented if entity still exists
 function _giftBoxExplode(id, pos, gs) {
+  SFX.stopEntitySound('giftBoxWindUp', id);
+  SFX.playAt('partyExplosion', pos.x, pos.y, 0.85);
   const vel = ECS.get(id, 'vel');
   if (vel) { vel.vx = 0; vel.vy = 0; }
   spawnPartyParticles(pos.x, pos.y);

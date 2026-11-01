@@ -66,6 +66,10 @@ const ECS = {
 destroyEntity(id) {
   const enemy = this.get(id, 'enemy');
   const pos = this.get(id, 'pos');
+  if (enemy?.type === 'utensil' && pos) {
+    SFX.playAt('utensilDeath', pos.x, pos.y, 0.65);
+  }
+  SFX.stopEntitySound('giftBoxWindUp', id);
   if (enemy?.type === 'partyHat' && pos) {
     SFX.playAt('partyHatDie', pos.x, pos.y, 0.5);
   }
@@ -676,12 +680,16 @@ function clippyExplain(itemId) {
   const tip = CLIPPY_ITEM_TIPS[itemId];
   if (tip) {
     _clippyBubbleText = tip;
+    SFX.play('clippySpeak', 0.75);
   }
 }
 
 function clippyExplainStatusEffect(statusId) {
   const tip = CLIPPY_STATUS_TIPS[statusId];
-  if (tip) _clippyBubbleText = tip;
+  if (tip) {
+    _clippyBubbleText = tip;
+    SFX.play('clippySpeak', 0.75);
+  }
 }
 
 // Random idle Clippy tips shown in pause menu
@@ -702,6 +710,7 @@ let _clippyIdleIdx = 0;
 function clippyIdleTip() {
   _clippyBubbleText = CLIPPY_IDLE_TIPS[_clippyIdleIdx % CLIPPY_IDLE_TIPS.length];
   _clippyIdleIdx++;
+  SFX.play('clippySpeak', 0.65);
 }
 
 // ================================================================
@@ -1500,6 +1509,7 @@ function offerItemChoice() {
     if (typeof CLIPPY_PICKUP_TIPS !== 'undefined' && CLIPPY_PICKUP_TIPS[id]) {
       gs.clippyPickupMsg = CLIPPY_PICKUP_TIPS[id];
       gs.clippyPickupTimer = 300;
+      SFX.play('clippySpeak', 0.75);
     }
     loop();
   });
@@ -1509,15 +1519,15 @@ function offerItemChoice() {
 
   choiceEl.style.display = 'flex';
   if (cards.length > 0) {
-    const revealSpeed = 1.5;
     SFX.play('itemReveal', 0.65);
     cards.forEach((card, index) => {
-      const delay = Math.min(index, 2) * 1000 / revealSpeed;
-      if (delay === 0) {
+      const delay = index === 0 ? 0 : index === 1 ? 1000 / 1.5 : 2 * 1000 / (1.5 * 1.2);
+      const reveal = () => {
+        card.getBoundingClientRect();
         card.classList.add('revealed');
-      } else {
-        revealTimers.push(setTimeout(() => card.classList.add('revealed'), delay));
-      }
+      };
+      if (delay === 0) reveal();
+      else revealTimers.push(setTimeout(reveal, delay));
     });
   }
   const skipBtn  = document.getElementById('skip-btn');
