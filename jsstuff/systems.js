@@ -142,12 +142,12 @@ function triggerSFPHit() {
   if (gs.sfpFull) {
     const ppos = ECS.get(gs.playerId,'pos');
     SFX.playAt('partyExplosion', ppos.x, ppos.y, 0.75);
-    triggerGiftBoxChainReaction(ppos.x, ppos.y, 400);
+    triggerGiftBoxChainReaction(ppos.x, ppos.y, CFG.SFP_EXPLOSION_RADIUS);
     const shockDmg = baseBulletDamage()*5;
     for (const id of ECS.query('enemy','pos','hp','vel')) {
       const epos=ECS.get(id,'pos'), ehp=ECS.get(id,'hp'), evel=ECS.get(id,'vel');
       const dx=epos.x-ppos.x, dy=epos.y-ppos.y, dist=Math.hypot(dx,dy);
-      if (dist < 400) {
+      if (dist < CFG.SFP_EXPLOSION_RADIUS) {
         ehp.hp -= shockDmg; ehp.hitFlash = 16;
         const nd=dist>1?dist:1;
         evel.vx += (dx/nd)*12; evel.vy += (dy/nd)*12;
@@ -699,7 +699,7 @@ const topSpd = slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult;
     const launchFrame = gs.dashLaunchFrame + 1;
     const progress = launchFrame / CFG.DASH_FRAMES;
     const previousProgress = (launchFrame - 1) / CFG.DASH_FRAMES;
-    const distance = CFG.DASH_SPEED * CFG.DASH_FRAMES * 0.7;
+    const distance = CFG.DASH_SPEED * CFG.DASH_FRAMES * 1.2;
     const stepDistance = distance * (easeInOut(progress) - easeInOut(previousProgress));
     vel.vx = gs.dashVx * stepDistance;
     vel.vy = gs.dashVy * stepDistance;

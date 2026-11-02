@@ -977,7 +977,11 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
     ctx.shadowColor = gs.sfpFull ? '#ffaa00' : '#ff2200';
     ctx.shadowBlur = 8 + ratio * 12;
     ctx.beginPath();
-    ctx.arc(0, 0, 400, -Math.PI * 0.78, Math.PI * 0.78);
+    ctx.arc(
+      0, 0, CFG.SFP_EXPLOSION_RADIUS,
+      -Math.PI / 2 + 0.14,
+      Math.PI * 1.5 - 0.14
+    );
     ctx.stroke();
     ctx.restore();
   }
