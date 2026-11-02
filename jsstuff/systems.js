@@ -1693,7 +1693,7 @@ gs.health -= Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMult || 
     }
       if (eb.life<=0||eb.bounces>8) return false;
     } else {
-      if (eb.life<=0||eb.x<-10||eb.x>worldW+10||eb.y<-10||eb.y>worldH+10) return false;
+      if (eb.life<=0) return false;
     }
 
     if (!eb.friendlyFire&&gs.invincible<=0&&Math.hypot(eb.x-ppos.x,eb.y-ppos.y)<20) {

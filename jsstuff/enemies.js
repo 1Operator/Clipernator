@@ -560,13 +560,6 @@ if (ai.wbState === 'ROAM') {
       const spd = Math.hypot(vel.vx, vel.vy);
       if (spd > phy.speed) { vel.vx=vel.vx/spd*phy.speed; vel.vy=vel.vy/spd*phy.speed; }
 
-      // Soft wall repulsion
-      const M = 110;
-      if (pos.x < M)          vel.vx += (M - pos.x)*0.15;
-      if (pos.x > worldW - M) vel.vx -= (pos.x-(worldW-M))*0.15;
-      if (pos.y < M)          vel.vy += (M - pos.y)*0.15;
-      if (pos.y > worldH - M) vel.vy -= (pos.y-(worldH-M))*0.15;
-
       // Advance idle anim
       ai.wbAnimTick++;
       if (ai.wbAnimTick >= 8) { ai.wbAnimTick = 0; ai.wbAnimFrame = (ai.wbAnimFrame+1) % 8; }
@@ -1214,12 +1207,10 @@ if (ai.hatState === 'IDLE') {
 } else if (ai.hatState === 'DIVE') {
   if (ai.hatAnimTimer >= 4) { ai.hatAnimTimer = 0; ai.hatAnimFrame = (ai.hatAnimFrame + 1) % 4; }
   ai.hatTimer--;
-  const hitWall = pos.x < CFG.WALL_PAD || pos.x > worldW - CFG.WALL_PAD ||
-                  pos.y < CFG.WALL_PAD || pos.y > worldH - CFG.WALL_PAD;
   const hitPlayer = dist < 24 && gs.invincible <= 0;
   const reachedTarget = ai.hatDiveTarget &&
     Math.hypot(pos.x - ai.hatDiveTarget.x, pos.y - ai.hatDiveTarget.y) < 20;
-  if (hitPlayer || hitWall || reachedTarget || ai.hatTimer <= 0) {
+  if (hitPlayer || reachedTarget || ai.hatTimer <= 0) {
     if (hitPlayer && gs.invincible <= 0) {
       gs.health -= 18; gs.invincible = CFG.INVINCIBLE_FRAMES;
       SFX.playAt('clippyDamage', pos.x, pos.y, 0.55);
@@ -1247,11 +1238,6 @@ if (ai.hatState === 'IDLE') {
     ai.hatState = 'IDLE'; ai.hatTimer = 55 + Math.floor(Math.random() * 35);
     ai.hatAnimFrame = 0; ai.hatAnimTimer = 0;
   }
-}
-
-if (ai.hatState !== 'DIVE' && ai.hatState !== 'RIDING') {
-  pos.x = Math.max(CFG.WALL_PAD, Math.min(worldW - CFG.WALL_PAD, pos.x));
-  pos.y = Math.max(CFG.WALL_PAD, Math.min(worldH - CFG.WALL_PAD, pos.y));
 }
 
     return BT.RUNNING;
