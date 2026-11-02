@@ -1279,10 +1279,12 @@ if (b.isArcBall) {
 }    // ── Bowling ball: always bounces, pierces, explodes on expiry ──
 if (b.isBowlingBall) {
   let bounced = false;
-  if (b.x <= 18)         { b.x = 18;          b.vx =  Math.abs(b.vx); bounced = true; }
-  if (b.x >= worldW - 18){ b.x = worldW - 18; b.vx = -Math.abs(b.vx); bounced = true; }
-  if (b.y <= 18)         { b.y = 18;           b.vy =  Math.abs(b.vy); bounced = true; }
-  if (b.y >= worldH - 18){ b.y = worldH - 18;  b.vy = -Math.abs(b.vy); bounced = true; }
+  if (!b.travelsOffscreen) {
+    if (b.x <= 18)         { b.x = 18;          b.vx =  Math.abs(b.vx); bounced = true; }
+    if (b.x >= worldW - 18){ b.x = worldW - 18; b.vx = -Math.abs(b.vx); bounced = true; }
+    if (b.y <= 18)         { b.y = 18;           b.vy =  Math.abs(b.vy); bounced = true; }
+    if (b.y >= worldH - 18){ b.y = worldH - 18;  b.vy = -Math.abs(b.vy); bounced = true; }
+  }
   if (bounced) {
     b.bounces = (b.bounces || 0) + 1;
       SFX.playAt('bowlingBallBounce', b.x, b.y, 0.45);
@@ -1319,7 +1321,7 @@ if (b.isBowlingBall) {
       return b.life>0&&(b.bounces||0)<=8;
     }
     const oob=b.x<-10||b.x>worldW+10||b.y<-10||b.y>worldH+10;
-    if (oob && b.isExplosive) {
+    if (oob && b.isExplosive && !b.travelsOffscreen) {
       detonateExplosiveBullet(b, b.x, b.y);
       return false;
     }
@@ -2089,7 +2091,7 @@ function sysOobCleanup() {
     const ai  = ECS.get(id, 'ai');
     if (enemy.type === 'corRed' || enemy.type === 'corBlue') continue;
     if (enemy.type === 'cakeBoss' && ai.antipieBoss) continue;
-    if (enemy.type === 'utensil' && ai.windowActive) {
+    if (ai.windowActive) {
       ai._oobTimer = 0;
       continue;
     }
@@ -2345,6 +2347,9 @@ function shoot() {
 
   gs.shakeX=(Math.random()-.5)*13; gs.shakeY=(Math.random()-.5)*13;
   const muzzle=gunMuzzlePos();
+  const aimedOutside = mouse.x < 0 || mouse.x > worldW || mouse.y < 0 || mouse.y > worldH;
+  const travelsOffscreen = !!gs.clippyWindowActive || aimedOutside;
+  const targetDistance = Math.hypot(mouse.x - muzzle.x, mouse.y - muzzle.y);
 
   // ── Bowling Ball shot ──
   if (gs.bowlingBallReady) {
@@ -2355,10 +2360,11 @@ function shoot() {
       vx: Math.cos(gunAngle) * 10.0,
       vy: Math.sin(gunAngle) * 10.0,
       angle: gunAngle,
-      life: 220, maxLife: 220,
+      life: travelsOffscreen ? Math.max(220, Math.ceil(targetDistance / 10) + 4) : 220,
+      maxLife: travelsOffscreen ? Math.max(220, Math.ceil(targetDistance / 10) + 4) : 220,
       damageMult: dmg,
       isDud: false,
-      travelsOffscreen: !!gs.clippyWindowActive,
+      travelsOffscreen,
       isBowlingBall: true,
       bounces: 0,
       hitEnemies: new Set(), // pierce tracking
@@ -2379,13 +2385,16 @@ function shoot() {
     else if (gs.hasTripleCake) { if (Math.random() < 0.45) isDud = true; }
     else if (gs.hasDoubleCake) { if (Math.random() < 0.40) isDud = true; }
     const finalMult = isDud ? 1 : damageMult * (gs.sfpFull ? 1.5 : 1);
+    const bulletLife = travelsOffscreen
+      ? Math.max(CFG.BULLET_LIFE, Math.ceil(targetDistance / CFG.BULLET_SPEED) + 4)
+      : CFG.BULLET_LIFE;
     gs.bullets.push({
       x: muzzle.x, y: muzzle.y,
       vx: Math.cos(a) * CFG.BULLET_SPEED,
       vy: Math.sin(a) * CFG.BULLET_SPEED,
-      angle: a, life: CFG.BULLET_LIFE,
+      angle: a, life: bulletLife,
       damageMult: finalMult, isDud,
-      travelsOffscreen: !!gs.clippyWindowActive
+      travelsOffscreen
     });
   }
   spawnParticles(muzzle.x,muzzle.y,doubleCount>0?'#ff44ff':'#ff8800',doubleCount>0?8:6);

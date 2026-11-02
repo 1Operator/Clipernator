@@ -740,6 +740,7 @@ function loop(timestamp = 0) {
 }
 
 const offscreenWindowElements = new Map();
+const chippyWindowElements = new Map();
 let clippyWindowElement = null;
 
 function getAimWorldPosition(clientX, clientY, target) {
@@ -752,9 +753,10 @@ function getAimWorldPosition(clientX, clientY, target) {
   if (miniCanvas && miniCanvas.dataset.cameraScale) {
     const rect = miniCanvas.getBoundingClientRect();
     const scale = Number(miniCanvas.dataset.cameraScale);
+    const shake = getScreenShakeOffset();
     return {
-      x: Number(miniCanvas.dataset.cameraX) + (clientX - rect.left - rect.width / 2) / scale,
-      y: Number(miniCanvas.dataset.cameraY) + (clientY - rect.top - rect.height / 2) / scale,
+      x: Number(miniCanvas.dataset.cameraX) + (clientX - rect.left - rect.width / 2) / scale - shake.x,
+      y: Number(miniCanvas.dataset.cameraY) + (clientY - rect.top - rect.height / 2) / scale - shake.y,
     };
   }
 
@@ -814,28 +816,19 @@ function makeFloatingWindowDraggable(card, moveEntities) {
 }
 
 function positionWindowWithEntity(card, worldX, worldY, rect, width, height) {
-  if (!card.dataset.positioned) {
-    let screenX = rect.left + worldX * rect.width / worldW;
-    let screenY = rect.top + worldY * rect.height / worldH;
-    if (worldX < 0) screenX = rect.left - width / 2 - 8;
-    else if (worldX > worldW) screenX = rect.right + width / 2 + 8;
-    else if (worldY < 0) screenY = rect.top - height / 2 - 8;
-    else if (worldY > worldH) screenY = rect.bottom + height / 2 + 8;
-    card.dataset.positioned = 'true';
-    card.dataset.trackWorldX = String(worldX);
-    card.dataset.trackWorldY = String(worldY);
-    card.dataset.trackScreenX = String(screenX);
-    card.dataset.trackScreenY = String(screenY);
-    card.dataset.trackScaleX = String(rect.width / worldW);
-    card.dataset.trackScaleY = String(rect.height / worldH);
-  }
-
-  const centerX = Number(card.dataset.trackScreenX)
-    + (worldX - Number(card.dataset.trackWorldX)) * Number(card.dataset.trackScaleX);
-  const centerY = Number(card.dataset.trackScreenY)
-    + (worldY - Number(card.dataset.trackWorldY)) * Number(card.dataset.trackScaleY);
-  const left = centerX - width / 2;
-  const top = centerY - height / 2;
+  const scaleX = rect.width / worldW;
+  const scaleY = rect.height / worldH;
+  const mainRect = document.getElementById('wrapper').getBoundingClientRect();
+  let centerX = rect.left + worldX * scaleX;
+  let centerY = rect.top + worldY * scaleY;
+  if (worldX < 0) centerX = mainRect.left - width / 2 - 8 + worldX * scaleX;
+  else if (worldX > worldW) centerX = mainRect.right + width / 2 + 8 + (worldX - worldW) * scaleX;
+  if (worldY < 0) centerY = mainRect.top - height / 2 - 8 + worldY * scaleY;
+  else if (worldY > worldH) centerY = mainRect.bottom + height / 2 + 8 + (worldY - worldH) * scaleY;
+  card.dataset.trackScaleX = String(scaleX);
+  card.dataset.trackScaleY = String(scaleY);
+  const left = Math.max(8, Math.min(window.innerWidth - width - 8, centerX - width / 2));
+  const top = Math.max(8, Math.min(window.innerHeight - height - 8, centerY - height / 2));
   card.dataset.trackedLeft = String(left);
   card.dataset.trackedTop = String(top);
   card.style.left = `${left}px`;
@@ -862,14 +855,12 @@ function renderOffscreenWindows() {
   if (!canvasRect.width || !canvasRect.height || !gameRunning) {
     layer.replaceChildren();
     offscreenWindowElements.clear();
+    chippyWindowElements.clear();
     clippyWindowElement = null;
     return;
   }
 
-  const enemyIds = [...ECS.query('enemy', 'pos', 'ai')].filter(id => {
-    const type = ECS.get(id, 'enemy').type;
-    return type !== 'corRed' && type !== 'corBlue';
-  });
+  const enemyIds = [...ECS.query('enemy', 'pos', 'ai')];
   for (const id of enemyIds) {
     const pos = ECS.get(id, 'pos');
     const ai = ECS.get(id, 'ai');
@@ -1037,6 +1028,69 @@ function renderOffscreenWindows() {
     }
   }
 
+  for (const id of ECS.query('chippyMachine', 'pos')) {
+    const machine = ECS.get(id, 'chippyMachine');
+    const pos = ECS.get(id, 'pos');
+    const outside = pos.x < 0 || pos.x > worldW || pos.y < 0 || pos.y > worldH;
+    let card = chippyWindowElements.get(id);
+    if (!outside) {
+      if (card) {
+        card.remove();
+        chippyWindowElements.delete(id);
+      }
+      continue;
+    }
+
+    if (!card) {
+      card = document.createElement('div');
+      card.className = 'utensil-window chippy-window';
+      card.innerHTML = '<div class="utensil-window-title">Chippy</div><div class="utensil-window-body"><canvas></canvas></div>';
+      layer.appendChild(card);
+      makeFloatingWindowDraggable(card, (deltaX, deltaY) => {
+        const scaleX = Number(card.dataset.trackScaleX);
+        const scaleY = Number(card.dataset.trackScaleY);
+        if (!scaleX || !scaleY) return;
+        pos.x += deltaX / scaleX;
+        pos.y += deltaY / scaleY;
+      });
+      chippyWindowElements.set(id, card);
+    }
+
+    const width = 240;
+    const height = 190;
+    const bodyWidth = width - 8;
+    const bodyHeight = height - 26;
+    const preview = card.lastElementChild.firstElementChild;
+    const dpr = window.devicePixelRatio || 1;
+    card.style.width = `${width}px`;
+    card.style.height = `${height}px`;
+    const previewWidth = Math.round(bodyWidth * dpr);
+    const previewHeight = Math.round(bodyHeight * dpr);
+    if (preview.width !== previewWidth) preview.width = previewWidth;
+    if (preview.height !== previewHeight) preview.height = previewHeight;
+    const previewCtx = preview.getContext('2d');
+    const cameraWidth = Math.max(280, 180 * bodyWidth / bodyHeight);
+    const scale = Math.min(bodyWidth / cameraWidth, bodyHeight / (cameraWidth * bodyHeight / bodyWidth));
+    draw(previewCtx, preview, { x: pos.x, y: pos.y, scale }, false);
+    preview.dataset.cameraX = String(pos.x);
+    preview.dataset.cameraY = String(pos.y);
+    preview.dataset.cameraScale = String(scale);
+    positionWindowWithEntity(card, pos.x, pos.y, canvasRect, width, height);
+
+    if (windowOverlapsMainWindow(card)) {
+      const cardRect = card.getBoundingClientRect();
+      const mergedPosition = screenToWorldPosition(
+        cardRect.left + cardRect.width / 2,
+        cardRect.top + cardRect.height / 2,
+        canvasRect
+      );
+      pos.x = mergedPosition.x;
+      pos.y = mergedPosition.y;
+      card.remove();
+      chippyWindowElements.delete(id);
+    }
+  }
+
   for (const [groupId, card] of offscreenWindowElements) {
     if (groups.has(groupId)) continue;
     card.remove();
@@ -1167,6 +1221,53 @@ function throwGiftBox() {
 }
 
 function handleChippyClick(worldX, worldY) {
+  const id = getChippyAtWorldPosition(worldX, worldY);
+  if (id === null) return false;
+  const pos = ECS.get(id, 'pos');
+  const machine = ECS.get(id, 'chippyMachine');
+
+  const playerPos = ECS.get(gs.playerId, 'pos');
+  if (Math.hypot(playerPos.x - pos.x, playerPos.y - pos.y) > CFG.CHIPPY_INTERACT_RANGE) {
+    SFX.play('notAllowed', 0.65);
+    showMsg('MOVE CLOSER TO CHIPPY!');
+    return true;
+  }
+
+  if (machine.phase === 'idle') {
+    if (gs.maxHealth <= 20) {
+      SFX.play('notAllowed', 0.65);
+      showMsg('CHIPPY NEEDS MORE THAN 20 MAX HP!');
+      return true;
+    }
+    gs.maxHealth -= 20;
+    gs.health = Math.min(gs.health, gs.maxHealth);
+    beginChippyTransition(machine, 'produce', 'produce', 0);
+    SFX.playAt('chippyUse', pos.x, pos.y, 0.55);
+    updateHUD();
+    showMsg('CHIPPY IS MAKING A GOLDEN CHIP!');
+    const reactions = [
+      'Ow! Twenty max HP? I hope that chip is worth it.',
+      'That was 20 max health. I am choosing not to think about it.',
+      'I felt that. Well, technically, I felt the health bar go down.',
+      'A golden chip for a piece of your maximum health. Seems fair. Probably.',
+    ];
+    gs.clippyPickupMsg = reactions[Math.floor(Math.random() * reactions.length)];
+    gs.clippyPickupTimer = 240;
+    SFX.play('clippySpeak', 0.8);
+  } else if (machine.phase === 'produceReady') {
+    gs.goldenChips++;
+    SFX.playAt('goldenChipPickup', pos.x, pos.y, 0.65);
+    updateHUD();
+    spawnPartyParticles(pos.x, pos.y);
+    beginChippyTransition(machine, 'spinning', 'spin', machine.restFrame);
+    showMsg('+1 GOLDEN CHIP');
+  } else {
+    SFX.play('notAllowed', 0.65);
+  }
+  return true;
+}
+
+function getChippyAtWorldPosition(worldX, worldY) {
   for (const id of ECS.query('chippyMachine', 'pos')) {
     const pos = ECS.get(id, 'pos');
     const machine = ECS.get(id, 'chippyMachine');
@@ -1182,51 +1283,10 @@ function handleChippyClick(worldX, worldY) {
       : 1;
     const spriteHeight = CFG.CHIPPY_DRAW_HEIGHT;
     const spriteWidth = spriteHeight * frameAspect;
-    const isOnMachine = Math.abs(worldX - pos.x) <= spriteWidth / 2
-      && worldY >= spriteY - spriteHeight && worldY <= spriteY;
-    if (!isOnMachine) continue;
-
-    const playerPos = ECS.get(gs.playerId, 'pos');
-    if (Math.hypot(playerPos.x - pos.x, playerPos.y - pos.y) > CFG.CHIPPY_INTERACT_RANGE) {
-      SFX.play('notAllowed', 0.65);
-      showMsg('MOVE CLOSER TO CHIPPY!');
-      return true;
-    }
-
-    if (machine.phase === 'idle') {
-      if (gs.maxHealth <= 20) {
-        SFX.play('notAllowed', 0.65);
-        showMsg('CHIPPY NEEDS MORE THAN 20 MAX HP!');
-        return true;
-      }
-      gs.maxHealth -= 20;
-      gs.health = Math.min(gs.health, gs.maxHealth);
-      beginChippyTransition(machine, 'produce', 'produce', 0);
-      SFX.playAt('chippyUse', pos.x, pos.y, 0.55);
-      updateHUD();
-      showMsg('CHIPPY IS MAKING A GOLDEN CHIP!');
-      const reactions = [
-        'Ow! Twenty max HP? I hope that chip is worth it.',
-        'That was 20 max health. I am choosing not to think about it.',
-        'I felt that. Well, technically, I felt the health bar go down.',
-        'A golden chip for a piece of your maximum health. Seems fair. Probably.',
-      ];
-      gs.clippyPickupMsg = reactions[Math.floor(Math.random() * reactions.length)];
-      gs.clippyPickupTimer = 240;
-      SFX.play('clippySpeak', 0.8);
-    } else if (machine.phase === 'produceReady') {
-      gs.goldenChips++;
-      SFX.playAt('goldenChipPickup', pos.x, pos.y, 0.65);
-      updateHUD();
-      spawnPartyParticles(pos.x, pos.y);
-      beginChippyTransition(machine, 'spinning', 'spin', machine.restFrame);
-      showMsg('+1 GOLDEN CHIP');
-    } else {
-      SFX.play('notAllowed', 0.65);
-    }
-    return true;
+    if (Math.abs(worldX - pos.x) <= spriteWidth / 2
+      && worldY >= spriteY - spriteHeight && worldY <= spriteY) return id;
   }
-  return false;
+  return null;
 }
 
 // ================================================================
@@ -1243,6 +1303,57 @@ canvas.addEventListener('contextmenu', e => {
   if (gs.hasGlowsticks) { swingGlowsticks(); return; }
   tryPickUpGiftBox();
 });
+
+let chippyPointerDrag = null;
+let suppressNextCanvasClick = false;
+
+canvas.addEventListener('pointerdown', event => {
+  if (event.button !== 0 || !gameRunning || isPaused) return;
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const shake = getScreenShakeOffset();
+  const worldX = ((event.clientX - rect.left) / rect.width) * worldW - shake.x;
+  const worldY = ((event.clientY - rect.top) / rect.height) * worldH - shake.y;
+  const chippyId = getChippyAtWorldPosition(worldX, worldY);
+  if (chippyId === null) return;
+
+  chippyPointerDrag = {
+    pointerId: event.pointerId,
+    entityId: chippyId,
+    startX: event.clientX,
+    startY: event.clientY,
+    lastX: event.clientX,
+    lastY: event.clientY,
+    moved: false,
+  };
+  canvas.style.cursor = 'grabbing';
+  canvas.setPointerCapture(event.pointerId);
+});
+
+canvas.addEventListener('pointermove', event => {
+  if (!chippyPointerDrag || event.pointerId !== chippyPointerDrag.pointerId) return;
+  const drag = chippyPointerDrag;
+  const totalDistance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+  if (!drag.moved && totalDistance < 6) return;
+  drag.moved = true;
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height || !ECS.has(drag.entityId, 'pos')) return;
+  const pos = ECS.get(drag.entityId, 'pos');
+  pos.x += (event.clientX - drag.lastX) * worldW / rect.width;
+  pos.y += (event.clientY - drag.lastY) * worldH / rect.height;
+  drag.lastX = event.clientX;
+  drag.lastY = event.clientY;
+});
+
+const finishChippyDrag = event => {
+  if (!chippyPointerDrag || event.pointerId !== chippyPointerDrag.pointerId) return;
+  suppressNextCanvasClick = event.type === 'pointerup' && chippyPointerDrag.moved;
+  chippyPointerDrag = null;
+  canvas.style.cursor = '';
+  if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+};
+canvas.addEventListener('pointerup', finishChippyDrag);
+canvas.addEventListener('pointercancel', finishChippyDrag);
 
 document.addEventListener('keydown', e => {
   if (document.getElementById('keybind-screen').style.display === 'flex') return;
@@ -1277,6 +1388,10 @@ document.addEventListener('keyup', e => { keys[e.key] = false; });
 
 document.addEventListener('click', e => {
   if (!gameRunning || isPaused || gs.playerId == null) return;
+  if (suppressNextCanvasClick) {
+    suppressNextCanvasClick = false;
+    return;
+  }
   if (!(e.target instanceof Element)) return;
   const isCanvasClick = e.target === canvas;
   const isMiniWindowClick = !!e.target.closest('.utensil-window-body');
@@ -1285,6 +1400,7 @@ document.addEventListener('click', e => {
 
   const worldPoint = updateAimFromPointer(e.clientX, e.clientY, e.target);
   if (!worldPoint) return;
+  if (e.target.closest('.chippy-window') && handleChippyClick(worldPoint.x, worldPoint.y)) return;
   gunAngle = Math.atan2(worldPoint.y - gunY, worldPoint.x - gunX);
   shoot();
 });
@@ -1293,6 +1409,17 @@ document.addEventListener('mousemove', e => {
   _pauseMouseX = e.clientX;
   _pauseMouseY = e.clientY;
   updateAimFromPointer(e.clientX, e.clientY, e.target);
+  if (!chippyPointerDrag && e.target === canvas && gameRunning && !isPaused) {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const shake = getScreenShakeOffset();
+      const worldX = ((e.clientX - rect.left) / rect.width) * worldW - shake.x;
+      const worldY = ((e.clientY - rect.top) / rect.height) * worldH - shake.y;
+      canvas.style.cursor = getChippyAtWorldPosition(worldX, worldY) === null ? '' : 'grab';
+    }
+  } else if (!chippyPointerDrag && e.target !== canvas) {
+    canvas.style.cursor = '';
+  }
 });
 
 // ================================================================
