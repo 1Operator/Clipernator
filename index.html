@@ -80,6 +80,71 @@ body::before { display: none; }
   image-rendering: auto;
 }
 
+.desktop-label-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.desktop-icon-label {
+  position: absolute;
+  transform: translateX(-50%);
+  color: #fff;
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  font-weight: normal;
+  text-align: center;
+  white-space: pre-line;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+.pause-clippy-bubble {
+  position: absolute;
+  left: 234px;
+  top: 22px;
+  width: 202px;
+  min-height: 101px;
+  padding: 8px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffcc;
+  border: 1px solid #999977;
+  border-radius: 7px;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.15);
+  color: #000;
+  font: 10px/14px 'MS Sans Serif', Arial, sans-serif;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  z-index: 9;
+}
+
+.pause-clippy-bubble[hidden] {
+  display: none;
+}
+
+.pause-clippy-bubble::before,
+.pause-clippy-bubble::after {
+  content: '';
+  position: absolute;
+  top: 38px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+}
+
+.pause-clippy-bubble::before {
+  left: -14px;
+  border-right: 14px solid #999977;
+}
+
+.pause-clippy-bubble::after {
+  left: -12px;
+  border-right: 14px solid #ffffcc;
+}
+
 #bottom-bar { flex: 0 0 4px; }
 
 #hud { cursor: move; user-select: none; }

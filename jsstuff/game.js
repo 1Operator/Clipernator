@@ -328,21 +328,15 @@ function _getClippyDirectionSprite(clippyCanvasX, clippyCanvasY, mouseX, mouseY)
 // The Clippy canvas for the pause menu — drawn onto a separate canvas
 // positioned absolutely over the pause dialog, next to stats
 let _pauseClippyCanvas = null;
-let _pauseBubbleCanvas = null;
+let _pauseBubbleElement = null;
 let _pauseClippyCtx = null;
 let _pauseClippyAnimId = null;
 
 function _createPauseClippyCanvas() {
   if (_pauseClippyCanvas) return;
 
-  _pauseBubbleCanvas = document.createElement('canvas');
-  _pauseBubbleCanvas.width = 220;
-  _pauseBubbleCanvas.height = 100;
-_pauseBubbleCanvas.style.cssText = `
-    position: absolute; left: 215px; top: 18px;
-    width: 230px; height: 110px;
-    pointer-events: none; z-index: 9; background: transparent;
-`;
+  _pauseBubbleElement = document.createElement('div');
+  _pauseBubbleElement.className = 'pause-clippy-bubble';
 
   _pauseClippyCanvas = document.createElement('canvas');
   _pauseClippyCanvas.width = 100;
@@ -358,7 +352,7 @@ _pauseBubbleCanvas.style.cssText = `
   if (statsFieldset) {
     statsFieldset.style.position = 'relative';
     statsFieldset.style.overflow = 'visible';
-    statsFieldset.appendChild(_pauseBubbleCanvas);
+    statsFieldset.appendChild(_pauseBubbleElement);
     statsFieldset.appendChild(_pauseClippyCanvas);
   }
 }
@@ -366,10 +360,10 @@ _pauseBubbleCanvas.style.cssText = `
 function _removePauseClippyCanvas() {
   if (_pauseClippyCanvas && _pauseClippyCanvas.parentNode)
     _pauseClippyCanvas.parentNode.removeChild(_pauseClippyCanvas);
-  if (_pauseBubbleCanvas && _pauseBubbleCanvas.parentNode)
-    _pauseBubbleCanvas.parentNode.removeChild(_pauseBubbleCanvas);
+  if (_pauseBubbleElement && _pauseBubbleElement.parentNode)
+    _pauseBubbleElement.parentNode.removeChild(_pauseBubbleElement);
   _pauseClippyCanvas = null;
-  _pauseBubbleCanvas = null;
+  _pauseBubbleElement = null;
   _pauseClippyCtx = null;
   if (_pauseClippyAnimId) { cancelAnimationFrame(_pauseClippyAnimId); _pauseClippyAnimId = null; }
 }
@@ -392,128 +386,13 @@ function _drawPauseClippy() {
     c.drawImage(imgToDraw, 0, 0, W, H);
   }
 
-  // Draw bubble on separate canvas
-  if (_pauseBubbleCanvas && _clippyBubbleText) {
-    const bc = _pauseBubbleCanvas.getContext('2d');
-    const BW = _pauseBubbleCanvas.width;
-    const BH = _pauseBubbleCanvas.height;
-    bc.clearRect(0, 0, BW, BH);
-    _drawPauseBubbleOnCanvas(bc, BW, BH);
+  if (_pauseBubbleElement) {
+    const bubbleText = _clippyBubbleText || '';
+    if (_pauseBubbleElement.textContent !== bubbleText) {
+      _pauseBubbleElement.textContent = bubbleText;
+    }
+    _pauseBubbleElement.hidden = !bubbleText;
   }
-}
-
-function _drawPauseBubbleOnCanvas(c, W, H) {
-  if (!_clippyBubbleText) return;
-  const pad = 9, r = 7;
-  const bw = W - 28, bh = H - 14, bx = 18, by = 4;
-  const tailMidY = by + bh * 0.42;
-  c.clearRect(0, 0, W, H);
-  c.save();
-  // Bubble body with tail on LEFT side pointing toward Clippy
-  c.beginPath();
-  c.moveTo(bx + r, by);
-  c.lineTo(bx + bw - r, by);
-  c.arcTo(bx + bw, by, bx + bw, by + r, r);
-  c.lineTo(bx + bw, by + bh - r);
-  c.arcTo(bx + bw, by + bh, bx + bw - r, by + bh, r);
-  c.lineTo(bx + r, by + bh);
-  c.arcTo(bx, by + bh, bx, by + bh - r, r);
-  // Left side: leave gap for tail
-  c.lineTo(bx, tailMidY + 10);
-  c.lineTo(bx - 14, tailMidY);   // tail tip points left toward Clippy
-  c.lineTo(bx, tailMidY - 10);
-  c.lineTo(bx, by + r);
-  c.arcTo(bx, by, bx + r, by, r);
-  c.closePath();
-  c.fillStyle = '#ffffcc';
-  c.shadowColor = 'rgba(0,0,0,0.15)'; c.shadowBlur = 4;
-  c.shadowOffsetX = 1; c.shadowOffsetY = 1;
-  c.fill();
-  c.shadowColor = 'transparent'; c.shadowBlur = 0;
-  c.strokeStyle = '#999977'; c.lineWidth = 1.2; c.stroke();
-  c.restore();
-  c.fillStyle = '#000';
-  c.font = '10px "MS Sans Serif", Arial, sans-serif';
-  c.textBaseline = 'top';
-  const maxW = bw - pad * 2 - 4;
-  const words = _clippyBubbleText.split(' ');
-  const lines = []; let cur = '';
-  for (const w of words) {
-    const test = cur ? cur + ' ' + w : w;
-    if (c.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; }
-    else cur = test;
-  }
-  if (cur) lines.push(cur);
-  const lineH = 14, totalH = lines.length * lineH;
-  const startY = by + pad + Math.max(0, (bh - totalH - pad) / 2);
-  for (let i = 0; i < lines.length; i++) c.fillText(lines[i], bx + pad, startY + i * lineH);
-}
-
-function _drawPauseClippyBubble(c, W, H) {
-  if (!_clippyBubbleText) return;
-
-  const bubbleW = W + 80;
-  const bubbleH = 90;
-  const bubbleX = -90; // to the left of Clippy
-  const bubbleY = 0;
-  const tailX = W * 0.3;
-  const tailY = bubbleH;
-  const r = 8;
-
-  c.save();
-
-  // Draw bubble
-  c.fillStyle = '#ffffcc';
-  c.strokeStyle = '#000000';
-  c.lineWidth = 1.5;
-
-  c.beginPath();
-  c.moveTo(bubbleX + r, bubbleY);
-  c.lineTo(bubbleX + bubbleW - r, bubbleY);
-  c.arcTo(bubbleX + bubbleW, bubbleY, bubbleX + bubbleW, bubbleY + r, r);
-  c.lineTo(bubbleX + bubbleW, bubbleY + bubbleH - r);
-  c.arcTo(bubbleX + bubbleW, bubbleY + bubbleH, bubbleX + bubbleW - r, bubbleY + bubbleH, r);
-  // bottom right before tail
-  c.lineTo(tailX + 14, bubbleY + bubbleH);
-  // tail pointing down-right toward Clippy body
-  c.lineTo(tailX + 7, bubbleY + bubbleH + 14);
-  c.lineTo(tailX - 2, bubbleY + bubbleH);
-  // rest of bottom
-  c.lineTo(bubbleX + r, bubbleY + bubbleH);
-  c.arcTo(bubbleX, bubbleY + bubbleH, bubbleX, bubbleY + bubbleH - r, r);
-  c.lineTo(bubbleX, bubbleY + r);
-  c.arcTo(bubbleX, bubbleY, bubbleX + r, bubbleY, r);
-  c.closePath();
-
-  c.fillStyle = '#ffffcc';
-  c.fill();
-  c.strokeStyle = '#000000';
-  c.lineWidth = 1.5;
-  c.stroke();
-
-  // Text
-  c.fillStyle = '#000000';
-  c.font = '10px "MS Sans Serif", Arial, sans-serif';
-  c.textBaseline = 'top';
-  const padX = 8, padY = 8;
-  const maxTextW = bubbleW - padX * 2 - 4;
-  const words = _clippyBubbleText.split(' ');
-  const lines = [];
-  let cur = '';
-  for (const w of words) {
-    const test = cur ? cur + ' ' + w : w;
-    if (c.measureText(test).width > maxTextW && cur) { lines.push(cur); cur = w; }
-    else cur = test;
-  }
-  if (cur) lines.push(cur);
-  const lineH = 14;
-  const totalH = lines.length * lineH;
-  const startY = bubbleY + padY + Math.max(0, (bubbleH - totalH) / 2 - padY);
-  for (let i = 0; i < lines.length; i++) {
-    c.fillText(lines[i], bubbleX + padX, startY + i * lineH);
-  }
-
-  c.restore();
 }
 
 function _startPauseClippyLoop() {

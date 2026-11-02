@@ -976,7 +976,7 @@ setTimeout(() => {
   }, 2200);
 }
 
-  function drawDesktop(targetCtx = getCtx(), includeErrorDialog = true) {
+  function drawDesktop(targetCtx = getCtx(), includeErrorDialog = true, drawLabels = true) {
     const c = targetCtx; if (!c) return;
     const W = 960, H = 600;
     c.fillStyle = '#008080'; c.fillRect(0, 0, W, H);
@@ -996,12 +996,14 @@ setTimeout(() => {
         c.fillText(sprite === 'dataLocked' ? '🔒' : sprite === 'folder' ? '📁' : '📄', x + IW/2, y + IH/2 + 4);
         c.textAlign = 'left';
       }
-      c.font = '11px "MS Sans Serif", Arial, sans-serif'; c.textAlign = 'center';
-      label.split('\n').forEach((ln, li) => {
-        c.fillStyle = 'rgba(0,0,0,0.7)'; c.fillText(ln, x + IW/2 + 1, y + IH + 14 + li * 13 + 1);
-        c.fillStyle = '#ffffff';          c.fillText(ln, x + IW/2,     y + IH + 14 + li * 13);
-      });
-      c.textAlign = 'left';
+      if (drawLabels) {
+        c.font = '11px "MS Sans Serif", Arial, sans-serif'; c.textAlign = 'center';
+        label.split('\n').forEach((ln, li) => {
+          c.fillStyle = 'rgba(0,0,0,0.7)'; c.fillText(ln, x + IW/2 + 1, y + IH + 14 + li * 13 + 1);
+          c.fillStyle = '#ffffff';          c.fillText(ln, x + IW/2,     y + IH + 14 + li * 13);
+        });
+        c.textAlign = 'left';
+      }
     });
 
     if (desktopLoadingData) {
@@ -1582,6 +1584,23 @@ setTimeout(() => {
     const desktopCtx = desktopCanvas.getContext('2d');
     if (!desktopCtx) throw new Error('Unable to create persistent desktop canvas context.');
 
+    const labelOverlay = document.createElement('div');
+    labelOverlay.className = 'desktop-label-overlay';
+    document.body.insertBefore(labelOverlay, desktopCanvas.nextSibling);
+    const updateDesktopLabels = () => {
+      const fontScale = Math.min(window.innerWidth / 960, window.innerHeight / 600);
+      labelOverlay.replaceChildren(...DESKTOP_APPS.map(app => {
+        const label = document.createElement('span');
+        label.className = 'desktop-icon-label';
+        label.textContent = app.label;
+        label.style.left = `${((app.x + 24) / 960) * 100}%`;
+        label.style.top = `${((app.y + 52) / 600) * 100}%`;
+        label.style.fontSize = `${11 * fontScale}px`;
+        label.style.lineHeight = `${13 * fontScale}px`;
+        return label;
+      }));
+    };
+
     const dialogCanvas = document.createElement('canvas');
     dialogCanvas.width = 960;
     dialogCanvas.height = 600;
@@ -1590,7 +1609,10 @@ setTimeout(() => {
     const dialogCtx = dialogCanvas.getContext('2d');
     if (!dialogCtx) throw new Error('Unable to create desktop dialog canvas context.');
 
-    const redrawDesktop = () => drawDesktop(desktopCtx, false);
+    const redrawDesktop = () => {
+      drawDesktop(desktopCtx, false, false);
+      updateDesktopLabels();
+    };
     persistentDesktopRedraw = redrawDesktop;
     const redrawDialog = () => {
       dialogCtx.clearRect(0, 0, dialogCanvas.width, dialogCanvas.height);
@@ -1609,6 +1631,7 @@ setTimeout(() => {
 
     desktopCanvas.addEventListener('click', handleClick);
     dialogCanvas.addEventListener('click', handleClick);
+    window.addEventListener('resize', updateDesktopLabels);
     redrawDesktop();
     redrawDialog();
     setInterval(redrawDesktop, 60000);
