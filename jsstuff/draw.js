@@ -971,7 +971,7 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
     const ratio = Math.max(0, Math.min(1, gs.sfpFull ? 1 : gs.sfpMeter / gs.sfpMax));
     ctx.save();
     ctx.translate(x, y);
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.48;
     ctx.lineWidth = 3;
     ctx.shadowBlur = 0;
     ctx.beginPath();

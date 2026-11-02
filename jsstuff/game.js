@@ -1526,6 +1526,7 @@ function offerItemChoice() {
       const reveal = () => {
         card.getBoundingClientRect();
         card.classList.add('revealed');
+        revealTimers.push(setTimeout(() => SFX.play('partyExplosion', 0.45), 1050 * 0.59));
       };
       if (delay === 0) reveal();
       else revealTimers.push(setTimeout(reveal, delay));
