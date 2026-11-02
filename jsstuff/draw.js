@@ -967,22 +967,18 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
   }
 }
 
-  if (gs.hasShakeFizzlePop && !gs.sfpFull) {
-    const ratio = gs.sfpMeter / gs.sfpMax;
-    const shake = ratio * 5;
-    x += (Math.random() - 0.5) * shake;
-    y += (Math.random() - 0.5) * shake;
-  }
-
   if (gs.hasShakeFizzlePop) {
     const ratio = gs.sfpFull ? 1 : gs.sfpMeter / gs.sfpMax;
     ctx.save();
     ctx.translate(x, y);
-    ctx.globalAlpha = ratio * 0.55;
-    ctx.fillStyle = gs.sfpFull ? '#ff8800' : '#ff2200';
-    ctx.shadowColor = gs.sfpFull ? '#ffaa00' : '#ff0000';
-    ctx.shadowBlur = 20 + ratio * 20;
-    ctx.beginPath(); ctx.arc(0, 0, 32, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.2 + ratio * 0.42;
+    ctx.strokeStyle = gs.sfpFull ? '#ffb52e' : '#ff4a24';
+    ctx.lineWidth = gs.sfpFull ? 3 : 2;
+    ctx.shadowColor = gs.sfpFull ? '#ffaa00' : '#ff2200';
+    ctx.shadowBlur = 8 + ratio * 12;
+    ctx.beginPath();
+    ctx.arc(0, 0, 400, -Math.PI * 0.78, Math.PI * 0.78);
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -1007,17 +1003,45 @@ const BODY_H = 48; // square since image is 959x959
     const lean = playerVel ? Math.max(-0.12, Math.min(0.12, playerVel.vy * 0.025)) : 0;
 const movingLeft = Math.cos(playerMoveAngle) < 0;
 
+const sfpRatio = gs.hasShakeFizzlePop
+  ? Math.max(0, Math.min(1, gs.sfpFull ? 1 : gs.sfpMeter / gs.sfpMax))
+  : 0;
+const shaking = gs.hasShakeFizzlePop && !gs.sfpFull ? sfpRatio : 0;
+const shakePhase = Date.now() / 1000;
+const shakeX = Math.sin(shakePhase * 49) * shaking * 4.5;
+const shakeY = Math.cos(shakePhase * 57) * shaking * 3.5;
+const windingUp = gs.dashTimer > 0 && gs.dashLaunchFrame === 0;
+const windupProgress = windingUp
+  ? 1 - gs.dashWindupTimer / CFG.DASH_WINDUP_FRAMES
+  : 0;
+const launchProgress = gs.dashLaunchFrame > 0
+  ? Math.min(1, gs.dashLaunchFrame / CFG.DASH_FRAMES)
+  : 0;
+const stretch = Math.sin(launchProgress * Math.PI) * 0.38;
+const scaleX = windingUp ? 1 - windupProgress * 0.16 : 1 + stretch;
+const scaleY = windingUp ? 1 + windupProgress * 0.2 : 1 - stretch * 0.52;
+const dashFlash = gs.dashActiveThisFrame
+  && gs.dashLaunchFrame <= 7
+  && gs.dashLaunchFrame % 2 === 1;
+
 ctx.save();
-ctx.translate(x, y + bob);
+ctx.translate(x + shakeX, y + bob + shakeY);
 ctx.rotate(lean);
 if (movingLeft) ctx.scale(-1, 1);
-ctx.filter = gs.leakingTimer > 0 ? 'grayscale(1)' : 'none';
-ctx.drawImage(
-  sourceImg,
-  0, 0, 959, 959,        // use full image, no crop
-  -BODY_W / 2, -BODY_H * 0.75,
-  BODY_W, BODY_H
-);
+ctx.scale(scaleX, scaleY);
+ctx.filter = dashFlash ? 'brightness(0) invert(1)' : gs.leakingTimer > 0 ? 'grayscale(1)' : 'none';
+ctx.drawImage(sourceImg, 0, 0, 959, 959, -BODY_W / 2, -BODY_H * 0.75, BODY_W, BODY_H);
+if (sfpRatio > 0 && playerRedCanvas) {
+  const sourceY = 959 * (1 - sfpRatio);
+  const tintHeight = 959 * sfpRatio;
+  const destinationY = -BODY_H * 0.75 + BODY_H * (1 - sfpRatio);
+  ctx.filter = dashFlash ? 'brightness(0) invert(1)' : gs.leakingTimer > 0 ? 'grayscale(1)' : 'none';
+  ctx.drawImage(
+    playerRedCanvas,
+    0, sourceY, 959, tintHeight,
+    -BODY_W / 2, destinationY, BODY_W, BODY_H * sfpRatio
+  );
+}
 ctx.restore();
   }
 
@@ -1385,14 +1409,30 @@ if (gs.hasMirrorMaze && gs.mirrorShards) {
     }
   }
 
-  // Dash trail
-  for(const t of gs.dashTrail) {
-    ctx.save(); ctx.globalAlpha=(t.life/12)*.5;
-    ctx.strokeStyle='#ffaa00'; ctx.lineWidth=3.5*1.4; ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.shadowColor='#ffcc00'; ctx.shadowBlur=8;
-    const s=1.4; ctx.save(); ctx.translate(t.x,t.y); ctx.rotate(t.angle+Math.PI/2);
-    ctx.beginPath(); ctx.moveTo(-7*s,15*s); ctx.lineTo(-7*s,-9*s); ctx.arcTo(-7*s,-17*s,0,-17*s,7*s); ctx.arcTo(7*s,-17*s,7*s,-9*s,7*s); ctx.lineTo(7*s,11*s); ctx.stroke();
-    ctx.restore(); ctx.restore();
+  // Dash launch pop
+  if (gs.dashBurst) {
+    const burst = gs.dashBurst;
+    const progress = 1 - burst.life / burst.maxLife;
+    ctx.save();
+    ctx.translate(burst.x, burst.y);
+    ctx.rotate(burst.angle);
+    ctx.globalAlpha = burst.life / burst.maxLife;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = '#ffdd55';
+    ctx.shadowBlur = 12;
+    const colors = ['#ffffff', '#ffdd55', '#ff69b4', '#66ffbb'];
+    for (let i = 0; i < 12; i++) {
+      const angle = i * Math.PI / 6;
+      const inner = 8 + progress * 8;
+      const outer = 20 + progress * 24;
+      ctx.strokeStyle = colors[i % colors.length];
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
+      ctx.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   // Bouncy wall glow
@@ -1755,7 +1795,15 @@ ctx.shadowColor = 'transparent';
 for(const p of gs.particles) {
   ctx.globalAlpha = p.life / p.maxLife;
   ctx.fillStyle = p.color;
-  ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+  if (p.confetti) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rotation);
+    ctx.fillRect(-p.size * 0.65, -p.size * 0.3, p.size * 1.3, p.size * 0.6);
+    ctx.restore();
+  } else {
+    ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+  }
 }
 ctx.globalAlpha = 1;
 ctx.restore();

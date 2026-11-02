@@ -48,6 +48,25 @@ function spawnParticles(x, y, color, n = 8) {
   }
 }
 
+function spawnDashConfetti(x, y, angle) {
+  const MAX_PARTICLES = 250;
+  const available = MAX_PARTICLES - gs.particles.length;
+  const colors = ['#ff69b4', '#ffdd00', '#00ff99', '#ff4444', '#aaddff', '#ffffff'];
+  const count = Math.min(42, available);
+  for (let i = 0; i < count; i++) {
+    const a = angle + Math.PI + (Math.random() - 0.5) * 1.8;
+    const speed = 3 + Math.random() * 7;
+    const life = 38 + Math.floor(Math.random() * 16);
+    const size = 3 + Math.random() * 4;
+    gs.particles.push({
+      x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
+      life, maxLife: life, color: colors[i % colors.length], size,
+      confetti: true, rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.35,
+    });
+  }
+}
+
 function spawnPartyParticles(x, y) {
   const MAX_PARTICLES = 250;
   const available = MAX_PARTICLES - gs.particles.length;
@@ -658,15 +677,42 @@ function sysPlayerMovement() {
   
   const pId=gs.playerId, pos=ECS.get(pId,'pos'), vel=ECS.get(pId,'vel');
   const dashing=gs.dashTimer>0, slowed=gs.confettiSlowTimer>0;
+  gs.dashActiveThisFrame = false;
  let speedMult = 1;
 if (gs.speedBoostTimer > 0) speedMult = gs.speedBoostMult || CFG.SPEED_BOOST_MULT;
 if (gs.sfpFull) speedMult = Math.max(speedMult, 1.3);
 if (gs.hasTightropeBoots) speedMult = Math.max(speedMult, 3.00);
 const topSpd = slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult;
   if (dashing) {
-    gs.dashTimer--; gs.dashTrail.push({x:pos.x,y:pos.y,life:12,angle:playerMoveAngle});
-    vel.vx=gs.dashVx; vel.vy=gs.dashVy;
+  const easeInOut = progress => progress < 0.5
+    ? 4 * progress * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+  if (gs.dashWindupTimer > 0) {
+    const step = CFG.DASH_WINDUP_FRAMES - gs.dashWindupTimer + 1;
+    const progress = step / CFG.DASH_WINDUP_FRAMES;
+    const previousProgress = (step - 1) / CFG.DASH_WINDUP_FRAMES;
+    const backstep = 11 * (easeInOut(progress) - easeInOut(previousProgress));
+    vel.vx = -gs.dashVx * backstep;
+    vel.vy = -gs.dashVy * backstep;
+    gs.dashWindupTimer--;
   } else {
+    const launchFrame = gs.dashLaunchFrame + 1;
+    const progress = launchFrame / CFG.DASH_FRAMES;
+    const previousProgress = (launchFrame - 1) / CFG.DASH_FRAMES;
+    const distance = CFG.DASH_SPEED * CFG.DASH_FRAMES * 0.7;
+    const stepDistance = distance * (easeInOut(progress) - easeInOut(previousProgress));
+    vel.vx = gs.dashVx * stepDistance;
+    vel.vy = gs.dashVy * stepDistance;
+    gs.dashLaunchFrame = launchFrame;
+    gs.dashActiveThisFrame = true;
+    if (launchFrame === 1) {
+      const angle = Math.atan2(gs.dashVy, gs.dashVx);
+      gs.dashBurst = { x: pos.x, y: pos.y, angle, life: 10, maxLife: 10 };
+      spawnDashConfetti(pos.x, pos.y, angle);
+    }
+  }
+  gs.dashTimer--;
+} else {
     let ix=0,iy=0;
     if (!gs.forkGrabbed) {
       if (keys[KEYBINDS.moveLeft]||keys['ArrowLeft'])  ix--;
@@ -727,7 +773,6 @@ if (gs.knockingPinsActive) {
   let da=Math.atan2(mouse.y-pos.y,mouse.x-pos.x)-gunAngle;
   while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;
   gunAngle+=da*0.25;
-  gs.dashTrail=gs.dashTrail.filter(t=>{t.life--;return t.life>0;});
   if (gs.heldGiftBox!==null){
     if (!ECS.has(gs.heldGiftBox,'pos')){gs.heldGiftBox=null;}
     else{const hbpos=ECS.get(gs.heldGiftBox,'pos'),ppos=ECS.get(gs.playerId,'pos');hbpos.x=ppos.x+Math.cos(gunAngle)*36;hbpos.y=ppos.y+Math.sin(gunAngle)*36;}
@@ -1395,7 +1440,7 @@ if (gs.hasMirrorMaze) {
 }
 
 function sysDashCollision() {
-  if (gs.dashTimer<=0){for (const id of ECS.query('enemy','ai')) ECS.get(id,'ai').dashHit=false;return;}
+  if (!gs.dashActiveThisFrame){for (const id of ECS.query('enemy','ai')) ECS.get(id,'ai').dashHit=false;return;}
   const ppos=ECS.get(gs.playerId,'pos'),pvel=ECS.get(gs.playerId,'vel');
   const dashSpd=Math.hypot(pvel.vx,pvel.vy),speedScale=Math.max(1,dashSpd/CFG.DASH_SPEED);
   for (const id of ECS.query('enemy','pos','hp','ai')) {
@@ -1823,8 +1868,15 @@ function sysTimers() {
   if (tickLeakingStatusEffects()) return;
 
   // ── Always run these regardless of transition state ──
-  for (const p of gs.particles){p.x+=p.vx;p.y+=p.vy;p.vx*=0.91;p.vy*=0.91;p.life--;}
+  for (const p of gs.particles){
+    p.x+=p.vx;p.y+=p.vy;p.vx*=0.91;p.vy*=0.91;p.life--;
+    if (p.confetti) p.rotation += p.spin;
+  }
   gs.particles=gs.particles.filter(p=>p.life>0);
+  if (gs.dashBurst) {
+    gs.dashBurst.life--;
+    if (gs.dashBurst.life <= 0) gs.dashBurst = null;
+  }
  gs.shakeX*=0.72; gs.shakeY*=0.72;
 if (Math.abs(gs.shakeX) < 0.1) gs.shakeX = 0;
 if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
@@ -2351,10 +2403,14 @@ function tryDash() {
   gs.dashCharges--; updateHUD();
   const ppos=ECS.get(gs.playerId,'pos'),pvel=ECS.get(gs.playerId,'vel');
   const spd=Math.hypot(pvel.vx,pvel.vy);
-  if (spd>0.3){gs.dashVx=(pvel.vx/spd)*CFG.DASH_SPEED;gs.dashVy=(pvel.vy/spd)*CFG.DASH_SPEED;}
-  else{gs.dashVx=Math.cos(gunAngle)*CFG.DASH_SPEED;gs.dashVy=Math.sin(gunAngle)*CFG.DASH_SPEED;}
-  gs.dashTimer=CFG.DASH_FRAMES; gs.invincible=Math.max(gs.invincible,CFG.DASH_FRAMES+4);
-  spawnParticles(ECS.get(gs.playerId,'pos').x,ECS.get(gs.playerId,'pos').y,'#ffaa00',8);
+  if (spd>0.3){gs.dashVx=pvel.vx/spd;gs.dashVy=pvel.vy/spd;}
+  else{gs.dashVx=Math.cos(gunAngle);gs.dashVy=Math.sin(gunAngle);}
+  gs.dashWindupTimer=CFG.DASH_WINDUP_FRAMES;
+  gs.dashLaunchFrame=0;
+  gs.dashActiveThisFrame=false;
+  gs.dashBurst=null;
+  gs.dashTimer=CFG.DASH_FRAMES+CFG.DASH_WINDUP_FRAMES;
+  gs.invincible=Math.max(gs.invincible,gs.dashTimer+4);
 }
 
 function checkWave() {

@@ -8,6 +8,7 @@ const CFG = {
   SPEED_BOOST_MULT: 1.65,
   DASH_SPEED: 14,
   DASH_FRAMES: 10,
+  DASH_WINDUP_FRAMES: 4,
   WALL_PAD: 22,
   MAX_AMMO: 8,
   RELOAD_FRAMES: 90,
@@ -82,6 +83,7 @@ let ctx = canvas.getContext('2d');
 
 const playerImg = new Image();
 let playerCanvas = null;
+let playerRedCanvas = null;
 
 playerImg.onload = function() {
   const off = document.createElement('canvas');
@@ -97,6 +99,16 @@ playerImg.onload = function() {
   }
   offCtx.putImageData(imageData, 0, 0);
   playerCanvas = off;
+
+  const red = document.createElement('canvas');
+  red.width = off.width;
+  red.height = off.height;
+  const redCtx = red.getContext('2d');
+  redCtx.drawImage(off, 0, 0);
+  redCtx.globalCompositeOperation = 'source-atop';
+  redCtx.fillStyle = 'rgba(255, 0, 0, 0.78)';
+  redCtx.fillRect(0, 0, red.width, red.height);
+  playerRedCanvas = red;
 };
 playerImg.src = '/Clipernator/sprites/Clippy.png';
 

@@ -185,7 +185,8 @@ const ITEM_DEFS = {
     effect(gs) {
       gs.hasDash = true; gs.dashCharges = CFG.DASH_MAX_CHARGES; gs.dashMaxCharges = CFG.DASH_MAX_CHARGES;
       gs.dashCooldownTimer = 0; gs.dashCooldownMax = CFG.DASH_COOLDOWN_FRAMES;
-      gs.dashTimer = 0; gs.dashVx = 0; gs.dashVy = 0; gs.dashTrail = [];
+      gs.dashTimer = 0; gs.dashVx = 0; gs.dashVy = 0;
+      gs.dashWindupTimer = 0; gs.dashLaunchFrame = 0; gs.dashActiveThisFrame = false; gs.dashBurst = null;
       showMsg('SHIFT TO DASH! 3 CHARGES!');
     },
     draw(fi) {
