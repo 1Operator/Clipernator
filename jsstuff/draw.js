@@ -968,21 +968,24 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
 }
 
   if (gs.hasShakeFizzlePop) {
-    const ratio = gs.sfpFull ? 1 : gs.sfpMeter / gs.sfpMax;
+    const ratio = Math.max(0, Math.min(1, gs.sfpFull ? 1 : gs.sfpMeter / gs.sfpMax));
     ctx.save();
     ctx.translate(x, y);
-    ctx.globalAlpha = 0.2 + ratio * 0.42;
-    ctx.strokeStyle = gs.sfpFull ? '#ffb52e' : '#ff4a24';
-    ctx.lineWidth = gs.sfpFull ? 3 : 2;
-    ctx.shadowColor = gs.sfpFull ? '#ffaa00' : '#ff2200';
-    ctx.shadowBlur = 8 + ratio * 12;
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 0;
     ctx.beginPath();
-    ctx.arc(
-      0, 0, CFG.SFP_EXPLOSION_RADIUS,
-      -Math.PI / 2 + 0.14,
-      Math.PI * 1.5 - 0.14
-    );
+    ctx.strokeStyle = '#ffdd00';
+    ctx.arc(0, 0, CFG.SFP_EXPLOSION_RADIUS, 0, Math.PI * 2);
     ctx.stroke();
+    if (ratio > 0) {
+      ctx.strokeStyle = '#ff3322';
+      ctx.shadowColor = '#ff2200';
+      ctx.shadowBlur = 8 + ratio * 12;
+      ctx.beginPath();
+      ctx.arc(0, 0, CFG.SFP_EXPLOSION_RADIUS, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ratio);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 
@@ -1821,19 +1824,6 @@ ctx.restore();
     ctx.fillRect(ppos.x-26,ppos.y+26,52*prog,8); ctx.shadowBlur=0;
   }
 
-
-  // SFP meter
-  if (gs.hasShakeFizzlePop) {
-    const ppos2 = ECS.get(gs.playerId, 'pos');
-    const ratio = gs.sfpMeter / gs.sfpMax;
-    const bw = 52;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(ppos2.x - bw/2, ppos2.y + 38, bw, 6);
-    const col = gs.sfpFull ? '#ff8800' : `rgb(${Math.round(200*ratio+55)},${Math.round(80*(1-ratio))},0)`;
-    ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = gs.sfpFull ? 10 : 4;
-    ctx.fillRect(ppos2.x - bw/2, ppos2.y + 38, bw * ratio, 6);
-    ctx.shadowBlur = 0;
-  }
 
   // Speed ring
   if (gs.speedBoostTimer > 0) {
