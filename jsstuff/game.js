@@ -1046,13 +1046,6 @@ function renderOffscreenWindows() {
       card.className = 'utensil-window chippy-window';
       card.innerHTML = '<div class="utensil-window-title">Chippy</div><div class="utensil-window-body"><canvas></canvas></div>';
       layer.appendChild(card);
-      makeFloatingWindowDraggable(card, (deltaX, deltaY) => {
-        const scaleX = Number(card.dataset.trackScaleX);
-        const scaleY = Number(card.dataset.trackScaleY);
-        if (!scaleX || !scaleY) return;
-        pos.x += deltaX / scaleX;
-        pos.y += deltaY / scaleY;
-      });
       chippyWindowElements.set(id, card);
     }
 
@@ -1304,57 +1297,6 @@ canvas.addEventListener('contextmenu', e => {
   tryPickUpGiftBox();
 });
 
-let chippyPointerDrag = null;
-let suppressNextCanvasClick = false;
-
-canvas.addEventListener('pointerdown', event => {
-  if (event.button !== 0 || !gameRunning || isPaused) return;
-  const rect = canvas.getBoundingClientRect();
-  if (!rect.width || !rect.height) return;
-  const shake = getScreenShakeOffset();
-  const worldX = ((event.clientX - rect.left) / rect.width) * worldW - shake.x;
-  const worldY = ((event.clientY - rect.top) / rect.height) * worldH - shake.y;
-  const chippyId = getChippyAtWorldPosition(worldX, worldY);
-  if (chippyId === null) return;
-
-  chippyPointerDrag = {
-    pointerId: event.pointerId,
-    entityId: chippyId,
-    startX: event.clientX,
-    startY: event.clientY,
-    lastX: event.clientX,
-    lastY: event.clientY,
-    moved: false,
-  };
-  canvas.style.cursor = 'grabbing';
-  canvas.setPointerCapture(event.pointerId);
-});
-
-canvas.addEventListener('pointermove', event => {
-  if (!chippyPointerDrag || event.pointerId !== chippyPointerDrag.pointerId) return;
-  const drag = chippyPointerDrag;
-  const totalDistance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
-  if (!drag.moved && totalDistance < 6) return;
-  drag.moved = true;
-  const rect = canvas.getBoundingClientRect();
-  if (!rect.width || !rect.height || !ECS.has(drag.entityId, 'pos')) return;
-  const pos = ECS.get(drag.entityId, 'pos');
-  pos.x += (event.clientX - drag.lastX) * worldW / rect.width;
-  pos.y += (event.clientY - drag.lastY) * worldH / rect.height;
-  drag.lastX = event.clientX;
-  drag.lastY = event.clientY;
-});
-
-const finishChippyDrag = event => {
-  if (!chippyPointerDrag || event.pointerId !== chippyPointerDrag.pointerId) return;
-  suppressNextCanvasClick = event.type === 'pointerup' && chippyPointerDrag.moved;
-  chippyPointerDrag = null;
-  canvas.style.cursor = '';
-  if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-};
-canvas.addEventListener('pointerup', finishChippyDrag);
-canvas.addEventListener('pointercancel', finishChippyDrag);
-
 document.addEventListener('keydown', e => {
   if (document.getElementById('keybind-screen').style.display === 'flex') return;
 
@@ -1388,10 +1330,6 @@ document.addEventListener('keyup', e => { keys[e.key] = false; });
 
 document.addEventListener('click', e => {
   if (!gameRunning || isPaused || gs.playerId == null) return;
-  if (suppressNextCanvasClick) {
-    suppressNextCanvasClick = false;
-    return;
-  }
   if (!(e.target instanceof Element)) return;
   const isCanvasClick = e.target === canvas;
   const isMiniWindowClick = !!e.target.closest('.utensil-window-body');
@@ -1409,17 +1347,6 @@ document.addEventListener('mousemove', e => {
   _pauseMouseX = e.clientX;
   _pauseMouseY = e.clientY;
   updateAimFromPointer(e.clientX, e.clientY, e.target);
-  if (!chippyPointerDrag && e.target === canvas && gameRunning && !isPaused) {
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width && rect.height) {
-      const shake = getScreenShakeOffset();
-      const worldX = ((e.clientX - rect.left) / rect.width) * worldW - shake.x;
-      const worldY = ((e.clientY - rect.top) / rect.height) * worldH - shake.y;
-      canvas.style.cursor = getChippyAtWorldPosition(worldX, worldY) === null ? '' : 'grab';
-    }
-  } else if (!chippyPointerDrag && e.target !== canvas) {
-    canvas.style.cursor = '';
-  }
 });
 
 // ================================================================
