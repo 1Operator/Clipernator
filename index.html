@@ -432,14 +432,36 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   justify-content: center;
   padding: 2px;
   overflow: hidden;
-  background: #f8f8f8;
-  border: 1px solid #aaa;
+  background: linear-gradient(145deg, #fff 0%, #e8e8e8 45%, #c8c8c8 100%);
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #777;
+  border-bottom: 2px solid #777;
+  box-shadow: inset 1px 1px 0 #f7f7f7, 1px 1px 0 #aaa;
   cursor: pointer;
+  transition: background 100ms ease, transform 100ms ease, box-shadow 100ms ease;
+}
+
+.trash-item-row:hover {
+  background: linear-gradient(145deg, #fff 0%, #e3edff 48%, #b8cdea 100%);
+  box-shadow: inset 1px 1px 0 #fff, 0 0 0 1px #7597c1;
+}
+
+.trash-item-row:active {
+  transform: translate(1px, 1px);
+  border-top-color: #777;
+  border-left-color: #777;
+  border-right-color: #fff;
+  border-bottom-color: #fff;
 }
 
 .trash-item-row[aria-pressed="true"] {
-  background: #dbe8ff;
-  outline: 1px solid #2455a4;
+  background: linear-gradient(145deg, #e6f0ff 0%, #c8d9f3 100%);
+  border-top-color: #7597c1;
+  border-left-color: #7597c1;
+  border-right-color: #315b91;
+  border-bottom-color: #315b91;
+  box-shadow: inset 1px 1px 2px rgba(29, 66, 112, 0.3), 0 0 0 1px #7597c1;
 }
 
 .trash-item-row img {
@@ -470,8 +492,14 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   flex: 1;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px inset #aaa;
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,0.95), rgba(214,225,240,0.55) 74%),
+    repeating-linear-gradient(45deg, #e2e8f0 0 6px, #d6deea 6px 12px);
+  border-top: 2px solid #6b6b6b;
+  border-left: 2px solid #6b6b6b;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.25), 0 1px 0 #fff;
 }
 
 .trash-item-preview img {

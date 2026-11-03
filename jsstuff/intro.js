@@ -402,7 +402,7 @@ function detachKeys() {
       if (!target) return;
       if (target.closest('.desktop-error-close, .desktop-error-ok')) {
         desktopErrorVisible = false;
-        if (app.id !== 'recycle') playSound('click');
+        playSound('click');
         renderPersistentDesktop();
         return;
       }
@@ -804,7 +804,7 @@ setTimeout(() => {
             draftSelected = (draftSelected + 1) % itemCount;
           } else if (e.key === 'Enter') {
             picking = true;          // set immediately, before any async
-            SFX.play('itemConfirm', 0.65);
+            playSound('confirm');
             detachKeys();            // remove listener right away
 
             const chosen = draftItems[draftSelected];
@@ -960,7 +960,7 @@ setTimeout(() => {
 
     const app = DESKTOP_APPS.find(desktopApp => desktopApp.id === appId);
     if (!app || (app.id === 'data' && _introDone)) return;
-    playSound('click');
+    if (app.id !== 'recycle') playSound('click');
     if (app.id === 'data') {
       handleDataClick();
     } else if (app.id === 'recycle') {

@@ -14,12 +14,13 @@
 - **Hotbar** means the Windows-style taskbar along the bottom edge of the full-screen desktop (Start, app buttons, active-window button, audio/settings controls, and clock). It does not mean the MGW's bottom bar; that is only a thin window border/status strip.
 - The post-boot desktop and its taskbar are HTML UI. The BIOS, loading, bluescreen, and other intro sequences continue to use canvas for their animation.
 - Desktop icons and error dialogs are HTML elements so their text, buttons, and click targets are independent of canvas drawing.
+- Opening-sequence item-draft selections use the BIOS confirmation sound; `ItemConfirm` is reserved for in-game item choices, pickups, and relic unlocks.
 - Email is a draggable inbox overlay and does not pause an active run. Offers expire after 20–60 seconds of active gameplay; random mail is checked once per active minute with a 50% chance.
 - New email plays a notification chime, bounces the Email hotbar icon briefly, and shows a blinking unread count. Hovering the icon shows the unread total; opening the inbox plays its open cue.
 - The inbox lists messages by soonest expiry, with unread messages bolded, an expiry bar, a preview, and up to two message-specific actions. Selecting a message is always safe.
 - Bounties and terms agreements count complete waves, starting with the next full wave. Bounties fail without penalty if their accepted condition is broken; terms must be scrolled to the bottom before acceptance and apply their stated modifier.
 - Spam consequences happen only through its link button; reporting spam rewards a chip, while reporting a real offer only deletes it. System notices provide information without rewards.
-- The desktop Trash icon opens a draggable item-uninstall window without pausing the run. It lists installed permanent items, previews the selected item, and pays chips when it is uninstalled: most items are worth 2 chips, advanced upgrades are worth 4, and Quadruple Layered Cake is worth 8. Removing an item also removes its installed effect; lower cake tiers do not return after uninstalling an upgrade. Temporary pickups are not part of the installed-item list.
+- The desktop Trash icon opens a draggable item-uninstall window without pausing the run. It lists owned items as sprite-only tiles, previews the selected item above the grid, and shows its value/action in a full-height side panel. Items are worth 2 chips by default; Triple Layered Cake, Popcorn Bowl, and Full Clown Mode are worth 4, while Quadruple Layered Cake is worth 8. Uninstalling removes an item from the available loadout and clears its persistent effect; an already-running timed effect finishes normally. Dependent upgrades are removed with their parent, and lower cake tiers do not return after uninstalling an upgrade.
 - Trash opening and successful item uninstall play the dedicated `TrashOpen` and `TrashUse` sound effects.
 
 ---
@@ -186,7 +187,7 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | `Chips/ChipPickup.mp3` | Wired: a normal chip is collected. |
 | `Chips/GoldenChipTarget.mp3` | Wired as a loop: plays while at least one golden chip is magnetized and homing toward the player. |
 | `Chips/GoldenChipPickup.mp3` | Wired: a golden chip is collected, including from Chippy. |
-| `items/ItemConfirm.mp3` | Wired: confirms an item in the opening draft or in-game choice, and plays when an item is picked up or Glowsticks are unlocked. |
+| `items/ItemConfirm.mp3` | Wired: confirms an in-game item choice, plays when an item is picked up, and plays when Glowsticks are unlocked. Opening-sequence item drafts use `opening/confirm.mp3`. |
 | `items/BirthdayParty/BirthdayParty.mp3` | Wired: intended to play when the Birthday Party item effect activates and freezes enemy movement. The current file is 1 byte and needs valid audio data to be audible. |
 | `items/ItemReveal.mp3` | Wired: plays at normal speed when in-game item choices appear; cards reveal immediately, at about +0.67 seconds, and at about +1.33 seconds, each with a 1.5-second impact-scale animation. The fourth Floor 2 card reveals with the third. |
 | `misc/CandleLight.mp3` | Wired: plays whenever one of the player's Cursed Candles relights. Reuse this cue for future boss-candle lighting events. |
@@ -197,6 +198,11 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | File | Intended event / status |
 |---|---|
 | `UI/PauseSound.mp3` | Wired: entering the pause menu. Starts directly from the pause key event; pausing the game loop does not prevent audio playback. |
+| `UI/Email/EmailNotification.mp3` | Wired: a new message arrives. |
+| `UI/Email/EmailOpen.mp3` | Wired: opening the inbox or selecting an unread message. |
+| `UI/Email/EmailAccept.mp3`, `EmailReject.mp3` | Wired: accepting/rejecting an offer. |
+| `UI/Trash/TrashOpen.mp3` | Wired: opening the Trash window. |
+| `UI/Trash/TrashUse.mp3` | Wired: successfully uninstalling an item. |
 | `misc/Waves/WaveComplete.mp3` | Wired: a wave is completed. |
 | `misc/CreepySound.mp3`, `misc/OMINI.mp3` | Unused, as requested; reserved for later. |
 | `opening/bluescreen.mp3` | Wired: opening sequence blue-screen effect. |
