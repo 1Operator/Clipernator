@@ -614,6 +614,12 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
           const aim = Math.atan2(dy, dx);
         
         const hasHatNow = !!(ai.hatrider && ECS.has(ai.hatrider, 'pos'));
+          SFX.playAt(
+            hasHatNow ? 'redBalloonShoot' : 'balloonShoot',
+            pos.x,
+            pos.y,
+            0.55
+          );
           if (hasHatNow) {
             // Hat-buffed: fire 4 homing red tears in a spread
             const spreads = [-0.35, -0.12, 0.12, 0.35];

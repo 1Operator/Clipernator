@@ -341,6 +341,8 @@ SFX.load('utensilDeath',     'sounds/soundeffects/enemies/Utensil/UtensilDeath.m
 SFX.load('spoonDamage',      'sounds/soundeffects/enemies/Utensil/Spoon/SpoonDamage.mp3');
 SFX.load('giftBoxWindUp',    'sounds/soundeffects/enemies/GiftBox/GiftBoxWindUp.mp3');
 SFX.load('balloonSpawn',     'sounds/soundeffects/enemies/WaterBalloon/BalloonSpawn.mp3');
+SFX.load('balloonShoot',     'sounds/soundeffects/enemies/WaterBalloon/BalloonShoot.mp3');
+SFX.load('redBalloonShoot',  'sounds/soundeffects/enemies/WaterBalloon/RedBalloonShoot.mp3');
 
 SFX.load('frostingLaunch',   'sounds/soundeffects/enemies/CakeBoss/FrostingLaunch.mp3');
 SFX.load('frostingHit',      'sounds/soundeffects/enemies/CakeBoss/FrostingHit.mp3');

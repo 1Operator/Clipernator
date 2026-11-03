@@ -656,8 +656,11 @@ function endEmailRun() {
 function toggleEmailInbox() {
   const inbox = document.getElementById('email-window');
   const opening = getComputedStyle(inbox).display === 'none';
-  inbox.style.display = opening ? 'block' : 'none';
-  if (opening) bringFloatingWindowToFront(inbox);
+  inbox.style.display = opening ? 'flex' : 'none';
+  if (opening) {
+    SFX.play('EmailOpen', 0.45);
+    bringFloatingWindowToFront(inbox);
+  }
   else updateTaskbarActiveWindow();
 }
 

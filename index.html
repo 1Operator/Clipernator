@@ -340,17 +340,28 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 #email-window {
-  width: 410px;
+  width: min(410px, calc(100vw - 20px));
   max-width: calc(100vw - 20px);
+  min-width: 0;
+  height: auto;
   max-height: calc(100vh - 52px);
+  overflow: hidden;
   z-index: 2;
   background: #d4d0c8;
+  color: #111;
   border-top: 2px solid #fff;
   border-left: 2px solid #fff;
   border-right: 2px solid #404040;
   border-bottom: 2px solid #404040;
   box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.45);
   font: 11px 'MS Sans Serif', Arial, sans-serif;
+}
+
+#utensil-window-layer #email-window {
+  width: min(410px, calc(100vw - 20px));
+  height: auto;
+  background: #d4d0c8;
+  color: #111;
 }
 
 #email-window .desktop-window-titlebar {
@@ -366,6 +377,8 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .email-window-content {
   display: flex;
+  width: 100%;
+  min-width: 0;
   min-height: 0;
   flex-direction: column;
   gap: 5px;
@@ -380,6 +393,8 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 #email-list {
   display: flex;
+  width: 100%;
+  min-width: 0;
   height: 150px;
   min-height: 90px;
   flex-direction: column;
@@ -458,6 +473,8 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 .email-expiry-bar.critical { background: #c22; }
 
 #email-preview {
+  width: 100%;
+  min-width: 0;
   min-height: 108px;
   max-height: 126px;
   overflow: auto;
@@ -471,6 +488,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   box-shadow: inset 1px 1px 0 #aaa;
   line-height: 1.45;
   white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 #email-preview:focus-visible {
@@ -487,9 +505,13 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .email-actions {
   display: flex;
+  flex: 0 0 auto;
+  width: 100%;
   min-height: 25px;
   justify-content: flex-end;
   gap: 5px;
+  padding-top: 3px;
+  background: #d4d0c8;
 }
 
 .email-action-button {
@@ -503,6 +525,14 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   border-right: 1px solid #404040;
   border-bottom: 1px solid #404040;
   cursor: pointer;
+}
+
+#email-window [data-email-close] {
+  width: 22px;
+  min-width: 22px;
+  height: 18px;
+  padding: 0;
+  font-weight: bold;
 }
 
 .email-action-button:disabled {
