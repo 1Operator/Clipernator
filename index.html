@@ -82,7 +82,7 @@ body::before { display: none; }
 
 #persistent-desktop {
   position: fixed;
-  inset: 0;
+  inset: 0 0 42px;
   z-index: 1;
   overflow: hidden;
   background-color: #008080;
@@ -143,7 +143,7 @@ body::before { display: none; }
 #desktop-loading {
   position: absolute;
   left: 2.5%;
-  bottom: 42px;
+  bottom: 50px;
   color: #ffdd00;
   font: 13px 'Fixedsys', monospace;
   text-shadow: 1px 1px #000;
@@ -204,7 +204,7 @@ body::before { display: none; }
   left: 0;
   z-index: 3;
   display: flex;
-  height: 34px;
+  height: 42px;
   align-items: center;
   gap: 4px;
   min-width: 0;
@@ -311,7 +311,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   align-items: center;
   justify-content: center;
   gap: 4px;
-  height: 25px;
+  height: 32px;
   padding: 2px 6px;
   color: #000;
   font: bold 11px 'MS Sans Serif', Arial, sans-serif;
@@ -346,18 +346,18 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   outline-offset: -4px;
 }
 
-.taskbar-button { min-width: 72px; }
+.taskbar-button { min-width: 82px; }
 
 .taskbar-button img {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
   image-rendering: pixelated;
 }
 
 .taskbar-divider {
   flex: 0 0 2px;
-  height: 24px;
+  height: 30px;
   border-left: 1px solid #808080;
   border-right: 1px solid #fff;
 }
@@ -371,14 +371,14 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .taskbar-app,
 .taskbar-tray-button {
-  width: 28px;
+  width: 34px;
   padding: 2px;
 }
 
 .taskbar-app img,
 .taskbar-tray-button img {
-  width: 19px;
-  height: 19px;
+  width: 25px;
+  height: 25px;
   object-fit: contain;
   image-rendering: pixelated;
 }
