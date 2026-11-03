@@ -48,9 +48,9 @@ clippyJump2:     'sprites/clippy/Clippycrouchingleft.png',
     antipie:        'sprites/ui/ANTIPIE.png',
     computer:     'sprites/ui/computer.png',
     calculator:   'sprites/ui/calculator.png',
-    trash:   'sprites/ui/trash.png',
-    dataLocked:     'sprites/ui/data_locked.png',
-    sapmovy:        'sprites/ui/sapmovy.png',
+    trash:          'sprites/ui/Trash.png',
+    dataLocked:     'sprites/ui/data_locked1.png',
+    wonderWeb:      'sprites/ui/WonderWeb.png',
     drawalogo:      'sprites/ui/drawalogo.png',
   };
 
@@ -256,8 +256,8 @@ function stopSound(key) {
     { id: 'recycle',     label: 'Trash',        sprite: 'trash',       x: 24,  y: 100 },
     { id: 'docs',        label: 'My Documents', sprite: 'folder',      x: 24,  y: 170 },
     { id: 'notepad',     label: 'Notepad',      sprite: 'notes',       x: 24,  y: 240 },
-    { id: 'internet',    label: 'Sapmovy',      sprite: 'sapmovy',     x: 24,  y: 310 },
-    { id: 'data',        label: 'data.md',      sprite: 'dataLocked',  x: 24,  y: 400 },
+    { id: 'internet',    label: 'WonderWeb',    sprite: 'wonderWeb',   x: 24,  y: 310 },
+    { id: 'data',        label: 'Data.md',      sprite: 'dataLocked',  x: 24,  y: 400 },
     { id: 'folder1',     label: 'Projects',     sprite: 'folder',      x: 110, y: 30  },
     { id: 'folder2',     label: 'Downloads',    sprite: 'folder',      x: 110, y: 100 },
   ];

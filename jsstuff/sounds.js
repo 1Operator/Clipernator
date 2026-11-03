@@ -5,6 +5,7 @@
 const SFX = {
   _cache: {},
   _loops: {},
+  _activeAudio: new Set(),
   _entityAudio: new Map(),
   _giftBoxAudio: new Map(),
   _decodedAudio: new Map(),
@@ -17,6 +18,43 @@ const SFX = {
     this._cache[key] = audio;
   },
 
+  setMuted(muted) {
+    this._muted = Boolean(muted);
+    if (!this._muted) return;
+
+    for (const audio of this._activeAudio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    this._activeAudio.clear();
+
+    for (const key of Object.keys(this._loops)) {
+      const audio = this._cache[key];
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.loop = false;
+      }
+      delete this._loops[key];
+    }
+
+    for (const entry of this._entityAudio.values()) {
+      entry.audio.pause();
+      entry.audio.currentTime = 0;
+    }
+
+    for (const entry of this._giftBoxAudio.values()) {
+      if (entry.source) {
+        const source = entry.source;
+        entry.source = null;
+        source.stop();
+        entry.gain?.disconnect();
+        entry.gain = null;
+      }
+      entry.direction = null;
+    }
+  },
+
   play(key, volumeOverride, onStarted) {
     if (this._muted) return;
     const src = this._cache[key];
@@ -25,8 +63,11 @@ const SFX = {
       const clone = src.cloneNode();
       clone.volume = volumeOverride !== undefined ? volumeOverride : 0.6;
       if (key === 'partyExplosion') clone.playbackRate = 0.96 + Math.random() * 0.08;
+      this._activeAudio.add(clone);
+      clone.addEventListener('ended', () => this._activeAudio.delete(clone), { once: true });
       const playback = clone.play();
       const reportPauseFailure = error => {
+        this._activeAudio.delete(clone);
         if (key === 'pause') console.warn('Unable to play pause sound.', error);
       };
       if (onStarted) playback.then(onStarted).catch(reportPauseFailure);
@@ -258,7 +299,9 @@ const SFX = {
       const clone = src.cloneNode();
       clone.volume = Math.max(0, Math.min(1, base * spatial));
       if (key === 'partyExplosion') clone.playbackRate = 0.96 + Math.random() * 0.08;
-      clone.play().catch(() => {});
+      this._activeAudio.add(clone);
+      clone.addEventListener('ended', () => this._activeAudio.delete(clone), { once: true });
+      clone.play().catch(() => this._activeAudio.delete(clone));
     } catch(e) {}
   },
 };

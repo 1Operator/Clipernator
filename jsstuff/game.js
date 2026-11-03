@@ -440,6 +440,7 @@ function togglePause() {
   } else {
     _removePauseClippyCanvas();
     document.getElementById('pause-menu').style.display = 'none';
+    updateTaskbarActiveWindow();
     gameRunning = true;
     lastTime = performance.now();
     loop();
@@ -603,6 +604,7 @@ let _keybindKeyHandler = null;
 
 function openKeybindScreen() {
   document.getElementById('pause-menu').style.display = 'none';
+  updateTaskbarActiveWindow();
   const screen = document.getElementById('keybind-screen');
   screen.style.display = 'flex';
   bringFloatingWindowToFront(screen);
@@ -821,9 +823,33 @@ function makeFloatingWindowDraggable(card, moveEntities) {
 }
 
 let floatingWindowZIndex = 10;
+let activeFloatingWindow = null;
 
 function bringFloatingWindowToFront(windowElement) {
   windowElement.style.zIndex = String(++floatingWindowZIndex);
+  updateTaskbarActiveWindow();
+}
+
+function updateTaskbarActiveWindow() {
+  const taskbarTitle = document.getElementById('taskbar-active-title');
+  const taskbarButton = document.getElementById('taskbar-active-window');
+  if (!taskbarTitle || !taskbarButton) return;
+
+  activeFloatingWindow = [...document.querySelectorAll('#utensil-window-layer .utensil-window, #utensil-window-layer .independent-window')]
+    .filter(windowElement => getComputedStyle(windowElement).display !== 'none')
+    .reduce((front, windowElement) => {
+      if (!front || Number(windowElement.style.zIndex) > Number(front.style.zIndex)) return windowElement;
+      return front;
+    }, null);
+
+  const title = activeFloatingWindow
+    ? activeFloatingWindow.dataset.windowTitle
+      || activeFloatingWindow.querySelector('.utensil-window-title')?.textContent.trim()
+      || 'Window'
+    : 'party.exe';
+  taskbarTitle.textContent = title;
+  taskbarButton.title = `Active window: ${title}`;
+  taskbarButton.classList.add('is-active');
 }
 
 function makeIndependentWindowDraggable(windowElement) {
@@ -871,6 +897,7 @@ function initializeIndependentWindows() {
   for (const windowElement of document.querySelectorAll('.independent-window')) {
     registerIndependentWindow(windowElement);
   }
+  updateTaskbarActiveWindow();
 }
 
 initializeIndependentWindows();
@@ -904,6 +931,7 @@ function renderOffscreenWindows() {
     offscreenWindowElements.clear();
     chippyWindowElements.clear();
     clippyWindowElement = null;
+    updateTaskbarActiveWindow();
     return;
   }
 
@@ -1002,7 +1030,10 @@ function renderOffscreenWindows() {
       return type.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, char => char.toUpperCase());
     }).join(', ');
     const titleElement = card.firstElementChild;
-    titleElement.textContent = title;
+    if (titleElement.textContent !== title) {
+      titleElement.textContent = title;
+      updateTaskbarActiveWindow();
+    }
     titleElement.title = title;
 
     const preview = card.lastElementChild.firstElementChild;
@@ -1103,6 +1134,7 @@ function renderOffscreenWindows() {
     if (groups.has(groupId)) continue;
     card.remove();
     offscreenWindowElements.delete(groupId);
+    updateTaskbarActiveWindow();
   }
 
   const playerPos = ECS.get(gs.playerId, 'pos');
@@ -1156,6 +1188,7 @@ function renderOffscreenWindows() {
   } else if (clippyWindowElement) {
     clippyWindowElement.remove();
     clippyWindowElement = null;
+    updateTaskbarActiveWindow();
   }
 }
 
@@ -1310,6 +1343,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       _removePauseClippyCanvas();
       document.getElementById('pause-menu').style.display = 'none';
+      updateTaskbarActiveWindow();
       isPaused = false;
       gameRunning = false;
       document.getElementById('overlay').style.display = 'flex';
@@ -1354,6 +1388,32 @@ document.addEventListener('mousemove', e => {
 // BUTTON LISTENERS
 // ================================================================
 document.getElementById('startBtn').addEventListener('click', startGame);
+
+document.getElementById('taskbar-start').addEventListener('click', () => {
+  const overlay = document.getElementById('overlay');
+  if (overlay.style.display !== 'none') document.getElementById('startBtn').click();
+});
+
+document.getElementById('taskbar-active-window').addEventListener('click', () => {
+  if (activeFloatingWindow?.isConnected) bringFloatingWindowToFront(activeFloatingWindow);
+});
+
+const taskbarAudioButton = document.getElementById('taskbar-audio');
+taskbarAudioButton.addEventListener('click', () => {
+  SFX.setMuted(!SFX._muted);
+  const muted = SFX._muted;
+  taskbarAudioButton.setAttribute('aria-pressed', String(muted));
+  taskbarAudioButton.title = muted ? 'Turn audio on' : 'Mute audio';
+  taskbarAudioButton.setAttribute('aria-label', taskbarAudioButton.title);
+});
+
+function updateTaskbarClock() {
+  const clock = document.getElementById('taskbar-clock');
+  clock.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+updateTaskbarClock();
+setInterval(updateTaskbarClock, 1000);
 
 document.getElementById('floor-btn').addEventListener('click', () => {
   document.getElementById('floor-transition').style.display = 'none';
