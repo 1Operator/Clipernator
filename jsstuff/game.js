@@ -430,7 +430,9 @@ function togglePause() {
   if (isPaused) {
     gameRunning = false;
     cancelAnimationFrame(animId);
-    document.getElementById('pause-menu').style.display = 'flex';
+    const pauseMenu = document.getElementById('pause-menu');
+    pauseMenu.style.display = 'flex';
+    bringFloatingWindowToFront(pauseMenu);
     renderPauseMenu();
     _createPauseClippyCanvas();
     _startPauseClippyLoop();
@@ -603,12 +605,15 @@ function openKeybindScreen() {
   document.getElementById('pause-menu').style.display = 'none';
   const screen = document.getElementById('keybind-screen');
   screen.style.display = 'flex';
+  bringFloatingWindowToFront(screen);
   renderKeybindRows();
 }
 
 function closeKeybindScreen() {
   document.getElementById('keybind-screen').style.display = 'none';
-  document.getElementById('pause-menu').style.display = 'flex';
+  const pauseMenu = document.getElementById('pause-menu');
+  pauseMenu.style.display = 'flex';
+  bringFloatingWindowToFront(pauseMenu);
   cancelKeybindListen();
 }
 
@@ -815,6 +820,61 @@ function makeFloatingWindowDraggable(card, moveEntities) {
   titleBar.addEventListener('pointercancel', finishDrag);
 }
 
+let floatingWindowZIndex = 10;
+
+function bringFloatingWindowToFront(windowElement) {
+  windowElement.style.zIndex = String(++floatingWindowZIndex);
+}
+
+function makeIndependentWindowDraggable(windowElement) {
+  const titleBar = windowElement.querySelector('.desktop-window-titlebar');
+  let drag = null;
+  titleBar.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || event.target.closest('button')) return;
+    const rect = windowElement.getBoundingClientRect();
+    windowElement.style.left = `${rect.left}px`;
+    windowElement.style.top = `${rect.top}px`;
+    windowElement.style.transform = 'none';
+    drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top };
+    titleBar.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+  titleBar.addEventListener('pointermove', event => {
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const maxLeft = Math.max(0, window.innerWidth - windowElement.offsetWidth);
+    const maxTop = Math.max(0, window.innerHeight - windowElement.offsetHeight);
+    windowElement.style.left = `${Math.max(0, Math.min(maxLeft, drag.left + event.clientX - drag.x))}px`;
+    windowElement.style.top = `${Math.max(0, Math.min(maxTop, drag.top + event.clientY - drag.y))}px`;
+  });
+  const finishDrag = event => {
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    drag = null;
+  };
+  titleBar.addEventListener('pointerup', finishDrag);
+  titleBar.addEventListener('pointercancel', finishDrag);
+}
+
+function registerIndependentWindow(windowElement) {
+  windowElement.classList.add('independent-window');
+  document.getElementById('utensil-window-layer').appendChild(windowElement);
+  makeIndependentWindowDraggable(windowElement);
+  bringFloatingWindowToFront(windowElement);
+}
+
+function initializeIndependentWindows() {
+  const layer = document.getElementById('utensil-window-layer');
+  layer.addEventListener('pointerdown', event => {
+    if (!(event.target instanceof Element)) return;
+    const windowElement = event.target.closest('.utensil-window, .independent-window');
+    if (windowElement) bringFloatingWindowToFront(windowElement);
+  });
+  for (const windowElement of document.querySelectorAll('.independent-window')) {
+    registerIndependentWindow(windowElement);
+  }
+}
+
+initializeIndependentWindows();
+
 function positionWindowWithEntity(card, worldX, worldY, rect, width, height) {
   if (!card.dataset.worldAnchorX) {
     card.dataset.worldAnchorX = String(worldX);
@@ -840,7 +900,7 @@ function renderOffscreenWindows() {
   const layer = document.getElementById('utensil-window-layer');
   const canvasRect = canvas.getBoundingClientRect();
   if (!canvasRect.width || !canvasRect.height || !gameRunning) {
-    layer.replaceChildren();
+    layer.querySelectorAll('.utensil-window').forEach(windowElement => windowElement.remove());
     offscreenWindowElements.clear();
     chippyWindowElements.clear();
     clippyWindowElement = null;
@@ -910,6 +970,7 @@ function renderOffscreenWindows() {
         : 'utensil-window';
       card.innerHTML = '<div class="utensil-window-title"></div><div class="utensil-window-body"><canvas></canvas></div>';
       layer.appendChild(card);
+      bringFloatingWindowToFront(card);
       makeFloatingWindowDraggable(card, (deltaX, deltaY) => {
         const scaleX = Number(card.dataset.trackScaleX);
         const scaleY = Number(card.dataset.trackScaleY);
@@ -1011,6 +1072,7 @@ function renderOffscreenWindows() {
       card.className = 'utensil-window chippy-window';
       card.innerHTML = '<div class="utensil-window-title">Chippy</div><div class="utensil-window-body"><canvas></canvas></div>';
       layer.appendChild(card);
+      bringFloatingWindowToFront(card);
       chippyWindowElements.set(id, card);
     }
 
@@ -1062,6 +1124,7 @@ function renderOffscreenWindows() {
       clippyWindowElement.className = 'utensil-window clippy-window';
       clippyWindowElement.innerHTML = '<div class="utensil-window-title">Clippy</div><div class="utensil-window-body"><canvas></canvas></div>';
       layer.appendChild(clippyWindowElement);
+      bringFloatingWindowToFront(clippyWindowElement);
     }
 
     const width = 240;
