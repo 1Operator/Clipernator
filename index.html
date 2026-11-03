@@ -514,6 +514,24 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   background: #d4d0c8;
 }
 
+.email-action-status {
+  display: none;
+  width: 100%;
+  padding: 5px 7px;
+  color: #123d1b;
+  background: #e7f4e8;
+  border: 1px solid #78a982;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.email-action-status.visible { display: block; }
+.email-action-status.error {
+  color: #6b1d1d;
+  background: #f9e4e4;
+  border-color: #b77777;
+}
+
 .email-action-button {
   min-width: 88px;
   padding: 3px 8px;
@@ -525,6 +543,13 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   border-right: 1px solid #404040;
   border-bottom: 1px solid #404040;
   cursor: pointer;
+}
+
+.email-action-button:active:not(:disabled) {
+  border-top-color: #404040;
+  border-left-color: #404040;
+  border-right-color: #fff;
+  border-bottom-color: #fff;
 }
 
 #email-window [data-email-close] {
@@ -1544,6 +1569,7 @@ canvas {
       <div id="email-list" role="listbox" aria-label="Inbox"></div>
       <span class="email-pane-label">Preview</span>
       <div id="email-preview" tabindex="0" aria-live="polite">Select a message to read it. Reading is always safe.</div>
+      <div id="email-action-status" class="email-action-status" role="status" aria-live="polite"></div>
       <div id="email-actions" class="email-actions"></div>
     </div>
   </section>

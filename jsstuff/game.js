@@ -710,12 +710,14 @@ function startKeybindListen(action) {
   // Attach to all Win2k-style buttons in the HUD and wrapper
   document.addEventListener('click', function(e) {
     const el = e.target;
+    if (!(el instanceof Element)) return;
     // HUD titlebar buttons, w2k-btn class, pause menu buttons, keybind buttons
     if (
       el.closest('#hud-controls') ||
       el.classList.contains('w2k-btn') ||
       el.closest('#pause-menu button') ||
       el.closest('#keybind-screen button') ||
+      el.closest('.taskbar-button, .taskbar-app, .taskbar-active-window, .taskbar-tray-button, #email-window button') ||
       el.id === 'startBtn' ||
       el.id === 'skip-btn' ||
       el.id === 'floor-btn' ||

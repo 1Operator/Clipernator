@@ -192,6 +192,14 @@ function emailRenderPreview() {
   }
 }
 
+function emailSetActionStatus(text, isError = false) {
+  const status = document.getElementById('email-action-status');
+  if (!status) return;
+  status.textContent = text;
+  status.classList.toggle('visible', Boolean(text));
+  status.classList.toggle('error', isError);
+}
+
 function emailRenderList() {
   const list = document.getElementById('email-list');
   const sorted = [...emailMessages].sort((a, b) => a.expiresAt - b.expiresAt || a.id - b.id);
@@ -249,16 +257,20 @@ function emailRenderTracker() {
   if (emailActiveBounty) {
     appendLine("Clippy's Bounty", 'email-contract-title');
     appendLine(emailActiveBounty.subject);
-    appendLine(`${emailActiveBounty.progress}/${emailActiveBounty.duration} complete waves`);
+    appendLine(`Starts wave ${emailActiveBounty.eligibleWave}; ${emailActiveBounty.progress}/${emailActiveBounty.duration} complete waves`);
   }
   for (const agreement of emailActiveTerms) {
     appendLine(agreement.name, 'email-contract-title');
+    appendLine(agreement.name === 'Low Memory'
+      ? 'Ammo capacity reduced; chips and rewards doubled.'
+      : 'Movement speed and incoming damage increased; chips and rewards boosted.');
+    appendLine(`Effect active now; duration starts wave ${agreement.eligibleWave}.`);
     appendLine(`${agreement.completed}/${agreement.duration} complete waves`);
   }
   tracker.hidden = tracker.childElementCount === 0;
 }
 
-function emailDeliver({ type, sender, subject, body, payload = null, lifetime = 10_000 + Math.random() * 20_000 }) {
+function emailDeliver({ type, sender, subject, body, payload = null, lifetime = 20_000 + Math.random() * 40_000 }) {
   const message = {
     id: emailNextId++,
     type,
@@ -288,7 +300,7 @@ function deliverSystemEmail(subject, body) {
     type: 'system',
     subject,
     body,
-    lifetime: 10_000 + Math.random() * 20_000,
+    lifetime: 20_000 + Math.random() * 40_000,
   });
 }
 
@@ -341,6 +353,7 @@ function emailCreateRandomOffer() {
 function emailSelectMessage(id) {
   const message = emailMessages.find(item => item.id === id);
   if (!message || message.expired) return;
+  emailSetActionStatus('');
   emailSelectedId = id;
   if (!message.read) {
     message.read = true;
@@ -400,7 +413,14 @@ function pauseEmailTimers() {
 }
 
 function emailAcceptBounty(message) {
-  if (emailActiveBounty || !emailRunAvailable()) return;
+  if (emailActiveBounty) {
+    emailSetActionStatus('A bounty is already active. Finish or fail it before accepting another.', true);
+    return;
+  }
+  if (!emailRunAvailable()) {
+    emailSetActionStatus('Start or resume a run before accepting this offer.', true);
+    return;
+  }
   const { goal, duration } = message.payload;
   const pos = ECS.get(gs.playerId, 'pos');
   emailActiveBounty = {
@@ -417,10 +437,18 @@ function emailAcceptBounty(message) {
   emailRemoveMessage(message);
   emailRenderTracker();
   showMsg('BOUNTY ACCEPTED — STARTS NEXT WAVE');
+  emailSetActionStatus(`Accepted. The bounty starts at wave ${emailActiveBounty.eligibleWave} and tracks progress in the desktop corner.`);
 }
 
 function emailAcceptTerms(message) {
-  if (!emailRunAvailable() || document.getElementById('email-preview').dataset.termsScrolled !== 'true') return;
+  if (!emailRunAvailable()) {
+    emailSetActionStatus('Start or resume a run before accepting these terms.', true);
+    return;
+  }
+  if (document.getElementById('email-preview').dataset.termsScrolled !== 'true') {
+    emailSetActionStatus('Scroll to the bottom of the full agreement to enable acceptance.', true);
+    return;
+  }
   const agreement = {
     name: message.payload.name,
     ammoMultiplier: message.payload.ammoMultiplier,
@@ -439,6 +467,10 @@ function emailAcceptTerms(message) {
   emailRenderTracker();
   updateHUD();
   showMsg(`${agreement.name.toUpperCase()} TERMS ACCEPTED`);
+  const effect = agreement.name === 'Low Memory'
+    ? `Ammo capacity is now ${emailAmmoCapacity()}; chips and rewards are doubled.`
+    : 'Movement speed and incoming damage are increased; chips and rewards receive a 1.5x multiplier.';
+  emailSetActionStatus(`Accepted for ${agreement.duration} complete waves. ${effect} The effect is active now; its duration counter starts with wave ${agreement.eligibleWave}.`);
 }
 
 function emailReportSpam(message) {
