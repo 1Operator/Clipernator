@@ -405,7 +405,7 @@ function emailRewardChips(baseAmount) {
 }
 
 function emailRunAvailable() {
-  return Boolean(gs.playerId && gs.health > 0 && (gameRunning || isPaused || gs.pendingChoice));
+  return Number.isFinite(gs.playerId) && gs.health > 0;
 }
 
 function pauseEmailTimers() {
@@ -418,7 +418,7 @@ function emailAcceptBounty(message) {
     return;
   }
   if (!emailRunAvailable()) {
-    emailSetActionStatus('Start or resume a run before accepting this offer.', true);
+    emailSetActionStatus('There is no active game state to attach this offer to. Start a game, then accept while it is running or paused.', true);
     return;
   }
   const { goal, duration } = message.payload;
@@ -442,7 +442,7 @@ function emailAcceptBounty(message) {
 
 function emailAcceptTerms(message) {
   if (!emailRunAvailable()) {
-    emailSetActionStatus('Start or resume a run before accepting these terms.', true);
+    emailSetActionStatus('There is no active game state to apply these terms to. Start a game, then accept while it is running or paused.', true);
     return;
   }
   if (document.getElementById('email-preview').dataset.termsScrolled !== 'true') {
@@ -654,7 +654,7 @@ function tickEmailSystem(now = performance.now()) {
   }
   while (emailActiveMs >= emailNextRandomAt) {
     emailNextRandomAt += 60_000;
-    if (Math.random() < 0.4) emailCreateRandomOffer();
+    if (Math.random() < 0.5) emailCreateRandomOffer();
   }
   emailRenderExpiryBars();
   tickEmailEnemyRepairing();
