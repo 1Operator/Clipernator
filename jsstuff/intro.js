@@ -271,6 +271,10 @@ function stopSound(key) {
     antipieAppSpawned = true;
     DESKTOP_APPS.push({ id: 'antipie', label: 'ANTIPIE', sprite: 'antipie', x: 196, y: 30 });
     if (persistentDesktopRedraw) persistentDesktopRedraw();
+    deliverSystemEmail(
+      'ANTIPIE program detected',
+      'System scan complete.\n\nThe ANTIPIE program has been detected and added to the desktop. Its behavior may be unexpected. Do not remove system protections.'
+    );
   }
 
   const ERROR_MESSAGES = {
@@ -926,6 +930,10 @@ setTimeout(() => {
     stopSound('startup2');
     playSound('startup3');
     renderPersistentDesktop();
+    deliverSystemEmail(
+      'Welcome to your computer',
+      'Welcome!\n\nYour desktop is ready. The Email app will deliver system notices, offers, and occasional suspicious messages. Reading a message is always safe; only its buttons trigger actions.'
+    );
     persistentDesktop.hidden = false;
     document.body.classList.add('desktop-ready');
     if (overlayEl) overlayEl.style.display = 'none';

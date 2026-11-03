@@ -52,7 +52,7 @@ const ITEM_DEFS = {
     desc: '7x SPEED\n+ 7x FASTER RELOAD\nFOR 7 SECONDS',
     color: '#ffdd00', shadowColor: '#ffaa00', spawnCooldown: 17000,
     effect(gs) {
-      gs.ammo = gs.maxAmmo;
+      gs.ammo = emailAmmoCapacity();
       gs.speedBoostTimer = 420;
       gs.speedBoostMult = 7;
       if (gs.reloading) gs.reloadTimer = Math.floor(gs.reloadTimer / 7);
@@ -336,7 +336,7 @@ const ITEM_DEFS = {
   gs.maxHealth += hpBonus;
   gs.maxAmmo   += ammoBonus;
   gs.health     = gs.maxHealth;
-  gs.ammo       = gs.maxAmmo;
+  gs.ammo       = emailAmmoCapacity();
   gs.reloading  = false;
   updateHUD();
   showMsg('EXTRA CLIPS! +15% HP & AMMO, FULL HEAL!');

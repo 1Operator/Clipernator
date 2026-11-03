@@ -434,7 +434,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
           spawnParticles(ppos2.x, ppos2.y, '#ff2244', 16);
           if (gs.health <= 0) { gameOver(); return BT.FAILURE; }
         } else if (subtype === 'spoon') {
-          gs.health -= 14; gs.invincible = CFG.INVINCIBLE_FRAMES;
+          applyPlayerDamage(14); gs.invincible = CFG.INVINCIBLE_FRAMES;
           SFX.playAt('spoonDamage', ppos2.x, ppos2.y, 0.55);
           SFX.playAt('clippyDamage', ppos2.x, ppos2.y, 0.45);
           gs.shakeX = 22; gs.shakeY = 22; gs.flawlessThisWave = false;
@@ -1013,7 +1013,7 @@ function _giftBoxExplode(id, pos, gs) {
   let triggerSFP = false;
   const ppos = ECS.get(gs.playerId, 'pos');
   if (ppos && Math.hypot(pos.x - ppos.x, pos.y - ppos.y) < CFG.GIFT_BOX_EXPLOSION_RADIUS && gs.invincible <= 0) {
-    gs.health -= 30; gs.invincible = CFG.INVINCIBLE_FRAMES;
+    applyPlayerDamage(30); gs.invincible = CFG.INVINCIBLE_FRAMES;
     SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
     gs.flawlessThisWave = false;
     triggerSFP = true;
@@ -1212,7 +1212,7 @@ if (ai.hatState === 'IDLE') {
     Math.hypot(pos.x - ai.hatDiveTarget.x, pos.y - ai.hatDiveTarget.y) < 20;
   if (hitPlayer || reachedTarget || ai.hatTimer <= 0) {
     if (hitPlayer && gs.invincible <= 0) {
-      gs.health -= 18; gs.invincible = CFG.INVINCIBLE_FRAMES;
+      applyPlayerDamage(18); gs.invincible = CFG.INVINCIBLE_FRAMES;
       SFX.playAt('clippyDamage', pos.x, pos.y, 0.55);
       gs.shakeX = 14; gs.shakeY = 14; gs.flawlessThisWave = false;
       triggerSFPHit(); updateHUD();
@@ -1419,7 +1419,7 @@ const BT_CAKEBOSS = new BTSelector(
 
       // Player contact damage during spin
       if (gs.invincible <= 0 && Math.hypot(pos.x - pp.x, pos.y - pp.y) < 44) {
-        gs.health -= 28;
+        applyPlayerDamage(28);
         SFX.playAt('clippyDamage', pos.x, pos.y, 0.6);
         gs.invincible = CFG.INVINCIBLE_FRAMES;
         gs.shakeX = 20; gs.shakeY = 20;
@@ -1688,7 +1688,7 @@ const BT_CANNONBALL = new BTSelector(
       if (hitWall || ai.chargeTimer <= 0) {
         const ppos2 = ECS.get(gs.playerId, 'pos');
         if (Math.hypot(pos.x - ppos2.x, pos.y - ppos2.y) < 80 && gs.invincible <= 0) {
-          gs.health -= 15; gs.invincible = CFG.INVINCIBLE_FRAMES;
+          applyPlayerDamage(15); gs.invincible = CFG.INVINCIBLE_FRAMES;
           SFX.playAt('clippyDamage', pos.x, pos.y, 0.55);
           gs.shakeX = 14; gs.shakeY = 14;
           gs.flawlessThisWave = false;

@@ -218,6 +218,43 @@ body::before { display: none; }
 
 body.desktop-ready #desktop-taskbar { visibility: visible; }
 
+.taskbar-app-email {
+  position: relative;
+}
+
+.email-unread-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 1px 3px;
+  border: 1px solid #fff;
+  outline: 1px solid #800000;
+  background: #d00000;
+  color: #fff;
+  font: bold 10px/12px 'MS Sans Serif', Arial, sans-serif;
+  text-align: center;
+  text-shadow: 1px 1px #600;
+  animation: email-badge-blink 0.9s steps(2, end) infinite;
+}
+
+.email-unread-badge[hidden] { display: none; }
+
+.taskbar-app-email.has-new-mail img {
+  animation: email-icon-bounce 0.38s ease-in-out 8;
+}
+
+@keyframes email-badge-blink {
+  50% { filter: brightness(1.7); }
+}
+
+@keyframes email-icon-bounce {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  25% { transform: translateX(-3px) rotate(-8deg); }
+  75% { transform: translateX(3px) rotate(8deg); }
+}
+
 .desktop-error-layer {
   position: fixed;
   inset: 0;
@@ -300,6 +337,244 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   border-right: 1px solid #404040;
   border-bottom: 1px solid #404040;
   cursor: pointer;
+}
+
+#email-window {
+  width: 410px;
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 52px);
+  z-index: 2;
+  background: #d4d0c8;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.45);
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+}
+
+#email-window .desktop-window-titlebar {
+  display: flex;
+  height: 22px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+  background: linear-gradient(to right, #0a246a, #3a6ea8);
+  color: #fff;
+  font-weight: bold;
+}
+
+.email-window-content {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px;
+}
+
+.email-pane-label {
+  color: #333;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+#email-list {
+  display: flex;
+  height: 150px;
+  min-height: 90px;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+  padding: 3px;
+  background: #fff;
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  box-shadow: inset 1px 1px 0 #808080;
+}
+
+.email-empty {
+  padding: 16px 8px;
+  color: #666;
+  text-align: center;
+}
+
+.email-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid transparent;
+  color: #222;
+  cursor: pointer;
+}
+
+.email-row:hover { background: #e8f1ff; }
+
+.email-row[aria-selected="true"] {
+  border-color: #316ac5;
+  background: #dce8f8;
+}
+
+.email-row.unread { font-weight: bold; }
+
+.email-row.expiring {
+  opacity: 0;
+  transition: opacity 650ms ease;
+}
+
+.email-row-icon {
+  font-size: 17px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.email-row-main { min-width: 0; }
+
+.email-row-sender,
+.email-row-subject {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email-expiry-track {
+  height: 4px;
+  margin-top: 4px;
+  overflow: hidden;
+  background: #ddd;
+  border: 1px solid #aaa;
+}
+
+.email-expiry-bar {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #27a64b, #b0c52d);
+  transform-origin: left center;
+}
+
+.email-expiry-bar.low { background: #d98b22; }
+.email-expiry-bar.critical { background: #c22; }
+
+#email-preview {
+  min-height: 108px;
+  max-height: 126px;
+  overflow: auto;
+  padding: 7px;
+  color: #111;
+  background: #fff;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  box-shadow: inset 1px 1px 0 #aaa;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+#email-preview:focus-visible {
+  outline: 1px dotted #000080;
+  outline-offset: -3px;
+}
+
+.email-preview-header {
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #ccc;
+  font-weight: bold;
+}
+
+.email-actions {
+  display: flex;
+  min-height: 25px;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.email-action-button {
+  min-width: 88px;
+  padding: 3px 8px;
+  color: #000;
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  cursor: pointer;
+}
+
+.email-action-button:disabled {
+  color: #777;
+  cursor: default;
+}
+
+.email-contract-tracker {
+  position: fixed;
+  right: 12px;
+  bottom: 50px;
+  z-index: 10001;
+  max-width: 250px;
+  padding: 7px 9px;
+  color: #111;
+  background: #ffffcc;
+  border: 1px solid #777;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.35);
+  font: 11px/1.35 'MS Sans Serif', Arial, sans-serif;
+  pointer-events: none;
+}
+
+.email-contract-tracker[hidden] { display: none; }
+
+.email-contract-title { font-weight: bold; }
+
+.email-ad-popup {
+  position: fixed;
+  z-index: 10002;
+  width: 220px;
+  padding: 2px;
+  background: #d4d0c8;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.45);
+  color: #000;
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+  animation: email-popup-in 180ms ease-out;
+}
+
+.email-ad-popup[hidden] { display: none; }
+
+.email-ad-popup header {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 4px;
+  background: linear-gradient(to right, #7a174e, #d33b71);
+  color: #fff;
+  font-weight: bold;
+}
+
+.email-ad-popup button {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.email-ad-popup p { padding: 10px 7px; }
+
+@keyframes email-popup-in {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-height: 380px) {
+  #email-list { height: 74px; }
+  #email-preview { min-height: 56px; max-height: 64px; }
+  .email-window-content { gap: 3px; padding: 4px; }
 }
 
 .taskbar-button,
@@ -1206,8 +1481,9 @@ canvas {
   </button>
   <span class="taskbar-divider" aria-hidden="true"></span>
   <div class="taskbar-apps" role="group" aria-label="Pinned apps">
-    <button class="taskbar-app" type="button" title="Email" aria-label="Email">
+    <button id="taskbar-email" class="taskbar-app taskbar-app-email" type="button" title="Email" aria-label="Email">
       <img src="sprites/ui/Email.png" alt="">
+      <span id="email-unread-badge" class="email-unread-badge" aria-hidden="true" hidden></span>
     </button>
     <button class="taskbar-app" type="button" title="Task Manager" aria-label="Task Manager">
       <img src="sprites/ui/TaskManager.png" alt="">
@@ -1227,7 +1503,23 @@ canvas {
     </button>
   </div>
 </div>
-<div id="utensil-window-layer"></div>
+<div id="utensil-window-layer">
+  <section id="email-window" class="independent-window" data-window-title="Email - Inbox" aria-label="Email inbox">
+    <header class="desktop-window-titlebar">
+      <span>✉ Inbox</span>
+      <button class="email-action-button" type="button" data-email-close aria-label="Close inbox">×</button>
+    </header>
+    <div class="email-window-content">
+      <span class="email-pane-label">Messages (soonest to expire first)</span>
+      <div id="email-list" role="listbox" aria-label="Inbox"></div>
+      <span class="email-pane-label">Preview</span>
+      <div id="email-preview" tabindex="0" aria-live="polite">Select a message to read it. Reading is always safe.</div>
+      <div id="email-actions" class="email-actions"></div>
+    </div>
+  </section>
+  <div id="email-contract-tracker" class="email-contract-tracker" hidden></div>
+</div>
+<div id="email-popup-layer" aria-live="polite"></div>
 
 <script>
 (function() {
@@ -1377,6 +1669,7 @@ canvas {
 <script src="jsstuff/draw.js"></script>
    <script src="jsstuff/intro.js"></script>
   <script src="jsstuff/sounds.js"></script>
+   <script src="jsstuff/email.js"></script>
 
 <script src="jsstuff/game.js"></script>
 </body>

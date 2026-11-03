@@ -14,6 +14,9 @@
 - **Hotbar** means the Windows-style taskbar along the bottom edge of the full-screen desktop (Start, app buttons, active-window button, audio/settings controls, and clock). It does not mean the MGW's bottom bar; that is only a thin window border/status strip.
 - The post-boot desktop and its taskbar are HTML UI. The BIOS, loading, bluescreen, and other intro sequences continue to use canvas for their animation.
 - Desktop icons and error dialogs are HTML elements so their text, buttons, and click targets are independent of canvas drawing.
+- Email is a draggable inbox overlay and does not pause an active run. Offers expire after 10–30 seconds of active gameplay; random mail is checked once per active minute with a 40% chance.
+- Bounties and terms agreements count complete waves, starting with the next full wave. Bounties fail without penalty if their accepted condition is broken; terms must be scrolled to the bottom before acceptance.
+- Selecting email is safe. Spam consequences happen only through its link button; reporting spam rewards a chip, while reporting a real offer only deletes it.
 
 ---
 

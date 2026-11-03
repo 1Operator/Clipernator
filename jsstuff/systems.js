@@ -647,7 +647,7 @@ function _clownCarExplode(id, pos, gs, playerDriving) {
   if (!playerDriving) {
     const ppos = ECS.get(gs.playerId, 'pos');
     if (ppos && Math.hypot(pos.x - ppos.x, pos.y - ppos.y) < 120 && gs.invincible <= 0) {
-      gs.health -= 25; gs.invincible = CFG.INVINCIBLE_FRAMES;
+      applyPlayerDamage(25); gs.invincible = CFG.INVINCIBLE_FRAMES;
       SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
       gs.flawlessThisWave = false;
       triggerSFPHit(); updateHUD();
@@ -682,7 +682,7 @@ function sysPlayerMovement() {
 if (gs.speedBoostTimer > 0) speedMult = gs.speedBoostMult || CFG.SPEED_BOOST_MULT;
 if (gs.sfpFull) speedMult = Math.max(speedMult, 1.3);
 if (gs.hasTightropeBoots) speedMult = Math.max(speedMult, 3.00);
-const topSpd = slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult;
+const topSpd = (slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult) * emailMoveMultiplier();
   if (dashing) {
   const easeInOut = progress => progress < 0.5
     ? 4 * progress * progress * progress
@@ -742,6 +742,7 @@ const topSpd = slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult;
 if (gs.knockingPinsActive) {
   // Skip all friction/cap logic — velocity is set directly by sysTimers each frame
   pos.x += vel.vx; pos.y += vel.vy;
+  notifyEmailPlayerMoved(pos);
   if (gs.bouncyHouse) {
     if (pos.x < CFG.WALL_PAD) vel.vx = Math.abs(vel.vx);
     if (pos.x > worldW - CFG.WALL_PAD) vel.vx = -Math.abs(vel.vx);
@@ -754,6 +755,7 @@ if (gs.knockingPinsActive) {
   return;
 }
   pos.x+=vel.vx; pos.y+=vel.vy;
+  notifyEmailPlayerMoved(pos);
   if (gs.bouncyHouse) {
     if (pos.x < CFG.WALL_PAD) vel.vx = Math.abs(vel.vx);
     if (pos.x > worldW - CFG.WALL_PAD) vel.vx = -Math.abs(vel.vx);
@@ -789,7 +791,7 @@ function tickClippyOutsideDamage(pos) {
   gs.clippyOutsideTimer++;
   if (gs.clippyOutsideTimer < 60) return;
   gs.clippyOutsideTimer = 0;
-  gs.health = Math.max(0, gs.health - 3);
+  applyPlayerDamage(3);
   gs.flawlessThisWave = false;
   updateHUD();
   if (gs.health <= 0) gameOver();
@@ -1476,7 +1478,7 @@ function sysEnemyPlayerCollision() {
      const eaiCheck2 = ECS.get(id, 'ai');
 if (eaiCheck2 && eaiCheck2.thrownByFork) {
   eaiCheck2.thrownByFork = false;
-  gs.health -= 30; // harder hit than normal contact
+  applyPlayerDamage(30); // harder hit than normal contact
   SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.65);
   gs.invincible = CFG.INVINCIBLE_FRAMES;
   gs.shakeX = 20; gs.shakeY = 20;
@@ -1487,13 +1489,12 @@ if (eaiCheck2 && eaiCheck2.thrownByFork) {
   if (gs.health <= 0) { gameOver(); return; }
   return;
 }
-      // Add before gs.health -= line, inside the enemy loop:
 const eaiCheck = ECS.get(id,'ai');
 if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
   if (!eaiCheck.explodeCooldown || eaiCheck.explodeCooldown <= 0) {
     eaiCheck.explodeCooldown = 120;
     detonateExplosiveBullet({damageMult: eaiCheck.rmDmgMult || 3, life:1, isExplosive:true}, epos.x, epos.y, false);
-    gs.health -= 20;
+    applyPlayerDamage(20);
     SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
     gs.invincible = CFG.INVINCIBLE_FRAMES;
     gs.flawlessThisWave = false;
@@ -1509,7 +1510,7 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
       // Knocking Pins: reduced contact damage (8 instead of 20),
       // and the bowl itself damages the enemy it rams into
       if (gs.knockingPinsActive) {
-        gs.health-=2; gs.invincible=CFG.INVINCIBLE_FRAMES;
+        applyPlayerDamage(2); gs.invincible=CFG.INVINCIBLE_FRAMES;
        SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.45);
         gs.shakeX=16;gs.shakeY=16; gs.flawlessThisWave=false;
         // Deal damage to the enemy being bowled into
@@ -1536,7 +1537,6 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
         if (gs.health<=0){gameOver();return;} return;
       }
 
-      // Replace the gs.health -= 20 line (non-knocking-pins path):
 let contactMult = 1;
 for (const cid of ECS.query('enemy','pos')) {
   const cepos = ECS.get(cid,'pos');
@@ -1547,7 +1547,7 @@ for (const cid of ECS.query('enemy','pos')) {
   }
 }
 const diffMult = (gs._enemyDmgMult || 1.0);
-gs.health -= Math.round(20 * contactMult * diffMult);
+applyPlayerDamage(Math.round(20 * contactMult * diffMult));
 SFX.play('playerDamage', 0.5);
 SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 
@@ -1635,7 +1635,7 @@ if (eb.isFrosting && eb.spawnGiftBox) {
         spawnParticles(eb.x, eb.y, '#ff8800', Math.round(12 * scale));
         gs.shakeX = impactShake; gs.shakeY = impactShake;
         if (gs.invincible <= 0 && Math.hypot(eb.x - ppos.x, eb.y - ppos.y) < impactR) {
-gs.health -= Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMult || 1.0));
+applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMult || 1.0)));
          SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
           gs.invincible = CFG.INVINCIBLE_FRAMES;
           gs.shakeX = Math.round(16 * scale); gs.shakeY = Math.round(16 * scale);
@@ -1699,7 +1699,7 @@ gs.health -= Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMult || 
     if (!eb.friendlyFire&&gs.invincible<=0&&Math.hypot(eb.x-ppos.x,eb.y-ppos.y)<20) {
       const bulletDmg = Math.round(15 * (eb.rmDmgMult || 1));
 const diffMult = (gs._enemyDmgMult || 1.0);
-gs.health -= Math.round(bulletDmg * diffMult);
+applyPlayerDamage(Math.round(bulletDmg * diffMult));
       SFX.play('playerDamage', 0.5);
       SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 if (eb.isTear) SFX.playAt('tearHit', eb.x, eb.y, 0.5);
@@ -1766,7 +1766,7 @@ function sysChipPickup() {
         showMsg('+1 GOLDEN CHIP');
         SFX.playAt('goldenChipPickup', chip.x, chip.y, 0.65);
       } else {
-        gs.chips++;
+        gs.chips += emailPickupChipAmount();
         spawnParticles(chip.x, chip.y, '#ffcc44', 8);
         showMsg('+1 CHIP');
         SFX.playAt('chipPickup', chip.x, chip.y, 0.55);
@@ -1817,7 +1817,7 @@ function tickLeakingStatusEffects() {
     gs.leakingTickTimer = (gs.leakingTickTimer || 0) + 1;
     if (gs.leakingTickTimer >= LEAKING_TICK_FRAMES) {
       gs.leakingTickTimer -= LEAKING_TICK_FRAMES;
-      gs.health -= gs.maxHealth * 0.05;
+      applyPlayerDamage(gs.maxHealth * 0.05);
       gs.flawlessThisWave = false;
       updateHUD();
       if (gs.health <= 0) {
@@ -1920,7 +1920,7 @@ if (gs.glowExplosionTimer > 0) gs.glowExplosionTimer--;
   if (gs.reloading) {
     const reloadSpeed=gs.speedBoostTimer>0?Math.max(1,Math.round(gs.speedBoostMult||1)):1;
     gs.reloadTimer-=reloadSpeed;
-    if (gs.reloadTimer<=0){gs.reloading=false;gs.ammo=gs.maxAmmo;updateHUD();showMsg('RELOADED!');     SFX.play('reloadFinish', 0.5); 
+    if (gs.reloadTimer<=0){gs.reloading=false;gs.ammo=emailAmmoCapacity();updateHUD();showMsg('RELOADED!');     SFX.play('reloadFinish', 0.5);
 }
   }
   if (gs.ammo===0&&!gs.reloading) startReload();
@@ -1930,7 +1930,7 @@ if (gs.glowExplosionTimer > 0) gs.glowExplosionTimer--;
     else {
       gs.candleHpTimer=(gs.candleHpTimer||0)+1;
       if (gs.candleHpTimer>=60) {
-        gs.candleHpTimer=0; gs.health-=5; gs.flawlessThisWave=false;
+        gs.candleHpTimer=0; applyPlayerDamage(5); gs.flawlessThisWave=false;
         if (gs.health<=0){gameOver();return;}
         if (gs.candlesLit<5){
           gs.candlesLit=Math.min(5,gs.candlesLit+1);
@@ -2199,10 +2199,10 @@ function update() {
   tickMeleeWindow(); 
 }
 
-function spawnEnemy() {
-  if (gs.bossActive) return;
+function spawnEnemy(allowBeyondWaveLimit = false) {
+  if (gs.bossActive && !allowBeyondWaveLimit) return;
 const total = [...ECS.query('enemy')].length;
-  if (gs.waveKills+total>=gs.waveEnemiesLeft) return;
+  if (!allowBeyondWaveLimit && gs.waveKills+total>=gs.waveEnemiesLeft) return;
   let type='utensil';
   const roll=Math.random();
   if (gs.wave >= 15 && roll < 0.18) {
@@ -2401,7 +2401,8 @@ function shoot() {
 }
 
 function startReload() {
-  if (gs.reloading||gs.ammo===gs.maxAmmo) return;
+  if (gs.reloading||gs.ammo===emailAmmoCapacity()) return;
+  notifyEmailReloaded();
   gs.reloading=true; gs.reloadTimer=CFG.RELOAD_FRAMES; showMsg('RELOADING...');
     SFX.playRandom(['reloadStart1','reloadStart2','reloadStart3'], 0.5);
 
@@ -2427,6 +2428,7 @@ function checkWave() {
   const total = ECS.query('enemy').size;
   if (gs.waveKills + total < gs.waveEnemiesLeft || total > 0) return;
   const completed = gs.wave;
+  emailOnWaveCompleted(completed);
   if (completed === CFG.BOSS_WAVE) {
     SFX.play('omini', 0.55, () => {
       setTimeout(() => INTRO.spawnAntipieApp(), 4500);
@@ -2451,7 +2453,7 @@ function checkWave() {
     if (gs.hasFlawlessBaking && gs.flawlessThisWave) {
       gs.maxAmmo += 2;
       if (gs.hasExtraClips) gs.maxAmmo = Math.ceil(gs.maxAmmo * 1.25);
-      gs.ammo = Math.min(gs.ammo + 2, gs.maxAmmo);
+      gs.ammo = Math.min(gs.ammo + 2, emailAmmoCapacity());
       updateHUD();
       showMsg('FLAWLESS BAKING! +2 MAX AMMO!');
       spawnPartyParticles(CFG.W/2, CFG.H/2);
@@ -2469,7 +2471,7 @@ function checkWave() {
     gs.waveKills=0; gs.flawlessThisWave=true;
     if (gs.hasCursedCandles&&gs.candlesLit>0) {
       gs.maxAmmo=Math.max(CFG.MAX_AMMO,gs.maxAmmo-gs.candlesLit*2);
-      gs.ammo=Math.min(gs.ammo,gs.maxAmmo); gs.candlesLit=0; gs.candleHpTimer=0;
+      gs.ammo=Math.min(gs.ammo,emailAmmoCapacity()); gs.candlesLit=0; gs.candleHpTimer=0;
       gs.candleRelightDelay=180; showMsg('CANDLES SNUFFED! THEY WILL RELIGHT...');
     }
     updateHUD();

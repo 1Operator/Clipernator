@@ -131,6 +131,14 @@ function playerPos(gs) {
 // ================================================================
 let gs = {};
 
+function applyPlayerDamage(amount) {
+  const scaledDamage = typeof emailIncomingDamage === 'function'
+    ? emailIncomingDamage(amount)
+    : amount;
+  if (typeof notifyEmailPlayerDamaged === 'function') notifyEmailPlayerDamaged();
+  gs.health = Math.max(0, gs.health - scaledDamage);
+}
+
 function initGameState(applyIntroChoices = true) {
   ECS.clear();
   worldW = canvas.clientWidth || CFG.W;
@@ -250,6 +258,7 @@ clippyPickupTimer: 0,
     INTRO.applyDifficultyToGs(gs);
     INTRO.applyDraftItemsToGs(gs);
   }
+  resetEmailRunState();
  
 }
 
@@ -262,7 +271,7 @@ function updateHUD() {
   document.getElementById('health-bar').style.background =
     gs.health < gs.maxHealth * 0.3 ? '#cc0000' : '#00aa00';
   document.getElementById('health-num').textContent = Math.max(0, gs.health);
-  document.getElementById('ammo-val').textContent = gs.ammo + '/' + gs.maxAmmo;
+  document.getElementById('ammo-val').textContent = gs.ammo + '/' + emailAmmoCapacity();
   document.getElementById('wave-val').textContent = gs.wave;
   document.getElementById('chips-val').textContent = gs.chips;
   document.getElementById('golden-chips-val').textContent = gs.goldenChips;
@@ -409,6 +418,7 @@ function _startPauseClippyLoop() {
 // GAME OVER / PAUSE
 // ================================================================
 function gameOver() {
+  endEmailRun();
   SFX.play('clippyDeath', 0.7);
   gameRunning = false;
   cancelAnimationFrame(animId);
@@ -427,6 +437,7 @@ function togglePause() {
   if (gs.pendingChoice) return;
   if (!isPaused) SFX.play('pause', 0.75);
   isPaused = !isPaused;
+  pauseEmailTimers();
   if (isPaused) {
     gameRunning = false;
     cancelAnimationFrame(animId);
@@ -477,7 +488,7 @@ function renderPauseMenu() {
     `Wave ............ ${gs.wave}`,
     `Damage .......... ${dmgLabel}`,
     `Speed ........... ${speedVal}`,
-    `Clip Size ....... ${gs.maxAmmo}`,
+    `Clip Size ....... ${emailAmmoCapacity()}`,
     `Bullets/Shot .... ${bulletsPerShot}`,
   ];
   if (gs.hasCursedCandles)  lines.push(`Candles ......... ${gs.candlesLit}/5 lit`);
@@ -737,9 +748,10 @@ document.getElementById('keybind-reset-btn').addEventListener('click', () => {
 // ================================================================
 // GAME LOOP
 // ================================================================
-function loop(timestamp = 0) {
+function loop(timestamp = performance.now()) {
   if (!gameRunning) return;
   lastTime = timestamp;
+  tickEmailSystem(timestamp);
   update();
   draw();
   renderOffscreenWindows();
@@ -777,6 +789,7 @@ function getAimWorldPosition(clientX, clientY, target) {
 
 function updateAimFromPointer(clientX, clientY, target) {
   if (!gameRunning || isPaused || gs.playerId == null) return null;
+  if (target?.closest?.('#email-window, #desktop-taskbar, #email-popup-layer')) return null;
   const playerOutside = gs.clippyWindowActive;
   const canvasRect = canvas.getBoundingClientRect();
   const pointerOnCanvas = clientX >= canvasRect.left && clientX <= canvasRect.right
@@ -1333,6 +1346,7 @@ canvas.addEventListener('contextmenu', e => {
 
 document.addEventListener('keydown', e => {
   if (document.getElementById('keybind-screen').style.display === 'flex') return;
+  if (e.target instanceof Element && e.target.closest('#email-window')) return;
 
   if (e.key === KEYBINDS.pause) {
     togglePause();
@@ -1345,6 +1359,7 @@ document.addEventListener('keydown', e => {
       document.getElementById('pause-menu').style.display = 'none';
       updateTaskbarActiveWindow();
       isPaused = false;
+      pauseEmailTimers();
       gameRunning = false;
       document.getElementById('overlay').style.display = 'flex';
     }
@@ -1369,7 +1384,7 @@ document.addEventListener('click', e => {
   const isCanvasClick = e.target === canvas;
   const isMiniWindowClick = !!e.target.closest('.utensil-window-body');
   if (!isCanvasClick && !isMiniWindowClick && !gs.clippyWindowActive) return;
-  if (e.target.closest('button, input, select, textarea, a, [role="button"], .utensil-window-title, #pause-menu, #overlay, #item-choice, #floor-transition, #keybind-screen')) return;
+  if (e.target.closest('button, input, select, textarea, a, [role="button"], .utensil-window-title, #pause-menu, #overlay, #item-choice, #floor-transition, #keybind-screen, #email-window, #desktop-taskbar, #email-popup-layer, .email-ad-popup')) return;
 
   const worldPoint = updateAimFromPointer(e.clientX, e.clientY, e.target);
   if (!worldPoint) return;
@@ -1440,7 +1455,7 @@ function offerItemChoice() {
     for (const timer of revealTimers) clearTimeout(timer);
     revealTimers.length = 0;
   };
-  gs.pendingChoice = true; gameRunning = false; cancelAnimationFrame(animId); draw();
+  gs.pendingChoice = true; pauseEmailTimers(); gameRunning = false; cancelAnimationFrame(animId); draw();
   const choiceEl = document.getElementById('item-choice');
   const cardsEl  = document.getElementById('item-cards');
   choiceEl.dataset.floor = String(gs.floor);

@@ -353,6 +353,10 @@ SFX.load('partyHatRide2',    'sounds/soundeffects/enemies/PartyHat/PartyHatRide2
 SFX.load('partyHatSpawn',    'sounds/soundeffects/enemies/PartyHat/PartyHatSpawn.mp3');
 
 SFX.load('pause',            'sounds/soundeffects/UI/PauseSound.mp3');
+SFX.load('EmailNotification','sounds/soundeffects/UI/Email/EmailNotification.mp3');
+SFX.load('EmailAccept',      'sounds/soundeffects/UI/Email/EmailAccept.mp3');
+SFX.load('EmailReject',      'sounds/soundeffects/UI/Email/EmailReject.mp3');
+SFX.load('EmailOpen',        'sounds/soundeffects/UI/Email/EmailOpen.mp3');
 SFX.load('partyExplosion',   'sounds/soundeffects/misc/Explosions/PartyExplosion.mp3');
 SFX.load('waveComplete',     'sounds/soundeffects/misc/Waves/WaveComplete.mp3');
 SFX.load('waveOverload',     'sounds/soundeffects/misc/Waves/WaveOverload.mp3');
