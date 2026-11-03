@@ -359,6 +359,8 @@ SFX.load('EmailNotification','sounds/soundeffects/UI/Email/EmailNotification.mp3
 SFX.load('EmailAccept',      'sounds/soundeffects/UI/Email/EmailAccept.mp3');
 SFX.load('EmailReject',      'sounds/soundeffects/UI/Email/EmailReject.mp3');
 SFX.load('EmailOpen',        'sounds/soundeffects/UI/Email/EmailOpen.mp3');
+SFX.load('trashOpen',        'sounds/soundeffects/UI/Trash/TrashOpen.mp3');
+SFX.load('trashUse',         'sounds/soundeffects/UI/Trash/TrashUse.mp3');
 SFX.load('partyExplosion',   'sounds/soundeffects/misc/Explosions/PartyExplosion.mp3');
 SFX.load('waveComplete',     'sounds/soundeffects/misc/Waves/WaveComplete.mp3');
 SFX.load('waveOverload',     'sounds/soundeffects/misc/Waves/WaveOverload.mp3');

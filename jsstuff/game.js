@@ -712,6 +712,7 @@ function startKeybindListen(action) {
   document.addEventListener('click', function(e) {
     const el = e.target;
     if (!(el instanceof Element)) return;
+    if (el.closest('#trash-uninstall')) return;
     // HUD titlebar buttons, w2k-btn class, pause menu buttons, keybind buttons
     if (
       el.closest('#hud-controls') ||

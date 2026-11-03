@@ -58,12 +58,9 @@
       row.className = 'trash-item-row';
       row.setAttribute('role', 'option');
       row.setAttribute('aria-pressed', String(id === selectedItemId));
+      row.setAttribute('aria-label', itemLabel(id));
       addItemIcon(row, definition, 'trash-item-row-icon');
 
-      const name = document.createElement('span');
-      name.className = 'trash-item-name';
-      name.textContent = itemLabel(id);
-      row.appendChild(name);
       row.disabled = !definition;
       row.addEventListener('click', () => {
         selectedItemId = id;
@@ -212,6 +209,7 @@
       gs.fieldItems = gs.fieldItems.filter(item => !itemsToRemove.has(item.id));
     }
     gs.chips += value;
+    SFX.play('trashUse', 0.65);
     if (typeof updateHUD === 'function') updateHUD();
     if (typeof renderPauseMenu === 'function') renderPauseMenu();
     return value;
@@ -235,6 +233,7 @@
   });
 
   window.openTrashWindow = () => {
+    SFX.play('trashOpen', 0.6);
     selectedItemId = typeof gs !== 'undefined' && Array.isArray(gs.unlockedItems)
       ? gs.unlockedItems[0] || null
       : null;

@@ -365,8 +365,10 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 #utensil-window-layer #trash-window {
-  width: min(590px, calc(100vw - 20px));
+  width: min(440px, calc(100vw - 20px));
   height: auto;
+  max-height: calc(100vh - 20px);
+  overflow: hidden;
   background: #d4d0c8;
   color: #111;
   border-top: 2px solid #fff;
@@ -388,53 +390,48 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   font-weight: bold;
 }
 
-#trash-window [data-trash-close] {
-  width: 22px;
-  min-width: 22px;
-  height: 18px;
-  padding: 0;
-  font-weight: bold;
-}
-
 .trash-window-content {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) minmax(130px, 0.9fr) minmax(130px, 0.85fr);
+  height: min(440px, calc(100vh - 72px));
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.8fr);
+  grid-template-rows: 150px minmax(0, 1fr);
   gap: 7px;
   padding: 8px;
 }
 
 .trash-section {
   min-width: 0;
-  min-height: 210px;
+  min-height: 0;
   padding: 6px;
   background: #eee;
   border: 1px inset #fff;
 }
 
-.trash-section-title {
-  display: block;
-  margin-bottom: 6px;
-  color: #333;
-  font-weight: bold;
+.trash-purchase-section {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  flex-direction: column;
+  justify-content: center;
 }
 
 #trash-item-list {
-  display: flex;
-  max-height: 210px;
-  flex-direction: column;
-  gap: 3px;
+  display: grid;
+  max-height: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  align-content: start;
+  gap: 5px;
   overflow: auto;
 }
 
 .trash-item-row {
   display: flex;
-  min-height: 34px;
+  width: 52px;
+  height: 52px;
   align-items: center;
-  gap: 6px;
-  padding: 3px;
+  justify-content: center;
+  padding: 2px;
   overflow: hidden;
-  color: #111;
-  text-align: left;
   background: #f8f8f8;
   border: 1px solid #aaa;
   cursor: pointer;
@@ -446,29 +443,31 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .trash-item-row img {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
   image-rendering: pixelated;
 }
 
 .trash-item-row-icon {
-  width: 28px;
-  flex: 0 0 28px;
-  font-size: 19px;
+  font-size: 34px;
   text-align: center;
 }
 
-.trash-item-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.trash-selected-section {
+  display: flex;
+  grid-column: 1;
+  grid-row: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .trash-item-preview {
   display: flex;
-  min-height: 148px;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
   align-items: center;
   justify-content: center;
   background: #fff;
@@ -476,8 +475,8 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .trash-item-preview img {
-  width: 118px;
-  height: 118px;
+  width: min(105px, 100%);
+  height: 105px;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -488,13 +487,17 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 #trash-selected-name {
   display: block;
-  margin-top: 6px;
+  max-width: 100%;
+  margin-top: 4px;
+  overflow: hidden;
   font-weight: bold;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trash-value {
-  margin: 12px 0;
+  margin: 0 0 18px;
   font-size: 13px;
   font-weight: bold;
 }
@@ -520,22 +523,51 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 #trash-status {
   min-height: 28px;
-  margin-top: 8px;
+  margin-top: 10px;
   color: #333;
   line-height: 14px;
 }
 
+.desktop-window-close-button {
+  display: flex;
+  width: 16px;
+  min-width: 16px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #000;
+  font: 9px 'Marlett', 'Webdings', Arial, sans-serif;
+  line-height: 14px;
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  box-shadow: inset 1px 1px 0 #e8e8e0, inset -1px -1px 0 #808080;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.desktop-window-close-button:active {
+  border-top-color: #404040;
+  border-left-color: #404040;
+  border-right-color: #fff;
+  border-bottom-color: #fff;
+}
+
 @media (max-width: 520px) {
   .trash-window-content {
-    grid-template-columns: minmax(115px, 1fr) minmax(110px, 0.9fr);
+    height: min(440px, calc(100vh - 72px));
+    grid-template-columns: minmax(0, 1fr) minmax(125px, 0.8fr);
+    grid-template-rows: minmax(130px, 0.6fr) minmax(0, 1fr);
   }
-  .trash-purchase-section {
-    grid-column: 1 / -1;
-    min-height: 0;
+  #trash-item-list {
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
   }
-  #trash-item-list { max-height: 170px; }
-  .trash-section { min-height: 170px; }
-  .trash-purchase-section .trash-value { display: inline-block; margin: 4px 8px 4px 0; }
+  .trash-item-row { width: 44px; height: 44px; }
+  .trash-item-row img { width: 36px; height: 36px; }
+  .trash-item-row-icon { font-size: 28px; }
 }
 
 #email-window .desktop-window-titlebar {
@@ -719,6 +751,14 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   cursor: pointer;
 }
 
+.email-action-button.desktop-window-close-button {
+  width: 16px;
+  min-width: 16px;
+  height: 14px;
+  padding: 0;
+  font: 9px 'Marlett', 'Webdings', Arial, sans-serif;
+}
+
 .email-action-button:active:not(:disabled) {
   border-top-color: #404040;
   border-left-color: #404040;
@@ -727,11 +767,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 #email-window [data-email-close] {
-  width: 22px;
-  min-width: 22px;
-  height: 18px;
-  padding: 0;
-  font-weight: bold;
+  margin: 0;
 }
 
 .email-action-button:disabled {
@@ -1736,7 +1772,7 @@ canvas {
   <section id="email-window" class="independent-window" data-window-title="Email - Inbox" aria-label="Email inbox">
     <header class="desktop-window-titlebar">
       <span>✉ Inbox</span>
-      <button class="email-action-button" type="button" data-email-close aria-label="Close inbox">×</button>
+      <button class="email-action-button desktop-window-close-button" type="button" data-email-close aria-label="Close inbox" title="Close">&#x72;</button>
     </header>
     <div class="email-window-content">
       <span class="email-pane-label">Messages (soonest to expire first)</span>
@@ -1750,20 +1786,17 @@ canvas {
   <section id="trash-window" class="independent-window" data-window-title="Trash - Uninstall Items" aria-label="Trash item installer">
     <header class="desktop-window-titlebar">
       <span>Recycle Bin - Uninstall Items</span>
-      <button class="trash-action-button" type="button" data-trash-close aria-label="Close Trash">×</button>
+      <button class="desktop-window-close-button" type="button" data-trash-close aria-label="Close Trash" title="Close">&#x72;</button>
     </header>
     <div class="trash-window-content">
-      <section class="trash-section" aria-label="Owned items">
-        <span class="trash-section-title">Installed items</span>
-        <div id="trash-item-list" role="listbox" aria-label="Installed items"></div>
-      </section>
-      <section class="trash-section" aria-label="Selected item">
-        <span class="trash-section-title">Selected item</span>
+      <section class="trash-section trash-selected-section" aria-label="Selected item">
         <div id="trash-item-preview" class="trash-item-preview"></div>
         <span id="trash-selected-name">Select an item</span>
       </section>
+      <section class="trash-section" aria-label="Owned items">
+        <div id="trash-item-list" role="listbox" aria-label="Installed items"></div>
+      </section>
       <section class="trash-section trash-purchase-section" aria-label="Uninstall item">
-        <span class="trash-section-title">Uninstall item</span>
         <div id="trash-item-value" class="trash-value">Value: —</div>
         <button id="trash-uninstall" class="trash-action-button" type="button" disabled>Uninstall</button>
         <div id="trash-status" role="status" aria-live="polite">Choose an installed item to see its value.</div>

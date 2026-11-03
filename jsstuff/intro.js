@@ -402,7 +402,7 @@ function detachKeys() {
       if (!target) return;
       if (target.closest('.desktop-error-close, .desktop-error-ok')) {
         desktopErrorVisible = false;
-        playSound('click');
+        if (app.id !== 'recycle') playSound('click');
         renderPersistentDesktop();
         return;
       }
