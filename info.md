@@ -15,8 +15,12 @@
 - The post-boot desktop and its taskbar are HTML UI. The BIOS, loading, bluescreen, and other intro sequences continue to use canvas for their animation.
 - Desktop icons and error dialogs are HTML elements so their text, buttons, and click targets are independent of canvas drawing.
 - Email is a draggable inbox overlay and does not pause an active run. Offers expire after 20–60 seconds of active gameplay; random mail is checked once per active minute with a 50% chance.
-- Bounties and terms agreements count complete waves, starting with the next full wave. Bounties fail without penalty if their accepted condition is broken; terms must be scrolled to the bottom before acceptance.
-- Selecting email is safe. Spam consequences happen only through its link button; reporting spam rewards a chip, while reporting a real offer only deletes it.
+- New email plays a notification chime, bounces the Email hotbar icon briefly, and shows a blinking unread count. Hovering the icon shows the unread total; opening the inbox plays its open cue.
+- The inbox lists messages by soonest expiry, with unread messages bolded, an expiry bar, a preview, and up to two message-specific actions. Selecting a message is always safe.
+- Bounties and terms agreements count complete waves, starting with the next full wave. Bounties fail without penalty if their accepted condition is broken; terms must be scrolled to the bottom before acceptance and apply their stated modifier.
+- Spam consequences happen only through its link button; reporting spam rewards a chip, while reporting a real offer only deletes it. System notices provide information without rewards.
+- The desktop Trash icon opens a draggable item-uninstall window without pausing the run. It lists installed permanent items, previews the selected item, and pays chips when it is uninstalled: most items are worth 2 chips, advanced upgrades are worth 4, and Quadruple Layered Cake is worth 8. Removing an item also removes its installed effect; lower cake tiers do not return after uninstalling an upgrade. Temporary pickups are not part of the installed-item list.
+- Dedicated `TrashOpen` and `TrashUse` sound assets are not present yet; Trash interactions use the existing desktop/UI click sounds.
 
 ---
 

@@ -963,6 +963,8 @@ setTimeout(() => {
     playSound('click');
     if (app.id === 'data') {
       handleDataClick();
+    } else if (app.id === 'recycle') {
+      if (typeof window.openTrashWindow === 'function') window.openTrashWindow();
     } else if (app.id === 'antipie' && _introDone) {
       startAntipieBoss();
     } else if (app.sprite === 'folder') {

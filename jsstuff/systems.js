@@ -1727,6 +1727,7 @@ function sysFieldItemPickup() {
         gs.clippyPickupTimer = 240; // 4 seconds
       }
       const permanent=new Set(['bouncy','dash','doubledCake','tripleCake','quadCake','shakeFizzlePop','flawlessBaking','cursedCandles','glowsticks','paperCuts','extraClips','clownishUpgrade','popcornBowl']);
+      if (permanent.has(fi.id) && !gs.unlockedItems.includes(fi.id)) gs.unlockedItems.push(fi.id);
       if (!permanent.has(fi.id)) setTimeout(()=>{if(gameRunning)trySpawnFieldItems();},def.spawnCooldown);
     }
   }
@@ -2452,7 +2453,11 @@ function checkWave() {
 
     if (gs.hasFlawlessBaking && gs.flawlessThisWave) {
       gs.maxAmmo += 2;
-      if (gs.hasExtraClips) gs.maxAmmo = Math.ceil(gs.maxAmmo * 1.25);
+      if (gs.hasExtraClips) {
+        const previousMaxAmmo = gs.maxAmmo;
+        gs.maxAmmo = Math.ceil(gs.maxAmmo * 1.25);
+        gs.extraClipsAmmoBonus = (gs.extraClipsAmmoBonus || 0) + gs.maxAmmo - previousMaxAmmo;
+      }
       gs.ammo = Math.min(gs.ammo + 2, emailAmmoCapacity());
       updateHUD();
       showMsg('FLAWLESS BAKING! +2 MAX AMMO!');

@@ -187,6 +187,7 @@ clippyPickupTimer: 0,
     dashWindupTimer: 0, dashLaunchFrame: 0, dashActiveThisFrame: false, dashBurst: null,
     frozen: false,
     hasGlowsticks: false,
+    extraClipsHpBonus: 0, extraClipsAmmoBonus: 0,
     glowCooldown: 0,
     hasShakeFizzlePop: false,
     sfpMeter: 0, sfpMax: 600, sfpFull: false,
@@ -717,7 +718,7 @@ function startKeybindListen(action) {
       el.classList.contains('w2k-btn') ||
       el.closest('#pause-menu button') ||
       el.closest('#keybind-screen button') ||
-      el.closest('.taskbar-button, .taskbar-app, .taskbar-active-window, .taskbar-tray-button, #email-window button') ||
+      el.closest('.taskbar-button, .taskbar-app, .taskbar-active-window, .taskbar-tray-button, #email-window button, #trash-window button') ||
       el.id === 'startBtn' ||
       el.id === 'skip-btn' ||
       el.id === 'floor-btn' ||
