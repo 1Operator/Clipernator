@@ -342,10 +342,15 @@ function stopSound(key) {
     document.body.appendChild(overlayEl);
     const c = document.createElement('canvas');
     c.id = 'intro-canvas';
-c.style.cssText = 'display:block; width:100%; height:100%; image-rendering: pixelated; image-rendering: crisp-edges;';
+    c.style.cssText = 'display:block; width:100%; height:100%; image-rendering: pixelated; image-rendering: crisp-edges;';
     c.width = 960; c.height = 600;
     overlayEl.appendChild(c);
     container = c;
+
+    const crtEffects = document.createElement('div');
+    crtEffects.className = 'intro-crt-effects';
+    crtEffects.setAttribute('aria-hidden', 'true');
+    overlayEl.appendChild(crtEffects);
 
     bootInputEl = document.createElement('input');
     bootInputEl.type = 'text';
@@ -359,6 +364,7 @@ c.style.cssText = 'display:block; width:100%; height:100%; image-rendering: pixe
       padding: 2px 6px; border: 1px solid #00ff66; border-radius: 0;
       outline: none; background: #000; color: #00ff66;
       font: 13px "Fixedsys", "Courier New", monospace;
+      z-index: 3;
     `;
     bootInputEl.style.display = 'none';
     overlayEl.appendChild(bootInputEl);

@@ -616,6 +616,65 @@ canvas {
     box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
   }
   .pause-item-card:hover .tip { display: block; }
+
+  #intro-canvas {
+    filter: contrast(1.1) saturate(1.12);
+  }
+
+  .intro-crt-effects {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    border-radius: 2.5% / 3.5%;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.2) 0,
+        rgba(0, 0, 0, 0.2) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+      radial-gradient(ellipse at center, transparent 56%, rgba(0, 0, 0, 0.48) 100%);
+    box-shadow:
+      inset 0 0 70px rgba(0, 0, 0, 0.65),
+      inset 0 0 18px rgba(0, 255, 102, 0.12);
+    animation: intro-crt-flicker 0.16s infinite;
+  }
+
+  .intro-crt-effects::after {
+    position: absolute;
+    inset: -35% 0;
+    content: "";
+    background: linear-gradient(
+      to bottom,
+      transparent 42%,
+      rgba(150, 255, 190, 0.035) 49%,
+      rgba(150, 255, 190, 0.11) 50%,
+      rgba(150, 255, 190, 0.035) 51%,
+      transparent 58%
+    );
+    animation: intro-crt-sweep 8s linear infinite;
+  }
+
+  @keyframes intro-crt-sweep {
+    from { transform: translateY(-35%); }
+    to { transform: translateY(35%); }
+  }
+
+  @keyframes intro-crt-flicker {
+    0%, 97%, 100% { opacity: 1; }
+    98% { opacity: 0.92; }
+    99% { opacity: 0.97; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro-crt-effects,
+    .intro-crt-effects::after {
+      animation: none;
+    }
+  }
 </style>
 </head>
 <body>
