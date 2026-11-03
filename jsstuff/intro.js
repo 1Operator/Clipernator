@@ -248,6 +248,10 @@ function stopSound(key) {
   let desktopLoadDotsTimer = 0;
   let desktopClickedData = false;
   let persistentDesktopRedraw = null;
+  const persistentDesktop = document.getElementById('persistent-desktop');
+  const desktopIcons = document.getElementById('desktop-icons');
+  const desktopLoadingElement = document.getElementById('desktop-loading');
+  const desktopErrorLayer = document.getElementById('desktop-error-layer');
   let antipieAppSpawned = false;
 
   const DESKTOP_APPS = [
@@ -390,15 +394,28 @@ function detachKeys() {
   let desktopClickHandler = null;
   function attachDesktopClicks() {
     desktopClickHandler = (e) => {
-      const rect = container.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) * (container.width / rect.width);
-      const my = (e.clientY - rect.top)  * (container.height / rect.height);
-      handleDesktopClick(mx, my);
+      const target = e.target instanceof Element ? e.target : null;
+      if (!target) return;
+      if (target.closest('.desktop-error-close, .desktop-error-ok')) {
+        desktopErrorVisible = false;
+        playSound('click');
+        renderPersistentDesktop();
+        return;
+      }
+      if (desktopErrorVisible) return;
+      const appElement = target.closest('.desktop-icon');
+      if (!appElement) return;
+      handleDesktopAppClick(appElement.dataset.appId);
     };
-    container.addEventListener('click', desktopClickHandler);
+    persistentDesktop.addEventListener('click', desktopClickHandler);
+    desktopErrorLayer.addEventListener('click', desktopClickHandler);
   }
   function detachDesktopClicks() {
-    if (desktopClickHandler) { container.removeEventListener('click', desktopClickHandler); desktopClickHandler = null; }
+    if (desktopClickHandler) {
+      persistentDesktop.removeEventListener('click', desktopClickHandler);
+      desktopErrorLayer.removeEventListener('click', desktopClickHandler);
+      desktopClickHandler = null;
+    }
   }
 
   // ================================================================
@@ -908,6 +925,10 @@ setTimeout(() => {
     desktopClickedData = false;
     stopSound('startup2');
     playSound('startup3');
+    renderPersistentDesktop();
+    persistentDesktop.hidden = false;
+    document.body.classList.add('desktop-ready');
+    if (overlayEl) overlayEl.style.display = 'none';
     attachDesktopClicks();
     requestAnimationFrame(desktopLoop);
   }
@@ -918,52 +939,34 @@ setTimeout(() => {
       desktopLoadDotsTimer++;
       if (desktopLoadDotsTimer > 20) { desktopLoadDotsTimer = 0; desktopLoadDots = (desktopLoadDots + 1) % 4; }
     }
-    drawDesktop();
+    renderDesktopLoading();
     requestAnimationFrame(desktopLoop);
-
   }
 
-  function handleDesktopClick(mx, my) {
+  function handleDesktopAppClick(appId) {
     if (desktopPhase === 'loading_data') return;
 
     if (desktopErrorVisible) {
-      const bx = 960 / 2 - 340 / 2;
-      const by = 300 - 210 / 2;
-      const closeX = bx + 340 - 23;
-      const closeY = by + 2;
-      const okX = bx + 340 / 2 - 30;
-      const okY = by + 210 - 34;
-      if (
-        (mx >= closeX && mx <= closeX + 18 && my >= closeY && my <= closeY + 16) ||
-        (mx >= okX && mx <= okX + 60 && my >= okY && my <= okY + 22)
-      ) {
-        desktopErrorVisible = false;
-        playSound('click');
-      }
       return;
     }
 
-    const IW = 48, IH = 64;
-    for (const app of DESKTOP_APPS) {
-      if (mx >= app.x && mx <= app.x + IW && my >= app.y && my <= app.y + IH) {
-        if (app.id === 'data' && _introDone) return;
-        playSound('click');
-        if (app.id === 'data') {
-          handleDataClick();
-        } else if (app.id === 'antipie' && _introDone) {
-          startAntipieBoss();
-        } else if (app.sprite === 'folder') {
-          desktopErrorVisible = true;
-          desktopErrorApp = app.label;
-          desktopErrorMsg = ERROR_MESSAGES[app.id] || 'This folder is empty.';
-        } else {
-          desktopErrorVisible = true;
-          desktopErrorApp = app.label.replace('\n', ' ');
-          desktopErrorMsg = ERROR_MESSAGES[app.id] || 'This application cannot be opened.';
-        }
-        return;
-      }
+    const app = DESKTOP_APPS.find(desktopApp => desktopApp.id === appId);
+    if (!app || (app.id === 'data' && _introDone)) return;
+    playSound('click');
+    if (app.id === 'data') {
+      handleDataClick();
+    } else if (app.id === 'antipie' && _introDone) {
+      startAntipieBoss();
+    } else if (app.sprite === 'folder') {
+      desktopErrorVisible = true;
+      desktopErrorApp = app.label;
+      desktopErrorMsg = ERROR_MESSAGES[app.id] || 'This folder is empty.';
+    } else {
+      desktopErrorVisible = true;
+      desktopErrorApp = app.label.replace('\n', ' ');
+      desktopErrorMsg = ERROR_MESSAGES[app.id] || 'This application cannot be opened.';
     }
+    renderPersistentDesktop();
   }
 
   function handleDataClick() {
@@ -975,104 +978,46 @@ setTimeout(() => {
 
   setTimeout(() => {
     desktopLoadingData = false;
+    document.body.classList.remove('desktop-ready');
+    persistentDesktop.hidden = true;
     stage = 'FLICKERING';
     stopSound('startup3');
+    if (overlayEl) overlayEl.style.display = 'block';
     playSound('bluescreen');
     startBluescreen();
   }, 2200);
 }
 
-  function drawDesktop(targetCtx = getCtx(), includeErrorDialog = true, drawLabels = true) {
-    const c = targetCtx; if (!c) return;
-    const W = 960, H = 600;
-    c.fillStyle = '#008080'; c.fillRect(0, 0, W, H);
-    for (let y = 0; y < H; y += 2) { c.fillStyle = 'rgba(0,0,0,0.04)'; c.fillRect(0, y, W, 1); }
+function renderPersistentDesktop() {
+  desktopIcons.replaceChildren(...DESKTOP_APPS.map(app => {
+    const icon = document.createElement('button');
+    icon.className = 'desktop-icon';
+    icon.type = 'button';
+    icon.dataset.appId = app.id;
+    icon.style.left = `${app.x / 960 * 100}%`;
+    icon.style.top = `${app.y / 600 * 100}%`;
+    const image = document.createElement('img');
+    image.src = SPR[app.sprite];
+    image.alt = '';
+    const label = document.createElement('span');
+    label.textContent = app.label;
+    icon.append(image, label);
+    return icon;
+  }));
+  renderDesktopLoading();
+  const title = document.getElementById('desktop-error-title');
+  const message = document.getElementById('desktop-error-message');
+  title.textContent = `⚠ ${desktopErrorApp}`;
+  message.textContent = desktopErrorMsg;
+  desktopErrorLayer.hidden = !desktopErrorVisible;
+}
 
-    DESKTOP_APPS.forEach(app => {
-      const { x, y, label, sprite } = app;
-      const IW = 48, IH = 48;
-      const img = imgs[sprite];
-      if (img && img.complete && img.naturalWidth > 0) {
-        c.drawImage(img, x, y, IW, IH);
-      } else {
-        c.fillStyle = sprite === 'dataLocked' ? '#cc4400' : sprite === 'folder' ? '#ffcc44' : '#aaaacc';
-        c.fillRect(x, y, IW, IH);
-        c.strokeStyle = '#000'; c.lineWidth = 1; c.strokeRect(x, y, IW, IH);
-        c.fillStyle = '#000'; c.font = 'bold 9px "MS Sans Serif", Arial, sans-serif'; c.textAlign = 'center';
-        c.fillText(sprite === 'dataLocked' ? '🔒' : sprite === 'folder' ? '📁' : '📄', x + IW/2, y + IH/2 + 4);
-        c.textAlign = 'left';
-      }
-      if (drawLabels) {
-        c.font = '11px "MS Sans Serif", Arial, sans-serif'; c.textAlign = 'center';
-        label.split('\n').forEach((ln, li) => {
-          c.fillStyle = 'rgba(0,0,0,0.7)'; c.fillText(ln, x + IW/2 + 1, y + IH + 14 + li * 13 + 1);
-          c.fillStyle = '#ffffff';          c.fillText(ln, x + IW/2,     y + IH + 14 + li * 13);
-        });
-        c.textAlign = 'left';
-      }
-    });
-
-    if (desktopLoadingData) {
-      const dots = '.'.repeat(desktopLoadDots);
-      c.font = '13px "Fixedsys", monospace'; c.fillStyle = '#ffdd00';
-      c.fillText('Opening' + dots, 24, 490);
-      c.fillText(['|','/','\u2014','\\'][Math.floor(Date.now()/200)%4], 110, 490);
-    }
-
-    if (includeErrorDialog && desktopErrorVisible) drawErrorDialog(c, desktopErrorApp, desktopErrorMsg);
-    drawTaskbar(c, W, H);
+function renderDesktopLoading() {
+  desktopLoadingElement.hidden = !desktopLoadingData;
+  if (desktopLoadingData) {
+    desktopLoadingElement.textContent = `Opening${'.'.repeat(desktopLoadDots)} ${['|', '/', '—', '\\'][Math.floor(Date.now() / 200) % 4]}`;
   }
-
-  function drawErrorDialog(c, title, msg) {
-    const bw = 340, bh = 210, bx = 960/2 - bw/2, by = 300 - bh/2;
-    c.fillStyle = 'rgba(0,0,0,0.4)'; c.fillRect(bx+4, by+4, bw, bh);
-    c.fillStyle = '#d4d0c8'; c.fillRect(bx, by, bw, bh);
-    c.strokeStyle = '#ffffff'; c.lineWidth = 2; c.strokeRect(bx, by, bw, bh);
-    c.strokeStyle = '#404040'; c.lineWidth = 1;
-    c.beginPath(); c.moveTo(bx+bw-1, by+1); c.lineTo(bx+bw-1, by+bh-1); c.lineTo(bx+1, by+bh-1); c.stroke();
-    const grad = c.createLinearGradient(bx, by, bx+bw, by);
-    grad.addColorStop(0, '#0a246a'); grad.addColorStop(1, '#3a6ea8');
-    c.fillStyle = grad; c.fillRect(bx+2, by+2, bw-4, 18);
-    c.fillStyle = '#ffffff'; c.font = 'bold 11px "MS Sans Serif", Arial, sans-serif';
-    c.fillText('\u26a0  ' + title, bx + 8, by + 14);
-    const closeX = bx + bw - 23, closeY = by + 2;
-    c.fillStyle = '#d4d0c8'; c.fillRect(closeX, closeY, 18, 16);
-    c.strokeStyle = '#ffffff'; c.lineWidth = 1;
-    c.beginPath(); c.moveTo(closeX, closeY + 16); c.lineTo(closeX, closeY); c.lineTo(closeX + 18, closeY); c.stroke();
-    c.strokeStyle = '#404040';
-    c.beginPath(); c.moveTo(closeX + 18, closeY); c.lineTo(closeX + 18, closeY + 16); c.lineTo(closeX, closeY + 16); c.stroke();
-    c.fillStyle = '#000000'; c.font = 'bold 11px Arial, sans-serif';
-    c.textAlign = 'center'; c.fillText('×', closeX + 9, closeY + 12); c.textAlign = 'left';
-    c.fillStyle = '#ff0000'; c.font = 'bold 26px serif'; c.fillText('\u2715', bx + 18, by + 64);
-    c.fillStyle = '#000000'; c.font = '11px "MS Sans Serif", Arial, sans-serif';
-    msg.split('\n').forEach((ln, i) => c.fillText(ln, bx + 54, by + 48 + i * 16));
-    c.strokeStyle = '#808080'; c.lineWidth = 1;
-    c.beginPath(); c.moveTo(bx+6, by+bh-42); c.lineTo(bx+bw-6, by+bh-42); c.stroke();
-    c.strokeStyle = '#ffffff';
-    c.beginPath(); c.moveTo(bx+6, by+bh-41); c.lineTo(bx+bw-6, by+bh-41); c.stroke();
-    const okX = bx + bw/2 - 30, okY = by + bh - 34;
-    c.fillStyle = '#d4d0c8'; c.fillRect(okX, okY, 60, 22);
-    c.strokeStyle = '#ffffff'; c.lineWidth = 1;
-    c.beginPath(); c.moveTo(okX, okY+22); c.lineTo(okX, okY); c.lineTo(okX+60, okY); c.stroke();
-    c.strokeStyle = '#404040';
-    c.beginPath(); c.moveTo(okX+60, okY); c.lineTo(okX+60, okY+22); c.lineTo(okX, okY+22); c.stroke();
-    c.fillStyle = '#000'; c.font = '11px "MS Sans Serif", Arial, sans-serif';
-    c.textAlign = 'center'; c.fillText('OK', okX+30, okY+14); c.textAlign = 'left';
-  }
-
-  function drawTaskbar(c, W, H) {
-    c.fillStyle = '#c0c0c0'; c.fillRect(0, H-28, W, 28);
-    c.strokeStyle = '#ffffff'; c.lineWidth = 1;
-    c.beginPath(); c.moveTo(0, H-28); c.lineTo(W, H-28); c.stroke();
-    c.fillStyle = '#d4d0c8'; c.fillRect(2, H-26, 54, 24);
-    c.strokeStyle = '#ffffff'; c.beginPath(); c.moveTo(2,H-2); c.lineTo(2,H-26); c.lineTo(56,H-26); c.stroke();
-    c.strokeStyle = '#808080'; c.beginPath(); c.moveTo(56,H-26); c.lineTo(56,H-2); c.lineTo(2,H-2); c.stroke();
-    c.fillStyle = '#000'; c.font = 'bold 11px "MS Sans Serif", Arial, sans-serif'; c.fillText('Start', 10, H-10);
-    const timeStr = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    c.fillStyle = '#d4d0c8'; c.fillRect(W-68, H-26, 66, 24);
-    c.fillStyle = '#000'; c.font = '11px "MS Sans Serif", Arial, sans-serif';
-    c.textAlign = 'right'; c.fillText(timeStr, W-6, H-10); c.textAlign = 'left';
-  }
+}
 
   // ================================================================
   // STAGE: BLUESCREEN
@@ -1080,6 +1025,11 @@ setTimeout(() => {
   function startBluescreen() {
     stage = 'BLUESCREEN';
     detachDesktopClicks();
+    persistentDesktop.hidden = true;
+    document.body.classList.remove('desktop-ready');
+    desktopErrorVisible = false;
+    desktopErrorLayer.hidden = true;
+    if (overlayEl) overlayEl.style.display = 'block';
     bluescreenTimer = 0; clippyVisible = false; clippySlideY = 300; clippyDialogVisible = false; clippyAnim = 'notice';
 
     setTimeout(() => {
@@ -1580,68 +1530,15 @@ setTimeout(() => {
   }
 
   function installPersistentDesktop() {
-    if (persistentDesktopInstalled) return;
-    const desktopCanvas = document.createElement('canvas');
-    desktopCanvas.id = 'persistent-desktop';
-    desktopCanvas.width = 960;
-    desktopCanvas.height = 600;
-    desktopCanvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;margin:0;z-index:1;image-rendering:pixelated;image-rendering:crisp-edges;';
-    document.body.insertBefore(desktopCanvas, document.body.firstChild);
-    const desktopCtx = desktopCanvas.getContext('2d');
-    if (!desktopCtx) throw new Error('Unable to create persistent desktop canvas context.');
-
-    const labelOverlay = document.createElement('div');
-    labelOverlay.className = 'desktop-label-overlay';
-    document.body.insertBefore(labelOverlay, desktopCanvas.nextSibling);
-    const updateDesktopLabels = () => {
-      const fontScale = Math.min(window.innerWidth / 960, window.innerHeight / 600);
-      labelOverlay.replaceChildren(...DESKTOP_APPS.map(app => {
-        const label = document.createElement('span');
-        label.className = 'desktop-icon-label';
-        label.textContent = app.label;
-        label.style.left = `${((app.x + 24) / 960) * 100}%`;
-        label.style.top = `${((app.y + 52) / 600) * 100}%`;
-        label.style.fontSize = `${11 * fontScale}px`;
-        label.style.lineHeight = `${13 * fontScale}px`;
-        return label;
-      }));
-    };
-
-    const dialogCanvas = document.createElement('canvas');
-    dialogCanvas.width = 960;
-    dialogCanvas.height = 600;
-    dialogCanvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;margin:0;background:transparent;z-index:3;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges;';
-    document.body.appendChild(dialogCanvas);
-    const dialogCtx = dialogCanvas.getContext('2d');
-    if (!dialogCtx) throw new Error('Unable to create desktop dialog canvas context.');
-
-    const redrawDesktop = () => {
-      drawDesktop(desktopCtx, false, false);
-      updateDesktopLabels();
-    };
-    persistentDesktopRedraw = redrawDesktop;
-    const redrawDialog = () => {
-      dialogCtx.clearRect(0, 0, dialogCanvas.width, dialogCanvas.height);
-      dialogCanvas.style.pointerEvents = desktopErrorVisible ? 'auto' : 'none';
-      if (desktopErrorVisible) drawErrorDialog(dialogCtx, desktopErrorApp, desktopErrorMsg);
-    };
-    const handleClick = (e) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      handleDesktopClick(
-        (e.clientX - rect.left) * (desktopCanvas.width / rect.width),
-        (e.clientY - rect.top) * (desktopCanvas.height / rect.height)
-      );
-      redrawDesktop();
-      redrawDialog();
-    };
-
-    desktopCanvas.addEventListener('click', handleClick);
-    dialogCanvas.addEventListener('click', handleClick);
-    window.addEventListener('resize', updateDesktopLabels);
-    redrawDesktop();
-    redrawDialog();
-    setInterval(redrawDesktop, 60000);
-    persistentDesktopInstalled = true;
+    if (!persistentDesktopInstalled) {
+      persistentDesktopRedraw = renderPersistentDesktop;
+      renderPersistentDesktop();
+      persistentDesktop.hidden = false;
+      document.body.classList.add('desktop-ready');
+      persistentDesktopInstalled = true;
+    }
+    if (_introDone) attachDesktopClicks();
+    else detachDesktopClicks();
   }
 
   // ================================================================

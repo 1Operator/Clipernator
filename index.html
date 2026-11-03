@@ -80,24 +80,76 @@ body::before { display: none; }
   image-rendering: auto;
 }
 
-.desktop-label-overlay {
+#persistent-desktop {
   position: fixed;
   inset: 0;
   z-index: 1;
-  pointer-events: none;
   overflow: hidden;
+  background-color: #008080;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 1px,
+    rgba(0, 0, 0, 0.04) 1px,
+    rgba(0, 0, 0, 0.04) 2px
+  );
 }
 
-.desktop-icon-label {
+#persistent-desktop[hidden] {
+  display: none;
+}
+
+.desktop-icon {
   position: absolute;
-  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 5%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #fff;
   font-family: 'MS Sans Serif', Arial, sans-serif;
   font-weight: normal;
   text-align: center;
-  white-space: pre-line;
   text-shadow: 1px 1px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
 }
+
+.desktop-icon img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.desktop-icon span {
+  margin-top: 2px;
+  font-size: clamp(9px, 1.15vw, 11px);
+  line-height: 1.2;
+  white-space: pre-line;
+}
+
+.desktop-icon:focus-visible {
+  outline: 1px dotted #fff;
+  outline-offset: 1px;
+}
+
+#desktop-icons {
+  position: absolute;
+  inset: 0;
+}
+
+#desktop-loading {
+  position: absolute;
+  left: 2.5%;
+  bottom: 42px;
+  color: #ffdd00;
+  font: 13px 'Fixedsys', monospace;
+  text-shadow: 1px 1px #000;
+}
+
+#desktop-loading[hidden] { display: none; }
 
 .pause-clippy-bubble {
   position: absolute;
@@ -145,18 +197,109 @@ body::before { display: none; }
   border-right: 14px solid #ffffcc;
 }
 
-#bottom-bar {
+#desktop-taskbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
   display: flex;
-  flex: 0 0 34px;
+  height: 34px;
   align-items: center;
   gap: 4px;
-  width: 100%;
   min-width: 0;
   padding: 3px 4px;
   background: #c0c0c0;
   border-top: 2px solid #fff;
   box-shadow: inset 0 1px 0 #e8e8e0;
   font: 11px 'MS Sans Serif', Arial, sans-serif;
+  visibility: hidden;
+}
+
+body.desktop-ready #desktop-taskbar { visibility: visible; }
+
+.desktop-error-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+}
+
+.desktop-error-layer[hidden] { display: none; }
+
+.desktop-error-dialog {
+  width: 340px;
+  padding: 2px;
+  background: #d4d0c8;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 4px 4px rgba(0, 0, 0, 0.4);
+}
+
+.desktop-error-titlebar {
+  display: flex;
+  height: 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 3px 2px 6px;
+  background: linear-gradient(to right, #0a246a, #3a6ea8);
+  color: #fff;
+  font-weight: bold;
+}
+
+.desktop-error-close {
+  width: 18px;
+  height: 16px;
+  padding: 0;
+  color: #000;
+  font: bold 11px Arial, sans-serif;
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  cursor: pointer;
+}
+
+.desktop-error-content {
+  display: flex;
+  min-height: 145px;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 14px;
+  color: #000;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.desktop-error-icon {
+  color: #f00;
+  font: bold 26px serif;
+}
+
+.desktop-error-actions {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 6px;
+  border-top: 1px solid #808080;
+  box-shadow: inset 0 1px #fff;
+}
+
+.desktop-error-ok {
+  min-width: 60px;
+  padding: 3px 8px;
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  cursor: pointer;
 }
 
 .taskbar-button,
@@ -272,6 +415,13 @@ body::before { display: none; }
 
 #taskbar-audio[aria-pressed="true"] img {
   opacity: 0.45;
+}
+
+#bottom-bar {
+  flex: 0 0 4px;
+  height: 4px;
+  background: #d4d0c8;
+  border-top: 1px solid #808080;
 }
 
 #hud { cursor: move; user-select: none; }
@@ -1028,36 +1178,55 @@ canvas {
     </div>
   </div>
 
-  <div id="bottom-bar" role="toolbar" aria-label="Taskbar">
-    <button id="taskbar-start" class="taskbar-button" type="button" title="Start">
-      <img src="sprites/ui/DrawaHotbar.png" alt="">
-      <span>Start</span>
-    </button>
-    <span class="taskbar-divider" aria-hidden="true"></span>
-    <div class="taskbar-apps" role="group" aria-label="Pinned apps">
-      <button class="taskbar-app" type="button" title="Email" aria-label="Email">
-        <img src="sprites/ui/Email.png" alt="">
-      </button>
-      <button class="taskbar-app" type="button" title="Task Manager" aria-label="Task Manager">
-        <img src="sprites/ui/TaskManager.png" alt="">
-      </button>
-    </div>
-    <span class="taskbar-divider" aria-hidden="true"></span>
-    <button id="taskbar-active-window" class="taskbar-active-window is-active" type="button" title="party.exe">
-      <span id="taskbar-active-title">party.exe</span>
-    </button>
-    <div class="taskbar-tray">
-      <button id="taskbar-audio" class="taskbar-tray-button" type="button" title="Mute audio" aria-label="Mute audio" aria-pressed="false">
-        <img src="sprites/ui/Audio.png" alt="">
-      </button>
-      <span id="taskbar-clock" class="taskbar-clock" aria-label="Current time"></span>
-      <button id="taskbar-settings" class="taskbar-tray-button" type="button" title="Settings" aria-label="Settings">
-        <img src="sprites/ui/StatusEffects/Repairing.png" alt="">
-      </button>
-    </div>
-  </div>
-
+  <div id="bottom-bar" aria-hidden="true"></div>
 </div> <!-- wrapper end -->
+<div id="persistent-desktop" hidden>
+  <div id="desktop-icons" aria-label="Desktop"></div>
+  <div id="desktop-loading" aria-live="polite" hidden></div>
+</div>
+<div id="desktop-error-layer" class="desktop-error-layer" hidden role="presentation">
+  <section class="desktop-error-dialog" role="alertdialog" aria-modal="true" aria-labelledby="desktop-error-title">
+    <header class="desktop-error-titlebar">
+      <span id="desktop-error-title"></span>
+      <button class="desktop-error-close" type="button" aria-label="Close">×</button>
+    </header>
+    <div class="desktop-error-content">
+      <span class="desktop-error-icon" aria-hidden="true">✕</span>
+      <p id="desktop-error-message"></p>
+    </div>
+    <div class="desktop-error-actions">
+      <button class="desktop-error-ok" type="button">OK</button>
+    </div>
+  </section>
+</div>
+<div id="desktop-taskbar" role="toolbar" aria-label="Hotbar">
+  <button id="taskbar-start" class="taskbar-button" type="button" title="Start">
+    <img src="sprites/ui/DrawaHotbar.png" alt="">
+    <span>Start</span>
+  </button>
+  <span class="taskbar-divider" aria-hidden="true"></span>
+  <div class="taskbar-apps" role="group" aria-label="Pinned apps">
+    <button class="taskbar-app" type="button" title="Email" aria-label="Email">
+      <img src="sprites/ui/Email.png" alt="">
+    </button>
+    <button class="taskbar-app" type="button" title="Task Manager" aria-label="Task Manager">
+      <img src="sprites/ui/TaskManager.png" alt="">
+    </button>
+  </div>
+  <span class="taskbar-divider" aria-hidden="true"></span>
+  <button id="taskbar-active-window" class="taskbar-active-window is-active" type="button" title="party.exe">
+    <span id="taskbar-active-title">party.exe</span>
+  </button>
+  <div class="taskbar-tray">
+    <button id="taskbar-audio" class="taskbar-tray-button" type="button" title="Mute audio" aria-label="Mute audio" aria-pressed="false">
+      <img src="sprites/ui/Audio.png" alt="">
+    </button>
+    <span id="taskbar-clock" class="taskbar-clock" aria-label="Current time"></span>
+    <button id="taskbar-settings" class="taskbar-tray-button" type="button" title="Settings" aria-label="Settings">
+      <img src="sprites/ui/StatusEffects/Repairing.png" alt="">
+    </button>
+  </div>
+</div>
 <div id="utensil-window-layer"></div>
 
 <script>

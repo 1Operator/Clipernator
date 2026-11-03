@@ -11,6 +11,9 @@
 - want MS Sans Serif to be used for most of the UI, and for fixedsys to be used in a few specific areas, like how microsoft did it: MS Sans Serif was a bitmap, proportional UI font used for Windows interface text in early Windows versions, and Microsoft Sans Serif later replaced it as the TrueType successor distributed with Windows 2000 and later. In practice, this family was used for dialog boxes, labels, and general interface text rather than code-like text areas. Fixedsys was a bitmap, monospaced font originally used as the system font in Windows 1.0 and 2.0, and later it remained the default font in Notepad through the Windows 9x/ME era. It was mainly associated with old-style text display and legacy editor use rather than general GUI text.
 - When you press the minimize button the game just closes and becomes a tiny tab in the middle of the screen. this is funny and should be kept.
 - The MGW (main game window) and the simulated offscreen windows are part of the game world, not separate OS windows or separate game simulations.
+- **Hotbar** means the Windows-style taskbar along the bottom edge of the full-screen desktop (Start, app buttons, active-window button, audio/settings controls, and clock). It does not mean the MGW's bottom bar; that is only a thin window border/status strip.
+- The post-boot desktop and its taskbar are HTML UI. The BIOS, loading, bluescreen, and other intro sequences continue to use canvas for their animation.
+- Desktop icons and error dialogs are HTML elements so their text, buttons, and click targets are independent of canvas drawing.
 
 ---
 
