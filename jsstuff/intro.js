@@ -965,6 +965,8 @@ setTimeout(() => {
       handleDataClick();
     } else if (app.id === 'recycle') {
       if (typeof window.openTrashWindow === 'function') window.openTrashWindow();
+    } else if (app.id === 'internet') {
+      if (typeof window.openWonderWeb === 'function') window.openWonderWeb();
     } else if (app.id === 'antipie' && _introDone) {
       startAntipieBoss();
     } else if (app.sprite === 'folder') {

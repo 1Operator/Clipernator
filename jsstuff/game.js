@@ -719,7 +719,7 @@ function startKeybindListen(action) {
       el.classList.contains('w2k-btn') ||
       el.closest('#pause-menu button') ||
       el.closest('#keybind-screen button') ||
-      el.closest('.taskbar-button, .taskbar-app, .taskbar-active-window, .taskbar-tray-button, #email-window button, #trash-window button') ||
+      el.closest('.taskbar-button, .taskbar-app, .taskbar-active-window, .taskbar-tray-button, #email-window button, #trash-window button, #wonderweb-window button') ||
       el.id === 'startBtn' ||
       el.id === 'skip-btn' ||
       el.id === 'floor-btn' ||

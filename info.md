@@ -14,6 +14,7 @@
 - **Hotbar** means the Windows-style taskbar along the bottom edge of the full-screen desktop (Start, app buttons, active-window button, audio/settings controls, and clock). It does not mean the MGW's bottom bar; that is only a thin window border/status strip.
 - The post-boot desktop and its taskbar are HTML UI. The BIOS, loading, bluescreen, and other intro sequences continue to use canvas for their animation.
 - Desktop icons and error dialogs are HTML elements so their text, buttons, and click targets are independent of canvas drawing.
+- WonderWeb opens a draggable local browser window with working Home, Golden Chips, and About tabs. Golden Chips are earned from Chippy or rare drops and currently only accumulate/display; they do not have a spending use yet.
 - Opening-sequence item-draft selections use the BIOS confirmation sound; `ItemConfirm` is reserved for in-game item choices, pickups, and relic unlocks.
 - Email is a draggable inbox overlay and does not pause an active run. Offers expire after 20–60 seconds of active gameplay; random mail is checked once per active minute with a 50% chance.
 - New email plays a notification chime, bounces the Email hotbar icon briefly, and shows a blinking unread count. Hovering the icon shows the unread total; opening the inbox plays its open cue.

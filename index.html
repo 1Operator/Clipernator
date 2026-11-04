@@ -584,6 +584,134 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   border-bottom-color: #fff;
 }
 
+#utensil-window-layer #wonderweb-window {
+  width: min(620px, calc(100vw - 20px));
+  height: min(430px, calc(100vh - 60px));
+  min-height: 280px;
+  background: #d4d0c8;
+  color: #111;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.45);
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+}
+
+#wonderweb-window .desktop-window-titlebar {
+  display: flex;
+  height: 22px;
+  flex: 0 0 22px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+  background: linear-gradient(to right, #0a246a, #3a6ea8);
+  color: #fff;
+  font-weight: bold;
+}
+
+.wonderweb-browser {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px;
+}
+
+.wonderweb-tabs {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  gap: 3px;
+  border-bottom: 1px solid #808080;
+}
+
+.wonderweb-tab {
+  min-width: 82px;
+  max-width: 150px;
+  padding: 5px 10px 4px;
+  overflow: hidden;
+  color: #222;
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: linear-gradient(#ececec, #c8c8c8);
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #808080;
+  border-bottom: 0;
+  cursor: pointer;
+}
+
+.wonderweb-tab[aria-selected="true"] {
+  position: relative;
+  z-index: 1;
+  margin-bottom: -1px;
+  padding-bottom: 5px;
+  background: #fff;
+  border-bottom: 1px solid #fff;
+  font-weight: bold;
+}
+
+.wonderweb-address {
+  display: flex;
+  min-height: 25px;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  color: #333;
+  background: #eee;
+  border: 1px solid #aaa;
+}
+
+.wonderweb-address span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wonderweb-pages {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  padding: 14px;
+  background: #fff;
+  border-top: 1px solid #555;
+  border-left: 1px solid #555;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  box-shadow: inset 1px 1px 2px #aaa;
+}
+
+.wonderweb-page[hidden] {
+  display: none;
+}
+
+.wonderweb-page h2 {
+  margin: 0 0 10px;
+  color: #153b68;
+  font-size: 17px;
+}
+
+.wonderweb-page p {
+  max-width: 58ch;
+  margin: 7px 0;
+  line-height: 1.5;
+}
+
+.wonderweb-chip-balance {
+  display: inline-block;
+  margin: 6px 0;
+  padding: 8px 12px;
+  color: #442d00;
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(#fff5bf, #f3cf54);
+  border: 1px solid #b38a1a;
+  box-shadow: inset 1px 1px 0 #fffbdc, 1px 1px 0 #999;
+}
+
 @media (max-width: 520px) {
   .trash-window-content {
     height: min(440px, calc(100vh - 72px));
@@ -596,6 +724,8 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   .trash-item-row { width: 44px; height: 44px; }
   .trash-item-row img { width: 36px; height: 36px; }
   .trash-item-row-icon { font-size: 28px; }
+  #utensil-window-layer #wonderweb-window { height: min(430px, calc(100vh - 60px)); }
+  .wonderweb-tab { min-width: 0; flex: 1; padding-right: 5px; padding-left: 5px; }
 }
 
 #email-window .desktop-window-titlebar {
@@ -1831,6 +1961,39 @@ canvas {
       </section>
     </div>
   </section>
+  <section id="wonderweb-window" class="independent-window" data-window-title="WonderWeb" aria-label="WonderWeb browser">
+    <header class="desktop-window-titlebar">
+      <span>WonderWeb</span>
+      <button class="desktop-window-close-button" type="button" data-wonderweb-close aria-label="Close WonderWeb" title="Close">&#x72;</button>
+    </header>
+    <div class="wonderweb-browser">
+      <div class="wonderweb-tabs" role="tablist" aria-label="WonderWeb pages">
+        <button id="wonderweb-tab-home" class="wonderweb-tab" type="button" role="tab" aria-selected="true" aria-controls="wonderweb-page-home" data-wonderweb-tab="home">Home</button>
+        <button id="wonderweb-tab-golden" class="wonderweb-tab" type="button" role="tab" aria-selected="false" aria-controls="wonderweb-page-golden" data-wonderweb-tab="golden">Golden Chips</button>
+        <button id="wonderweb-tab-about" class="wonderweb-tab" type="button" role="tab" aria-selected="false" aria-controls="wonderweb-page-about" data-wonderweb-tab="about">About</button>
+      </div>
+      <div class="wonderweb-address" aria-label="Address">
+        <span aria-hidden="true">🔒</span>
+        <span id="wonderweb-address-text">drawa.local/home</span>
+      </div>
+      <div class="wonderweb-pages">
+        <section id="wonderweb-page-home" class="wonderweb-page" role="tabpanel" aria-labelledby="wonderweb-tab-home" data-wonderweb-page="home">
+          <h2>Welcome to WonderWeb</h2>
+          <p>Your local Drawa portal. Use the tabs above to browse this computer's pages.</p>
+        </section>
+        <section id="wonderweb-page-golden" class="wonderweb-page" role="tabpanel" aria-labelledby="wonderweb-tab-golden" data-wonderweb-page="golden" hidden>
+          <h2>Golden Chip Ledger</h2>
+          <p>Golden Chips collected by Chippy and found during a run:</p>
+          <div id="wonderweb-golden-balance" class="wonderweb-chip-balance">0 Golden Chips</div>
+          <p>Golden Chips are tracked separately from regular chips. Their purpose is reserved for a future feature.</p>
+        </section>
+        <section id="wonderweb-page-about" class="wonderweb-page" role="tabpanel" aria-labelledby="wonderweb-tab-about" data-wonderweb-page="about" hidden>
+          <h2>About this browser</h2>
+          <p>WonderWeb is a local, in-game browser mockup. Its tab strip and draggable window are ready for more pages.</p>
+        </section>
+      </div>
+    </div>
+  </section>
   <div id="email-contract-tracker" class="email-contract-tracker" hidden></div>
 </div>
 <div id="email-popup-layer" aria-live="polite"></div>
@@ -1985,6 +2148,7 @@ canvas {
   <script src="jsstuff/sounds.js"></script>
    <script src="jsstuff/email.js"></script>
 <script src="jsstuff/trash.js"></script>
+   <script src="jsstuff/wonderweb.js"></script>
 
 <script src="jsstuff/game.js"></script>
 </body>
