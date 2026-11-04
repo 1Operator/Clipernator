@@ -172,7 +172,7 @@ function clipShopMakeAd(stock) {
   return {
     name: clipShopListingName(listing),
     discount: 10 * (1 + Math.floor(Math.random() * 5)),
-    color: clipShopRandomFrom(['#f8e6d9', '#f7e8d2', '#f6edda', '#f3e5dc', '#f8eadc']),
+    color: clipShopRandomFrom(['#aaff77', '#8ee7f2', '#fff18a', '#ffadd2', '#ffad6e']),
   };
 }
 
