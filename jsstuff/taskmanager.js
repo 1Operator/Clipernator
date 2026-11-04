@@ -68,8 +68,8 @@
   };
 
   const enemyIcons = {
-    utensil: 'sprites/enemies/Utensil/Fork/ForkSheet.png',
-    waterballoon: 'sprites/enemies/WaterBalloon/WaterBalloonIdleSheet.png',
+    utensil: 'sprites/enemies/Utensil/Fork/ForkTip.png',
+    waterballoon: 'sprites/enemies/WaterBalloon/WaterBalloon.png',
     giftBox: 'sprites/enemies/GiftBox/GiftBox.png',
     partyHat: 'sprites/enemies/PartyHat/PartyHat.png',
     cakeBoss: 'sprites/ui/ANTIPIE.png',
@@ -302,7 +302,7 @@
       const isChippy = name === 'Chippy';
       const isChip = name === 'Chip' || name === 'Golden Chip';
       let icon = '';
-      if (isChippy) icon = 'sprites/objects/Chippy/ChippySpin.png';
+      if (isChippy) icon = 'sprites/objects/Chippy/Chippy.png';
       else if (name === 'Chip') icon = 'sprites/objects/Chips/Chip.png';
       else if (name === 'Golden Chip') icon = 'sprites/objects/Chips/GoldenChip.png';
       else if (typeof ITEM_DEFS !== 'undefined') icon = ITEM_DEFS[[...Object.keys(ITEM_DEFS)].find(id => ITEM_DEFS[id]?.name === name)]?.img || '';

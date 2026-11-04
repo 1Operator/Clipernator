@@ -1,6 +1,23 @@
 # CLIPERNATOR — Design Reference
 
-## General Notes
+## Contents
+
+- [Project and design notes](#project-and-design-notes)
+- [Desktop and Task Manager](#desktop-and-task-manager)
+- [Item rules](#item-rules)
+- [Status effects](#status-effects)
+- [Item pools](#item-pools)
+- [Glowsticks and melee](#glowsticks--melee)
+- [Enemy behaviors](#enemy-behaviors)
+- [Offscreen windows](#offscreen-windows-prototype)
+- [Sound effects](#sound-effects)
+
+---
+
+## Project and Design Notes
+
+### Game and workflow
+
 - "Entities" usually refers to both the player and enemies, but can also refer to bosses or projectiles
 - Goal is to make floor 1 & 2 as good as possible before adding more floors
 - I am trying to make this a actually good game, I do not want to cut any corners
@@ -8,12 +25,17 @@
 - This document should be updated after any signifcant changes
 - Sometimes game states are modified for play testing. I'm not playing 30 minutes until wave 19 to see if mirror maze is reflectable with bowling balls.
 
-- want MS Sans Serif to be used for most of the UI, and for fixedsys to be used in a few specific areas, like how microsoft did it: MS Sans Serif was a bitmap, proportional UI font used for Windows interface text in early Windows versions, and Microsoft Sans Serif later replaced it as the TrueType successor distributed with Windows 2000 and later. In practice, this family was used for dialog boxes, labels, and general interface text rather than code-like text areas. Fixedsys was a bitmap, monospaced font originally used as the system font in Windows 1.0 and 2.0, and later it remained the default font in Notepad through the Windows 9x/ME era. It was mainly associated with old-style text display and legacy editor use rather than general GUI text.
-- When you press the minimize button the game just closes and becomes a tiny tab in the middle of the screen. this is funny and should be kept.
+### Desktop model
+
+- Use MS Sans Serif for most UI, and Fixedsys sparingly for code-like or legacy text areas.
+- Keep the humorous minimize behavior: the game closes down to a tiny tab in the middle of the screen.
 - The MGW (main game window) and the simulated offscreen windows are part of the game world, not separate OS windows or separate game simulations.
 - **Hotbar** means the Windows-style taskbar along the bottom edge of the full-screen desktop (Start, app buttons, active-window button, audio/settings controls, and clock). It does not mean the MGW's bottom bar; that is only a thin window border/status strip.
 - The post-boot desktop and its taskbar are HTML UI. The BIOS, loading, bluescreen, and other intro sequences continue to use canvas for their animation.
 - Desktop icons and error dialogs are HTML elements so their text, buttons, and click targets are independent of canvas drawing.
+
+### Desktop applications
+
 - WonderWeb opens a draggable local browser window with working Home, Golden Chips, and About tabs. Golden Chips are earned from Chippy or rare drops and currently only accumulate/display; they do not have a spending use yet.
 - ChipShop is WonderWeb's retro software store. Listings are added to a cart first; installing one charges its chips and applies it to the current run. Customer Profile lists installed listings for that run, and Help explains the shop flow. Health, damage, and speed upgrades use floppy-disk art (blue, red, and amber respectively); other listings use item art or placeholders.
 - ChipShop's catalog displays random part numbers and occasional discounts. Its small banner ads are decorative promotions with randomized listings, discount percentages, and preset colors; they do not change the listing's actual price.
@@ -25,6 +47,19 @@
 - Spam consequences happen only through its link button; reporting spam rewards a chip, while reporting a real offer only deletes it. System notices provide information without rewards.
 - The desktop Trash icon opens a draggable item-uninstall window without pausing the run. It lists owned items as sprite-only tiles, previews the selected item above the grid, and shows its value/action in a full-height side panel. Items are worth 2 chips by default; Triple Layered Cake, Popcorn Bowl, and Full Clown Mode are worth 4, while Quadruple Layered Cake is worth 8. Uninstalling removes an item from the available loadout and clears its persistent effect; an already-running timed effect finishes normally. Dependent upgrades are removed with their parent, and lower cake tiers do not return after uninstalling an upgrade.
 - Trash opening and successful item uninstall play the dedicated `TrashOpen` and `TrashUse` sound effects.
+- Opening-sequence item-draft selections use the BIOS confirmation sound; `ItemConfirm` is reserved for in-game item choices, pickups, and relic unlocks.
+
+---
+
+## Desktop and Task Manager
+
+The Task Manager is a draggable HTML desktop window opened from its hotbar icon. It does not pause gameplay and has three tabs:
+
+- **Applications** lists Email, WonderWeb, Trash, and Task Manager with a Running/Not running status. Click rows to select them; Ctrl/Cmd-click, Shift-click, and dragging support multi-selection. **End Task** closes selected applications. The game window, enemies, and world objects are intentionally not endable from this tab.
+- **Processes** shows one row per active enemy type, plus Clippy and active system objects (Chippy, chips, and field items). Rows include a single-sprite icon, program name, user category, and damage attributed to Clippy's health loss where the source enemy is known. Enemies are `LOCAL`, CORs and objects are `SYSTEM`, and Clippy is `USER`.
+- **Performance** reports current health, chips, active enemy count, and the next process-patch cost.
+
+Selecting an enemy process enables **Damage Process** when enough chips are available. Each enemy type can be patched once per run: the patch costs 7 chips initially, then the price increases by 7 chips after each successful patch. It reduces that type's movement, damage to Clippy, and maximum/current health by 30%; future spawns of that type also receive reduced health and movement. The patch state and escalating price reset when a new run starts. CORs do not have a health pool, so their patch affects movement and damage only.
 
 ---
 
@@ -41,10 +76,6 @@
 - **Leaking** — applied by the Utensil's knife; deals 5% of the player's max health once per second for 3 seconds. Reapplications add another 3 seconds. Affected entities are tinted grey, and active player status is shown in the pause menu.
 
 ---
-
-  
-
-
 ## Item Pools
 
 ### Floor 1 Items (ALL_ITEM_IDS)
