@@ -85,10 +85,13 @@ function angleDiff(a, b) {
 }
 
 function baseBulletDamage() {
-  if (gs.hasQuadCake)   return 4;
-  if (gs.hasTripleCake) return 3;
-  if (gs.hasDoubleCake) return 2;
-  return 1;
+  const cakeDamage = gs.hasQuadCake ? 4
+    : gs.hasTripleCake ? 3
+      : gs.hasDoubleCake ? 2
+        : 1;
+  return cakeDamage
+    * (1 + (gs.clipShopDamageBonus || 0))
+    * (gs.clipShopDamageMultiplier || 1);
 }
 
 function gunMuzzlePos() {
@@ -682,7 +685,9 @@ function sysPlayerMovement() {
 if (gs.speedBoostTimer > 0) speedMult = gs.speedBoostMult || CFG.SPEED_BOOST_MULT;
 if (gs.sfpFull) speedMult = Math.max(speedMult, 1.3);
 if (gs.hasTightropeBoots) speedMult = Math.max(speedMult, 3.00);
-const topSpd = (slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult) * emailMoveMultiplier();
+const clipShopSpeed = (1 + (gs.clipShopSpeedBonus || 0)) * (gs.clipShopSpeedMultiplier || 1);
+const topSpd = (slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult)
+  * emailMoveMultiplier() * clipShopSpeed;
   if (dashing) {
   const easeInOut = progress => progress < 0.5
     ? 4 * progress * progress * progress

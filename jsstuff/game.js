@@ -149,6 +149,10 @@ function initGameState(applyIntroChoices = true) {
   gs = {
     score: 0, wave: 1,
     chips: 0, goldenChips: 0, chipDrops: [], flawlessWaveStreak: 0,
+    clipShopStock: [], clipShopRefreshCost: 5, clipShopRefreshCount: 0,
+    clipShopRestockCount: 0, clipShopNextListingId: 1,
+    clipShopSpeedBonus: 0, clipShopSpeedMultiplier: 1,
+    clipShopDamageBonus: 0, clipShopDamageMultiplier: 1,
     health: CFG.MAX_HEALTH, maxHealth: CFG.MAX_HEALTH,
     leakingTimer: 0, leakingTickTimer: 0,
     ammo: CFG.MAX_AMMO, maxAmmo: CFG.MAX_AMMO,
@@ -260,6 +264,7 @@ clippyPickupTimer: 0,
     INTRO.applyDraftItemsToGs(gs);
   }
   resetEmailRunState();
+  clipShopStartRun();
  
 }
 
@@ -276,6 +281,7 @@ function updateHUD() {
   document.getElementById('wave-val').textContent = gs.wave;
   document.getElementById('chips-val').textContent = gs.chips;
   document.getElementById('golden-chips-val').textContent = gs.goldenChips;
+  if (typeof clipShopUpdateBalances === 'function') clipShopUpdateBalances();
 }
 
 function showMsg(txt) {
@@ -477,10 +483,16 @@ function renderPauseMenu() {
     leakingStatus.appendChild(leakingIcon);
     statusEffectsEl.appendChild(leakingStatus);
   }
-  const dmgLabel = gs.hasQuadCake ? '4x (50% dud)' : gs.hasTripleCake ? '3x (45% dud)' :
-                   gs.hasDoubleCake ? '2x (40% dud)' : '1x';
-  const speedMult = gs.speedBoostTimer > 0 ? (gs.speedBoostMult || CFG.SPEED_BOOST_MULT) :
-                    gs.hasTightropeBoots ? 3.00 : 1;
+  const cakeDamageLabel = gs.hasQuadCake ? '4x (50% dud)' : gs.hasTripleCake ? '3x (45% dud)' :
+                          gs.hasDoubleCake ? '2x (40% dud)' : '1x';
+  const shopDamageMultiplier = (1 + (gs.clipShopDamageBonus || 0))
+    * (gs.clipShopDamageMultiplier || 1);
+  const dmgLabel = `${cakeDamageLabel} · ${shopDamageMultiplier.toFixed(2)}x shop`;
+  const baseSpeedMult = gs.speedBoostTimer > 0 ? (gs.speedBoostMult || CFG.SPEED_BOOST_MULT) :
+                        gs.hasTightropeBoots ? 3.00 : 1;
+  const speedMult = baseSpeedMult
+    * (1 + (gs.clipShopSpeedBonus || 0))
+    * (gs.clipShopSpeedMultiplier || 1);
   const speedVal  = speedMult.toFixed(2) + 'x';
   const bulletsPerShot = CFG.BULLET_COUNT + (gs.hasCursedCandles ? gs.candlesLit * 2 : 0);
 
@@ -1437,6 +1449,7 @@ setInterval(updateTaskbarClock, 1000);
 document.getElementById('floor-btn').addEventListener('click', () => {
   document.getElementById('floor-transition').style.display = 'none';
   gs.floor = 2;
+  clipShopStartFloor();
   worldW *= 1.5;
   worldH *= 1.5;
   renderScale = canvas.clientWidth / worldW;
