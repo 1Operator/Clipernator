@@ -1757,6 +1757,9 @@ function sysFieldItemPickup() {
       }
       const permanent=new Set(['bouncy','dash','doubledCake','tripleCake','quadCake','shakeFizzlePop','flawlessBaking','cursedCandles','glowsticks','paperCuts','extraClips','clownishUpgrade','popcornBowl']);
       if (permanent.has(fi.id) && !gs.unlockedItems.includes(fi.id)) gs.unlockedItems.push(fi.id);
+      if (typeof clipShopHandleItemAcquired === 'function') {
+        clipShopHandleItemAcquired(fi.id);
+      }
       if (!permanent.has(fi.id)) setTimeout(()=>{if(gameRunning)trySpawnFieldItems();},def.spawnCooldown);
     }
   }

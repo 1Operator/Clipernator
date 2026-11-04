@@ -25,6 +25,7 @@ const CLIPSHOP_UPGRADE_SPRITES = {
 };
 let clipShopRunSequence = 0;
 let clipShopCurrentView = 'home';
+let clipShopRemovalTimer = null;
 
 function clipShopHasRun() {
   return typeof gs !== 'undefined'
@@ -167,10 +168,12 @@ function clipShopListingName(listing) {
 }
 
 function clipShopMakeAd(stock) {
-  if (!stock.length || Math.random() >= 0.36) return null;
-  const listing = clipShopRandomFrom(stock);
+  if (Math.random() >= 0.3) return null;
+  const listings = stock.filter(listing => listing.kind !== 'golden');
+  if (!listings.length) return null;
+  const listing = clipShopRandomFrom(listings);
   return {
-    name: clipShopListingName(listing),
+    listingId: listing.id,
     discount: 10 * (1 + Math.floor(Math.random() * 5)),
     color: clipShopRandomFrom(['#aaff77', '#8ee7f2', '#fff18a', '#ffadd2', '#ffad6e']),
   };
@@ -213,6 +216,8 @@ function clipShopRestock(reason) {
 }
 
 function clipShopStartRun() {
+  clearTimeout(clipShopRemovalTimer);
+  clipShopRemovalTimer = null;
   gs.clipShopRunId = ++clipShopRunSequence;
   gs.clipShopRefreshCost = 5;
   gs.clipShopRefreshCount = 0;
@@ -223,6 +228,46 @@ function clipShopStartRun() {
   gs.clipShopView = 'home';
   clipShopCurrentView = 'home';
   clipShopRestock('floor');
+}
+
+function clipShopHandleItemAcquired(itemId) {
+  if (!Array.isArray(gs.clipShopStock)) return;
+  const removed = gs.clipShopStock.filter(listing =>
+    listing.kind !== 'upgrade' && listing.itemIds?.includes(itemId)
+  );
+  if (!removed.length) return;
+
+  const removedIds = new Set(removed.map(listing => listing.id));
+  gs.clipShopStock = gs.clipShopStock.filter(listing => !removedIds.has(listing.id));
+  gs.clipShopCart = (gs.clipShopCart || []).filter(listing =>
+    !listing.itemIds?.includes(itemId)
+  );
+  for (const slot of ['top', 'bottom']) {
+    if (removedIds.has(gs.clipShopAds?.[slot]?.listingId)) {
+      gs.clipShopAds[slot] = null;
+    }
+  }
+
+  const listings = document.getElementById('clipshop-listings');
+  if (listings) {
+    for (const card of listings.querySelectorAll('.clipshop-card')) {
+      if (!removedIds.has(card.dataset.clipshopListingId)) continue;
+      card.classList.add('is-invalidating');
+      card.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+      });
+    }
+  }
+  if (typeof clipShopRenderAd === 'function') {
+    clipShopRenderAd(document.getElementById('clipshop-ad-top'), gs.clipShopAds?.top);
+    clipShopRenderAd(document.getElementById('clipshop-ad-bottom'), gs.clipShopAds?.bottom);
+  }
+
+  clearTimeout(clipShopRemovalTimer);
+  clipShopRemovalTimer = setTimeout(() => {
+    clipShopRemovalTimer = null;
+    clipShopRender();
+  }, 520);
 }
 
 function clipShopStartFloor() {
@@ -294,12 +339,69 @@ function clipShopCanAfford(listing) {
 
 function clipShopRenderAd(element, ad) {
   if (!element) return;
-  element.hidden = !ad;
-  if (!ad) return;
+  const listing = ad && gs.clipShopStock?.find(candidate => candidate.id === ad.listingId);
+  element.hidden = !ad || !listing;
+  element.replaceChildren();
+  if (!ad || !listing) return;
   element.style.backgroundColor = ad.color;
-  element.querySelector('.clipshop-ad-copy').textContent =
-    `SPECIAL OFFER: ${ad.name} — Limited-time software deal!`;
-  element.querySelector('.clipshop-ad-discount').textContent = `${ad.discount}% OFF`;
+  element.setAttribute('aria-label',
+    `Apply ${ad.discount}% off ${clipShopListingName(listing)}`);
+
+  const image = document.createElement('span');
+  image.className = 'clipshop-ad-image';
+  if (listing.kind === 'upgrade') {
+    const icon = document.createElement('img');
+    icon.src = `sprites/ui/ChipShop/${CLIPSHOP_UPGRADE_SPRITES[listing.upgrade.stat]}`;
+    icon.alt = '';
+    image.appendChild(icon);
+  } else {
+    clipShopAddItemPreview(image, listing.itemIds);
+  }
+
+  const copy = document.createElement('span');
+  copy.className = 'clipshop-ad-copy';
+  copy.append('SPECIAL OFFER: ');
+  const itemName = document.createElement('strong');
+  itemName.textContent = clipShopListingName(listing);
+  copy.append(itemName, ' — Limited-time software deal!');
+
+  const discount = document.createElement('strong');
+  discount.className = 'clipshop-ad-discount';
+  discount.textContent = `${ad.discount}% OFF`;
+  element.append(image, copy, discount);
+
+  const callouts = ['CLICK HERE', 'AMAZING DEAL', 'BUY NOW'];
+  const positions = [
+    { top: '2px', left: `${8 + Math.floor(Math.random() * 28)}%` },
+    { top: '2px', right: `${8 + Math.floor(Math.random() * 20)}%` },
+    { bottom: '1px', left: `${24 + Math.floor(Math.random() * 36)}%` },
+  ];
+  for (let index = 0; index < callouts.length; index++) {
+    const callout = document.createElement('span');
+    callout.className = 'clipshop-ad-callout';
+    callout.textContent = callouts[index];
+    Object.assign(callout.style, positions[index]);
+    callout.style.transform = `rotate(${Math.floor(Math.random() * 17) - 8}deg)`;
+    element.appendChild(callout);
+  }
+}
+
+function clipShopApplyAd(element) {
+  if (!clipShopHasRun()) return;
+  const slot = element.dataset.clipshopAd;
+  const ad = gs.clipShopAds?.[slot];
+  const listing = ad && gs.clipShopStock?.find(candidate => candidate.id === ad.listingId);
+  if (!ad || !listing) return;
+
+  listing.listPrice = listing.price;
+  listing.discountPercent = ad.discount;
+  listing.price = Math.max(1, Math.floor(
+    listing.listPrice * (100 - ad.discount) / 100
+  ));
+  gs.clipShopAds[slot] = null;
+  clipShopRender();
+  document.getElementById('clipshop-notice').textContent =
+    `${ad.discount}% ad discount applied to ${clipShopListingName(listing)}.`;
 }
 
 function clipShopSetView(view) {
@@ -433,6 +535,7 @@ function clipShopRender() {
   for (const listing of gs.clipShopStock) {
     const card = document.createElement('article');
     card.className = 'clipshop-card';
+    card.dataset.clipshopListingId = listing.id;
     const productImage = document.createElement('div');
     productImage.className = 'clipshop-product-image';
     if (listing.kind === 'upgrade') {
@@ -672,6 +775,9 @@ document.getElementById('clipshop-cart-list').addEventListener('click', event =>
   if (button && !button.disabled) clipShopInstallFromCart(button.dataset.clipshopInstall);
 });
 document.getElementById('clipshop-install-all').addEventListener('click', clipShopInstallEverything);
+document.querySelectorAll('[data-clipshop-ad]').forEach(ad => {
+  ad.addEventListener('click', () => clipShopApplyAd(ad));
+});
 document.querySelector('.clipshop-nav').addEventListener('click', event => {
   const button = event.target.closest('[data-clipshop-view]');
   if (button) clipShopSetView(button.dataset.clipshopView);

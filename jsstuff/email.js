@@ -685,8 +685,16 @@ function endEmailRun() {
   emailRenderTracker();
 }
 
-function toggleEmailInbox() {
+function toggleEmailInbox(openInWonderWeb = false) {
   const inbox = document.getElementById('email-window');
+  if (!openInWonderWeb && typeof window.detachWonderWebAppWindow === 'function') {
+    window.detachWonderWebAppWindow(inbox);
+  }
+  if (openInWonderWeb) {
+    inbox.style.display = 'flex';
+    SFX.play('EmailOpen', 0.45);
+    return;
+  }
   const opening = getComputedStyle(inbox).display === 'none';
   inbox.style.display = opening ? 'flex' : 'none';
   if (opening) {

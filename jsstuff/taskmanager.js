@@ -22,7 +22,15 @@
       name: 'Email - Inbox',
       icon: 'sprites/ui/Email.png',
       window: () => document.getElementById('email-window'),
-      close: () => hideApplicationWindow('email-window'),
+      close: () => {
+        const appWindow = document.getElementById('email-window');
+        if (appWindow.classList.contains('wonderweb-embedded-app')
+            && typeof window.closeWonderWebAppTab === 'function') {
+          window.closeWonderWebAppTab('email');
+        } else {
+          hideApplicationWindow('email-window');
+        }
+      },
     },
     {
       id: 'wonderweb',
@@ -36,7 +44,15 @@
       name: 'Recycle Bin',
       icon: 'sprites/ui/Trash.png',
       window: () => document.getElementById('trash-window'),
-      close: () => hideApplicationWindow('trash-window'),
+      close: () => {
+        const appWindow = document.getElementById('trash-window');
+        if (appWindow.classList.contains('wonderweb-embedded-app')
+            && typeof window.closeWonderWebAppTab === 'function') {
+          window.closeWonderWebAppTab('trash');
+        } else {
+          hideApplicationWindow('trash-window');
+        }
+      },
     },
     {
       id: 'task-manager',

@@ -232,14 +232,17 @@
     if (typeof updateTaskbarActiveWindow === 'function') updateTaskbarActiveWindow();
   });
 
-  window.openTrashWindow = () => {
+  window.openTrashWindow = (openInWonderWeb = false) => {
+    if (!openInWonderWeb && typeof window.detachWonderWebAppWindow === 'function') {
+      window.detachWonderWebAppWindow(trashWindow);
+    }
     SFX.play('trashOpen', 0.6);
     selectedItemId = typeof gs !== 'undefined' && Array.isArray(gs.unlockedItems)
       ? gs.unlockedItems[0] || null
       : null;
     trashWindow.style.display = 'flex';
     renderTrashWindow();
-    if (typeof bringFloatingWindowToFront === 'function') {
+    if (!openInWonderWeb && typeof bringFloatingWindowToFront === 'function') {
       bringFloatingWindowToFront(trashWindow);
     }
   };

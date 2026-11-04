@@ -597,7 +597,12 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 #utensil-window-layer #wonderweb-window {
   width: min(620px, calc(100vw - 20px));
   height: min(430px, calc(100vh - 60px));
-  min-height: 280px;
+  min-width: min(360px, calc(100vw - 20px));
+  min-height: min(280px, calc(100vh - 20px));
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 20px);
+  resize: both;
+  overflow: hidden;
   background: #d4d0c8;
   color: #111;
   border-top: 2px solid #fff;
@@ -638,18 +643,17 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .wonderweb-tab {
+  height: 24px;
   min-width: 82px;
   max-width: 150px;
-  padding: 5px 10px 4px;
+  padding: 3px 12px;
   overflow: hidden;
   color: #222;
-  font: 11px 'MS Sans Serif', Arial, sans-serif;
+  font: 12px 'MS Sans Serif', Arial, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: linear-gradient(#ececec, #c8c8c8);
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-right: 1px solid #808080;
+  background: #c0c0c0;
+  border: 1px solid #808080;
   border-bottom: 0;
   cursor: pointer;
 }
@@ -657,11 +661,35 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 .wonderweb-tab[aria-selected="true"] {
   position: relative;
   z-index: 1;
-  margin-bottom: -1px;
-  padding-bottom: 5px;
+  top: 1px;
+  height: 25px;
   background: #fff;
+  border-color: #fff #808080 #fff #fff;
   border-bottom: 1px solid #fff;
   font-weight: bold;
+}
+
+.wonderweb-tab-entry {
+  display: flex;
+  align-items: flex-end;
+}
+
+.wonderweb-tab-close {
+  width: 18px;
+  height: 24px;
+  padding: 0;
+  color: #000;
+  font: 12px 'MS Sans Serif', Arial, sans-serif;
+  background: #c0c0c0;
+  border: 1px solid #808080;
+  border-bottom: 0;
+  cursor: pointer;
+}
+
+.wonderweb-tab-entry [aria-selected="true"] + .wonderweb-tab-close {
+  height: 25px;
+  background: #fff;
+  border-bottom-color: #fff;
 }
 
 .wonderweb-address {
@@ -723,6 +751,102 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .wonderweb-page[hidden] {
   display: none;
+}
+
+.wonderweb-page .wonderweb-embedded-app {
+  position: static;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.wonderweb-page .wonderweb-embedded-app > .desktop-window-titlebar {
+  display: none;
+}
+
+#email-window.wonderweb-embedded-app > .desktop-window-titlebar,
+#trash-window.wonderweb-embedded-app > .desktop-window-titlebar {
+  display: none;
+}
+
+.wonderweb-page[data-wonderweb-page="email"],
+.wonderweb-page[data-wonderweb-page="trash"] {
+  min-height: 100%;
+  padding: 0;
+  overflow: hidden;
+  background: #d4d0c8;
+}
+
+.wonderweb-page[data-wonderweb-page="email"]:not([hidden]),
+.wonderweb-page[data-wonderweb-page="trash"]:not([hidden]) {
+  display: flex;
+}
+
+.wonderweb-page[data-wonderweb-page="email"] #email-window,
+.wonderweb-page[data-wonderweb-page="trash"] #trash-window,
+.wonderweb-detached-page #email-window,
+.wonderweb-detached-page #trash-window {
+  position: static;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.wonderweb-popout-window {
+  width: min(620px, calc(100vw - 20px));
+  height: min(430px, calc(100vh - 60px));
+  min-width: min(360px, calc(100vw - 20px));
+  min-height: min(280px, calc(100vh - 20px));
+  overflow: hidden;
+  background: #d4d0c8;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.45);
+  font: 11px 'MS Sans Serif', Arial, sans-serif;
+}
+
+.wonderweb-popout-window > .desktop-window-titlebar {
+  display: flex;
+  height: 22px;
+  flex: 0 0 22px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+  background: linear-gradient(to right, #0a246a, #3a6ea8);
+  color: #fff;
+  font-weight: bold;
+}
+
+.wonderweb-popout-window > .wonderweb-page {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.wonderweb-popout-window .wonderweb-embedded-app {
+  height: 100%;
+}
+
+.wonderweb-page .wonderweb-embedded-app > .email-window-content,
+.wonderweb-page .wonderweb-embedded-app > .trash-window-content,
+.wonderweb-detached-page .wonderweb-embedded-app > .email-window-content,
+.wonderweb-detached-page .wonderweb-embedded-app > .trash-window-content {
+  min-height: 0;
+  flex: 1;
+}
+
+.wonderweb-page .wonderweb-embedded-app > .trash-window-content,
+.wonderweb-detached-page .wonderweb-embedded-app > .trash-window-content {
+  height: 100%;
 }
 
 .wonderweb-page h2 {
@@ -846,7 +970,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 .clipshop-tagline {
   margin-top: 4px;
   color: #526977;
-  font: 12px 'Ariel', Arial, sans-serif;
+  font: 12px 'Bitwise', Arial, sans-serif;
 }
 
 .clipshop-wallet {
@@ -857,32 +981,74 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   justify-content: flex-start;
   gap: 4px 10px;
   color: #173a53;
-  font-size: 10px;
-  font-weight: bold;
+  font: 10px 'Bitwise', Arial, sans-serif;
   text-align: right;
 }
 
 .clipshop-ad {
+  position: relative;
   display: flex;
+  width: 100%;
   min-height: 54px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
-  padding: 5px 8px;
+  padding: 12px 8px 8px;
   color: #081b1a;
   border: 2px solid #111;
   text-align: center;
+  font-family: 'Ariel', Arial, sans-serif;
+  cursor: pointer;
 }
 
 .clipshop-ad[hidden] { display: none; }
 
 .clipshop-ad-copy {
   flex: 1;
-  font: bold 10px 'Ariel', Arial, sans-serif;
+  font: 10px 'Ariel', Arial, sans-serif;
+}
+
+.clipshop-ad-copy strong {
+  font-weight: bold;
+}
+
+.clipshop-ad-image {
+  display: grid;
+  width: 42px;
+  height: 38px;
+  flex: 0 0 42px;
+  place-items: center;
+}
+
+.clipshop-ad-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.clipshop-ad-image .clipshop-item-preview {
+  width: 42px;
+  height: 38px;
+}
+
+.clipshop-ad-image .clipshop-item-preview img {
+  width: 36px;
+  height: 36px;
+}
+
+.clipshop-ad-callout {
+  position: absolute;
+  z-index: 1;
+  color: #9c0a08;
+  font: bold 8px 'Ariel', Arial, sans-serif;
+  pointer-events: none;
+  text-shadow: 1px 1px #fff;
 }
 
 .clipshop-ad-discount {
-  font: bold 17px 'Bitwise', Arial, sans-serif;
+  color: #a00000;
+  font: bold 15px 'Ariel', Arial, sans-serif;
   white-space: nowrap;
 }
 
@@ -988,6 +1154,18 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   gap: 7px;
   padding: 7px 6px;
   border-bottom: 1px solid #c8c8c8;
+}
+
+.clipshop-card.is-invalidating {
+  animation: clipshop-stock-invalidating 520ms ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes clipshop-stock-invalidating {
+  0% { background-color: #fff; }
+  28% { background-color: #ff7777; }
+  62% { background-color: #e33; }
+  100% { background-color: #b00; opacity: 0; }
 }
 
 .clipshop-card:last-child { border-bottom: 0; }
@@ -2216,18 +2394,6 @@ canvas {
 
   .task-manager-title img { width: 16px; height: 16px; object-fit: contain; }
 
-  .task-manager-titlebar button {
-    width: 18px;
-    height: 18px;
-    padding: 0;
-    color: #000;
-    font: bold 14px Arial, sans-serif;
-    line-height: 14px;
-    background: #c0c0c0;
-    border: 1px outset #fff;
-    cursor: pointer;
-  }
-
   .task-manager-content {
     min-height: 0;
     flex: 1;
@@ -2242,6 +2408,9 @@ canvas {
     flex: 0 0 27px;
     align-items: flex-end;
     gap: 3px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: -7px;
     border-bottom: 1px solid #808080;
   }
 
@@ -2260,12 +2429,13 @@ canvas {
     position: relative;
     top: 1px;
     height: 25px;
-    background: #eee;
-    border-color: #fff #808080 #eee #fff;
+    background: #fff;
+    border-color: #fff #808080 #fff #fff;
+    border-bottom: 1px solid #fff;
   }
 
   .task-manager-panels { min-height: 0; flex: 1; display: flex; }
-  .task-manager-panel { min-height: 0; flex: 1; flex-direction: column; }
+  .task-manager-panel { min-height: 0; flex: 1; flex-direction: column; background: #fff; }
   .task-manager-panel:not([hidden]) { display: flex; }
   .task-manager-hint { margin: 0 0 6px; color: #333; }
 
@@ -2672,7 +2842,7 @@ canvas {
   <section id="task-manager-window" class="independent-window task-manager-window" data-window-title="Task Manager" aria-label="Task Manager">
     <header class="desktop-window-titlebar task-manager-titlebar">
       <span class="task-manager-title"><img src="sprites/ui/TaskManager.png" alt="">Task Manager</span>
-      <button type="button" data-task-manager-close aria-label="Close Task Manager" title="Close">×</button>
+      <button class="desktop-window-close-button" type="button" data-task-manager-close aria-label="Close Task Manager" title="Close">&#x72;</button>
     </header>
     <div class="task-manager-content">
       <nav class="task-manager-tabs" id="task-manager-tabs" role="tablist" aria-label="Task Manager views">
@@ -2793,10 +2963,7 @@ canvas {
               <div class="clipshop-title">Computer Software Upgrades/Integrations</div>
               <div class="clipshop-tagline">Quality Software, Quality Prices</div>
             </div>
-            <div id="clipshop-ad-top" class="clipshop-ad" aria-label="ChipShop special offer" hidden>
-              <span class="clipshop-ad-copy"></span>
-              <span class="clipshop-ad-discount"></span>
-            </div>
+            <button id="clipshop-ad-top" class="clipshop-ad" type="button" data-clipshop-ad="top" aria-label="ChipShop special offer" hidden></button>
             <div class="clipshop-wallet" aria-label="Your balances">
               <span>CHIPS: <b id="clipshop-chip-balance">0</b></span>
               <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
@@ -2825,10 +2992,7 @@ canvas {
               <button id="clipshop-install-all" class="clipshop-button clipshop-cart-install" type="button">Install Everything</button>
             </aside>
           </div>
-          <div id="clipshop-ad-bottom" class="clipshop-ad clipshop-bottom-ad" aria-label="ChipShop special offer" hidden>
-            <span class="clipshop-ad-copy"></span>
-            <span class="clipshop-ad-discount"></span>
-          </div>
+          <button id="clipshop-ad-bottom" class="clipshop-ad clipshop-bottom-ad" type="button" data-clipshop-ad="bottom" aria-label="ChipShop special offer" hidden></button>
         </section>
       </div>
     </div>
