@@ -131,12 +131,22 @@ function playerPos(gs) {
 // ================================================================
 let gs = {};
 
-function applyPlayerDamage(amount) {
-  const scaledDamage = typeof emailIncomingDamage === 'function'
-    ? emailIncomingDamage(amount)
+function applyPlayerDamage(amount, sourceEntityId = null, sourceType = null) {
+  const source = sourceEntityId == null ? null : ECS.get(sourceEntityId, 'enemy');
+  const sourceEnemyType = source?.type || sourceType;
+  const adjustedAmount = sourceEnemyType
+    ? amount * taskManagerDamageMultiplier(sourceEnemyType)
     : amount;
+  const scaledDamage = typeof emailIncomingDamage === 'function'
+    ? emailIncomingDamage(adjustedAmount)
+    : adjustedAmount;
+  const healthBefore = gs.health;
   if (typeof notifyEmailPlayerDamaged === 'function') notifyEmailPlayerDamaged();
   gs.health = Math.max(0, gs.health - scaledDamage);
+  if (sourceEnemyType && gs.health < healthBefore) {
+    gs.taskManagerDamageByType[sourceEnemyType] =
+      (gs.taskManagerDamageByType[sourceEnemyType] || 0) + healthBefore - gs.health;
+  }
 }
 
 function initGameState(applyIntroChoices = true) {
@@ -149,6 +159,7 @@ function initGameState(applyIntroChoices = true) {
   gs = {
     score: 0, wave: 1,
     chips: 0, goldenChips: 0, chipDrops: [], flawlessWaveStreak: 0,
+    taskManagerNerfedTypes: {}, taskManagerDamageByType: {}, taskManagerNextNerfCost: 7,
     clipShopStock: [], clipShopCart: [], clipShopPurchases: [], clipShopAds: {},
     clipShopView: 'home', clipShopRefreshCost: 5, clipShopRefreshCount: 0,
     clipShopRestockCount: 0, clipShopNextListingId: 1,
@@ -283,6 +294,7 @@ function updateHUD() {
   document.getElementById('chips-val').textContent = gs.chips;
   document.getElementById('golden-chips-val').textContent = gs.goldenChips;
   if (typeof clipShopUpdateBalances === 'function') clipShopUpdateBalances();
+  if (typeof taskManagerRefresh === 'function') taskManagerRefresh();
 }
 
 function showMsg(txt) {

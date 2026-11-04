@@ -2181,6 +2181,247 @@ canvas {
       animation: none;
     }
   }
+
+  .task-manager-window {
+    width: min(650px, calc(100vw - 24px)) !important;
+    height: min(455px, calc(100vh - 24px)) !important;
+    padding: 3px;
+    overflow: hidden;
+    background: #d4d0c8 !important;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+    box-shadow: 2px 2px 0 #000, 0 8px 24px rgba(0, 0, 0, .45);
+    font: 12px 'MS Sans Serif', Arial, sans-serif;
+  }
+
+  .task-manager-titlebar {
+    flex: 0 0 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px;
+    color: #fff;
+    background: linear-gradient(90deg, #0a246a, #3a6ea8);
+    font-weight: bold;
+    cursor: move;
+  }
+
+  .task-manager-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .task-manager-title img { width: 16px; height: 16px; object-fit: contain; }
+
+  .task-manager-titlebar button {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    color: #000;
+    font: bold 14px Arial, sans-serif;
+    line-height: 14px;
+    background: #c0c0c0;
+    border: 1px outset #fff;
+    cursor: pointer;
+  }
+
+  .task-manager-content {
+    min-height: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 7px;
+    gap: 7px;
+  }
+
+  .task-manager-tabs {
+    display: flex;
+    flex: 0 0 27px;
+    align-items: flex-end;
+    gap: 3px;
+    border-bottom: 1px solid #808080;
+  }
+
+  .task-manager-tab {
+    height: 24px;
+    padding: 3px 12px;
+    color: #000;
+    font: 12px 'MS Sans Serif', Arial, sans-serif;
+    background: #c0c0c0;
+    border: 1px solid #808080;
+    border-bottom: 0;
+    cursor: pointer;
+  }
+
+  .task-manager-tab[aria-selected="true"] {
+    position: relative;
+    top: 1px;
+    height: 25px;
+    background: #eee;
+    border-color: #fff #808080 #eee #fff;
+  }
+
+  .task-manager-panels { min-height: 0; flex: 1; display: flex; }
+  .task-manager-panel { min-height: 0; flex: 1; flex-direction: column; }
+  .task-manager-panel:not([hidden]) { display: flex; }
+  .task-manager-hint { margin: 0 0 6px; color: #333; }
+
+  .task-manager-table {
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    background: #fff;
+    border: 1px inset #808080;
+    user-select: none;
+  }
+
+  .task-manager-columns,
+  .task-manager-row {
+    display: grid;
+    align-items: center;
+  }
+
+  .task-manager-columns {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: 23px;
+    color: #000;
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
+  }
+
+  .task-manager-columns span {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-right: 1px solid #aaa;
+  }
+
+  .task-manager-app-columns,
+  .task-manager-app-row { grid-template-columns: minmax(0, 1fr) 100px; }
+
+  .task-manager-process-columns,
+  .task-manager-process-row { grid-template-columns: minmax(0, 1.3fr) minmax(76px, .7fr) minmax(110px, .85fr); }
+
+  .task-manager-row {
+    width: 100%;
+    min-height: 25px;
+    padding: 2px 5px;
+    color: #111;
+    text-align: left;
+    background: #fff;
+    border: 0;
+    font: 12px 'MS Sans Serif', Arial, sans-serif;
+    cursor: default;
+  }
+
+  .task-manager-row:hover { background: #e8f1fb; }
+  .task-manager-row.is-selected { color: #fff; background: #0a246a; }
+  .task-manager-row.is-stopped { color: #777; }
+  .task-manager-cell { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .task-manager-status { padding-left: 6px; }
+
+  .task-manager-program {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .task-manager-icon {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #fff;
+    background: #376b9c;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .task-manager-icon img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+  .task-manager-process-row .task-manager-cell:last-child { padding-left: 6px; }
+
+  .task-manager-footer {
+    min-height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 2px 0;
+  }
+
+  .task-manager-footer-copy { flex: 1; color: #222; line-height: 1.4; }
+
+  .task-manager-button {
+    min-width: 98px;
+    padding: 5px 10px;
+    color: #000;
+    font: 12px 'MS Sans Serif', Arial, sans-serif;
+    background: #c0c0c0;
+    border: 2px outset #fff;
+    cursor: pointer;
+  }
+
+  .task-manager-button:active:not(:disabled) { border-style: inset; }
+  .task-manager-button:disabled { color: #777; cursor: default; }
+
+  .task-manager-statusbar {
+    flex: 0 0 20px;
+    display: flex;
+    align-items: center;
+    padding: 2px 6px;
+    color: #222;
+    border-top: 1px solid #888;
+    box-shadow: inset 0 1px #fff;
+    font-size: 11px;
+  }
+
+  .task-manager-info {
+    min-height: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    background: #eee;
+    border: 1px inset #808080;
+  }
+
+  .task-manager-info strong { font-size: 14px; }
+  .task-manager-info p { line-height: 1.5; }
+
+  .task-manager-perf-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .task-manager-perf-card {
+    min-height: 68px;
+    padding: 9px;
+    background: #eee;
+    border: 1px inset #808080;
+  }
+
+  .task-manager-perf-card span { display: block; margin-bottom: 7px; color: #444; }
+  .task-manager-perf-card strong { font-size: 17px; }
+  .task-manager-perf-note { margin-top: 7px; color: #444; line-height: 1.5; }
+
+  @media (max-width: 520px) {
+    .task-manager-window { height: min(455px, calc(100vh - 12px)) !important; }
+    .task-manager-content { padding: 5px; gap: 5px; }
+    .task-manager-tab { padding: 3px 8px; }
+    .task-manager-process-columns,
+    .task-manager-process-row { grid-template-columns: minmax(0, 1.2fr) minmax(58px, .7fr) minmax(80px, .8fr); }
+  }
 </style>
 </head>
 <body>
@@ -2409,7 +2650,7 @@ canvas {
       <img src="sprites/ui/Email.png" alt="">
       <span id="email-unread-badge" class="email-unread-badge" aria-hidden="true" hidden></span>
     </button>
-    <button class="taskbar-app" type="button" title="Task Manager" aria-label="Task Manager">
+    <button id="taskbar-task-manager" class="taskbar-app" type="button" title="Task Manager" aria-label="Task Manager">
       <img src="sprites/ui/TaskManager.png" alt="">
     </button>
   </div>
@@ -2428,6 +2669,54 @@ canvas {
   </div>
 </div>
 <div id="utensil-window-layer">
+  <section id="task-manager-window" class="independent-window task-manager-window" data-window-title="Task Manager" aria-label="Task Manager">
+    <header class="desktop-window-titlebar task-manager-titlebar">
+      <span class="task-manager-title"><img src="sprites/ui/TaskManager.png" alt="">Task Manager</span>
+      <button type="button" data-task-manager-close aria-label="Close Task Manager" title="Close">×</button>
+    </header>
+    <div class="task-manager-content">
+      <nav class="task-manager-tabs" id="task-manager-tabs" role="tablist" aria-label="Task Manager views">
+        <button class="task-manager-tab" type="button" role="tab" id="task-manager-tab-applications" aria-selected="true" aria-controls="task-manager-panel-applications" data-task-manager-tab="applications">Applications</button>
+        <button class="task-manager-tab" type="button" role="tab" id="task-manager-tab-processes" aria-selected="false" aria-controls="task-manager-panel-processes" data-task-manager-tab="processes">Processes</button>
+        <button class="task-manager-tab" type="button" role="tab" id="task-manager-tab-performance" aria-selected="false" aria-controls="task-manager-panel-performance" data-task-manager-tab="performance">Performance</button>
+      </nav>
+      <div class="task-manager-panels">
+        <section class="task-manager-panel" id="task-manager-panel-applications" role="tabpanel" aria-labelledby="task-manager-tab-applications">
+          <p class="task-manager-hint">Select one or more applications, then choose End Task.</p>
+          <div class="task-manager-table" id="task-manager-app-list" role="listbox" aria-label="Applications" aria-multiselectable="true">
+            <div class="task-manager-columns task-manager-app-columns" aria-hidden="true"><span>Task</span><span>Status</span></div>
+            <div id="task-manager-app-rows"></div>
+          </div>
+          <footer class="task-manager-footer">
+            <span class="task-manager-footer-copy" id="task-manager-app-message" role="status">Drag across rows to select multiple applications.</span>
+            <button class="task-manager-button" type="button" id="task-manager-end-task">End Task</button>
+          </footer>
+        </section>
+        <section class="task-manager-panel" id="task-manager-panel-processes" role="tabpanel" aria-labelledby="task-manager-tab-processes" hidden>
+          <p class="task-manager-hint">One row per running enemy type or system object.</p>
+          <div class="task-manager-table" id="task-manager-process-list" role="listbox" aria-label="Processes">
+            <div class="task-manager-columns task-manager-process-columns" aria-hidden="true"><span>Program Name</span><span>User Name</span><span>Memory Leaked</span></div>
+            <div id="task-manager-process-rows"></div>
+          </div>
+          <footer class="task-manager-footer">
+            <span class="task-manager-footer-copy" id="task-manager-process-message" role="status">Select a process for details.</span>
+            <button class="task-manager-button" type="button" id="task-manager-damage-process" disabled>Damage Process</button>
+          </footer>
+        </section>
+        <section class="task-manager-panel" id="task-manager-panel-performance" role="tabpanel" aria-labelledby="task-manager-tab-performance" hidden>
+          <p class="task-manager-hint">Live run status</p>
+          <div class="task-manager-perf-grid">
+            <div class="task-manager-perf-card"><span>Clippy health</span><strong id="task-manager-perf-health">—</strong></div>
+            <div class="task-manager-perf-card"><span>Chips available</span><strong id="task-manager-perf-chips">—</strong></div>
+            <div class="task-manager-perf-card"><span>Enemy entities</span><strong id="task-manager-perf-enemies">—</strong></div>
+            <div class="task-manager-perf-card"><span>Next process patch</span><strong id="task-manager-perf-cost">—</strong></div>
+          </div>
+          <p class="task-manager-perf-note">System monitor reports current run values. Enemy process patches persist until the run ends.</p>
+        </section>
+      </div>
+    </div>
+    <div class="task-manager-statusbar" id="task-manager-statusbar">Processes: 0 &nbsp; | &nbsp; CPU Usage: — &nbsp; | &nbsp; Memory: —</div>
+  </section>
   <section id="email-window" class="independent-window" data-window-title="Email - Inbox" aria-label="Email inbox">
     <header class="desktop-window-titlebar">
       <span>✉ Inbox</span>
@@ -2700,6 +2989,7 @@ canvas {
 <script src="jsstuff/trash.js"></script>
    <script src="jsstuff/clipshop.js"></script>
       <script src="jsstuff/wonderweb.js"></script>
+<script src="jsstuff/taskmanager.js"></script>
 
 <script src="jsstuff/game.js"></script>
 </body>

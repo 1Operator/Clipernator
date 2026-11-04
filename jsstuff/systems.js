@@ -612,6 +612,7 @@ function _spawnMiniClown(x, y, gs) {
   ECS.add(id, 'vel', { vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4 });
   ECS.add(id, 'hp', { hp: Math.ceil(baseHp * def.hpMult), maxHp: Math.ceil(baseHp * def.hpMult), hitFlash: 0 });
   ECS.add(id, 'physics', { speed: CFG.MINI_CLOWN_SPEED });
+  taskManagerApplySpawnNerf(id, 'miniClown');
   ECS.add(id, 'ai', { shootCooldown: 0, dashHit: false });
   spawnParticles(x, y, '#ff4400', 6);
 }
@@ -650,7 +651,7 @@ function _clownCarExplode(id, pos, gs, playerDriving) {
   if (!playerDriving) {
     const ppos = ECS.get(gs.playerId, 'pos');
     if (ppos && Math.hypot(pos.x - ppos.x, pos.y - ppos.y) < 120 && gs.invincible <= 0) {
-      applyPlayerDamage(25); gs.invincible = CFG.INVINCIBLE_FRAMES;
+      applyPlayerDamage(25, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
       SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
       gs.flawlessThisWave = false;
       triggerSFPHit(); updateHUD();
@@ -876,8 +877,9 @@ function tickCorEnemy(id, type) {
       const speed = ai.corDashFrame <= 18 ? 13 : 13 * Math.max(0, (29 - ai.corDashFrame) / 11);
       vel.vx = ai.corDirX * speed;
       vel.vy = ai.corDirY * speed;
-      pos.x += vel.vx;
-      pos.y += vel.vy;
+      const movementScale = taskManagerMovementMultiplier(type);
+      pos.x += vel.vx * movementScale;
+      pos.y += vel.vy * movementScale;
       if (ai.corDashFrame % 2 === 0) {
         ai.corTrail.push({
           x: pos.x,
@@ -924,8 +926,9 @@ function tickCorEnemy(id, type) {
   if (ai.corState === 'hover') {
     ai.corStateTimer--;
     ai.corHoverTime++;
-    pos.x = ai.corOriginX + Math.sin(ai.corHoverTime * 0.07) * 12;
-    pos.y = ai.corOriginY + Math.sin(ai.corHoverTime * 0.11) * 8;
+    const movementScale = taskManagerMovementMultiplier(type);
+    pos.x = ai.corOriginX + Math.sin(ai.corHoverTime * 0.07) * 12 * movementScale;
+    pos.y = ai.corOriginY + Math.sin(ai.corHoverTime * 0.11) * 8 * movementScale;
     if (ai.corStateTimer <= 0) {
       ai.corState = 'shoot';
       ai.corShotTimer = 1;
@@ -1041,7 +1044,9 @@ for (const id of [...ECS.query('enemy','pos','vel','ai','physics')]) {
       if (pos2 && vel2) {
         // Decay velocity slightly so it doesn't go forever, but keep most speed
         vel2.vx *= 0.97; vel2.vy *= 0.97;
-        pos2.x += vel2.vx; pos2.y += vel2.vy;
+        const movementScale = taskManagerMovementMultiplier(ECS.get(id, 'enemy')?.type);
+        pos2.x += vel2.vx * movementScale;
+        pos2.y += vel2.vy * movementScale;
       }
       ai2.forkThrowTimer--;
       if (ai2.forkThrowTimer <= 0) { ai2.thrownByFork = false; }
@@ -1159,7 +1164,9 @@ if (ai2&&ai2.reflectedByGlowstick&&ECS.has(id,'enemy')&&ECS.get(id,'enemy').type
       }
     }
 
-    pos.x+=vel.vx; pos.y+=vel.vy;
+    const movementScale = taskManagerMovementMultiplier(type);
+    pos.x += vel.vx * movementScale;
+    pos.y += vel.vy * movementScale;
     if (gs.bouncyHouse) {
       if (pos.x<18){pos.x=18;vel.vx=Math.abs(vel.vx);spawnParticles(pos.x,pos.y,'#88ffdd',4);}
       if (pos.x>worldW-18){pos.x=worldW-18;vel.vx=-Math.abs(vel.vx);spawnParticles(pos.x,pos.y,'#88ffdd',4);}
@@ -1483,7 +1490,7 @@ function sysEnemyPlayerCollision() {
      const eaiCheck2 = ECS.get(id, 'ai');
 if (eaiCheck2 && eaiCheck2.thrownByFork) {
   eaiCheck2.thrownByFork = false;
-  applyPlayerDamage(30); // harder hit than normal contact
+  applyPlayerDamage(30, id); // harder hit than normal contact
   SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.65);
   gs.invincible = CFG.INVINCIBLE_FRAMES;
   gs.shakeX = 20; gs.shakeY = 20;
@@ -1499,7 +1506,7 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
   if (!eaiCheck.explodeCooldown || eaiCheck.explodeCooldown <= 0) {
     eaiCheck.explodeCooldown = 120;
     detonateExplosiveBullet({damageMult: eaiCheck.rmDmgMult || 3, life:1, isExplosive:true}, epos.x, epos.y, false);
-    applyPlayerDamage(20);
+    applyPlayerDamage(20, id);
     SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
     gs.invincible = CFG.INVINCIBLE_FRAMES;
     gs.flawlessThisWave = false;
@@ -1515,7 +1522,7 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
       // Knocking Pins: reduced contact damage (8 instead of 20),
       // and the bowl itself damages the enemy it rams into
       if (gs.knockingPinsActive) {
-        applyPlayerDamage(2); gs.invincible=CFG.INVINCIBLE_FRAMES;
+        applyPlayerDamage(2, id); gs.invincible=CFG.INVINCIBLE_FRAMES;
        SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.45);
         gs.shakeX=16;gs.shakeY=16; gs.flawlessThisWave=false;
         // Deal damage to the enemy being bowled into
@@ -1552,7 +1559,7 @@ for (const cid of ECS.query('enemy','pos')) {
   }
 }
 const diffMult = (gs._enemyDmgMult || 1.0);
-applyPlayerDamage(Math.round(20 * contactMult * diffMult));
+applyPlayerDamage(Math.round(20 * contactMult * diffMult), id);
 SFX.play('playerDamage', 0.5);
 SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 
@@ -1569,6 +1576,22 @@ function sysEnemyBullets() {
   const bulletsToAdd = []; // deferred — added after filter completes
   
   gs.enemyBullets = gs.enemyBullets.filter(eb => {
+    if (eb.sourceId == null) {
+      let closestId = null;
+      let closestDistance = 70;
+      for (const id of ECS.query('enemy', 'pos')) {
+        const pos = ECS.get(id, 'pos');
+        const distance = Math.hypot(pos.x - eb.x, pos.y - eb.y);
+        if (distance < closestDistance) {
+          closestId = id;
+          closestDistance = distance;
+        }
+      }
+      if (closestId !== null) {
+        eb.sourceId = closestId;
+        eb.sourceType = ECS.get(closestId, 'enemy')?.type || null;
+      }
+    }
     if (!gs.frozen) {
       if (eb.curveRate) {
         const speed = Math.hypot(eb.vx, eb.vy);
@@ -1621,6 +1644,7 @@ if (eb.isFrosting && eb.spawnGiftBox) {
   ECS.add(gid, 'vel', { vx: 0, vy: 0 });
   ECS.add(gid, 'hp', { hp: Math.ceil(baseHp * def.hpMult), maxHp: Math.ceil(baseHp * def.hpMult), hitFlash: 0 });
   ECS.add(gid, 'physics', { speed: 0.8 });
+  taskManagerApplySpawnNerf(gid, 'giftBox');
   ECS.add(gid, 'ai', { windupTimer: 0, exploded: false, heldByPlayer: false, thrown: false, dashHit: false });
   spawnParticles(eb.x, eb.y, '#ffaa00', 14);
   showMsg('A GIFT BOX FELL FROM THE FROSTING!');
@@ -1640,7 +1664,7 @@ if (eb.isFrosting && eb.spawnGiftBox) {
         spawnParticles(eb.x, eb.y, '#ff8800', Math.round(12 * scale));
         gs.shakeX = impactShake; gs.shakeY = impactShake;
         if (gs.invincible <= 0 && Math.hypot(eb.x - ppos.x, eb.y - ppos.y) < impactR) {
-applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMult || 1.0)));
+applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMult || 1.0)), eb.sourceId, eb.sourceType);
          SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
           gs.invincible = CFG.INVINCIBLE_FRAMES;
           gs.shakeX = Math.round(16 * scale); gs.shakeY = Math.round(16 * scale);
@@ -1704,7 +1728,7 @@ applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMul
     if (!eb.friendlyFire&&gs.invincible<=0&&Math.hypot(eb.x-ppos.x,eb.y-ppos.y)<20) {
       const bulletDmg = Math.round(15 * (eb.rmDmgMult || 1));
 const diffMult = (gs._enemyDmgMult || 1.0);
-applyPlayerDamage(Math.round(bulletDmg * diffMult));
+applyPlayerDamage(Math.round(bulletDmg * diffMult), eb.sourceId, eb.sourceType);
       SFX.play('playerDamage', 0.5);
       SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 if (eb.isTear) SFX.playAt('tearHit', eb.x, eb.y, 0.5);
@@ -1806,9 +1830,10 @@ function sysPopcorn() {
 const LEAKING_DURATION_FRAMES = 3 * 60;
 const LEAKING_TICK_FRAMES = 60;
 
-function applyLeakingStatus(entityId, gameState) {
+function applyLeakingStatus(entityId, gameState, sourceId = null) {
   if (entityId === gameState.playerId) {
     gameState.leakingTimer = (gameState.leakingTimer || 0) + LEAKING_DURATION_FRAMES;
+    gameState.leakingSourceType = sourceId == null ? null : ECS.get(sourceId, 'enemy')?.type || null;
     return;
   }
 
@@ -1823,7 +1848,7 @@ function tickLeakingStatusEffects() {
     gs.leakingTickTimer = (gs.leakingTickTimer || 0) + 1;
     if (gs.leakingTickTimer >= LEAKING_TICK_FRAMES) {
       gs.leakingTickTimer -= LEAKING_TICK_FRAMES;
-      applyPlayerDamage(gs.maxHealth * 0.05);
+      applyPlayerDamage(gs.maxHealth * 0.05, null, gs.leakingSourceType);
       gs.flawlessThisWave = false;
       updateHUD();
       if (gs.health <= 0) {
@@ -2278,6 +2303,7 @@ const total = [...ECS.query('enemy')].length;
   }
 
   ECS.add(id,'physics',{speed:(1.2+Math.random()*0.6+gs.wave*0.12)*def.speedMult});
+  taskManagerApplySpawnNerf(id, type);
   const ai = ECS.add(id,'ai',{
     shootCooldown:120,
     ambushTimer:0,
@@ -2323,6 +2349,7 @@ function startAntipieBoss() {
   ECS.add(id, 'vel', { vx: 0, vy: 0 });
   ECS.add(id, 'hp', { hp: bossHp, maxHp: bossHp, hitFlash: 0 });
   ECS.add(id, 'physics', { speed: CFG.BOSS_SPEED });
+  taskManagerApplySpawnNerf(id, 'cakeBoss');
   ECS.add(id, 'ai', {
     bossPhase: 'IDLE', phaseTimer: 140,
     candlesLit: 5, candleTimer: 80,
@@ -2502,6 +2529,7 @@ if (gs.floor === 2 && gs.wave === CFG.BOSS2_WAVE) {
       const b2hp = CFG.BOSS_BASE_HP + gs.wave * 16;
       ECS.add(id, 'hp', { hp: b2hp, maxHp: b2hp, hitFlash: 0 });
       ECS.add(id, 'physics', { speed: CFG.BOSS_SPEED * 1.1 });
+      taskManagerApplySpawnNerf(id, 'boss2');
      ECS.add(id, 'ai', {
   bossPhase: 'IDLE', phaseTimer: 100,
   spiralAngle: 0, volleyCount: 0, volleyTimer: 0,

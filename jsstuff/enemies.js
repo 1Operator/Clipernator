@@ -429,12 +429,12 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
           gs.invincible = CFG.INVINCIBLE_FRAMES;
           SFX.playAt('clippyDamage', ppos2.x, ppos2.y, 0.55);
           gs.shakeX = 16; gs.shakeY = 16; gs.flawlessThisWave = false;
-          applyLeakingStatus(gs.playerId, gs); triggerSFPHit(); updateHUD();
+          applyLeakingStatus(gs.playerId, gs, id); triggerSFPHit(); updateHUD();
           showMsg('KNIFE SLASH! YOU\'RE BLEEDING!');
           spawnParticles(ppos2.x, ppos2.y, '#ff2244', 16);
           if (gs.health <= 0) { gameOver(); return BT.FAILURE; }
         } else if (subtype === 'spoon') {
-          applyPlayerDamage(14); gs.invincible = CFG.INVINCIBLE_FRAMES;
+          applyPlayerDamage(14, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
           SFX.playAt('spoonDamage', ppos2.x, ppos2.y, 0.55);
           SFX.playAt('clippyDamage', ppos2.x, ppos2.y, 0.45);
           gs.shakeX = 22; gs.shakeY = 22; gs.flawlessThisWave = false;
@@ -1019,7 +1019,7 @@ function _giftBoxExplode(id, pos, gs) {
   let triggerSFP = false;
   const ppos = ECS.get(gs.playerId, 'pos');
   if (ppos && Math.hypot(pos.x - ppos.x, pos.y - ppos.y) < CFG.GIFT_BOX_EXPLOSION_RADIUS && gs.invincible <= 0) {
-    applyPlayerDamage(30); gs.invincible = CFG.INVINCIBLE_FRAMES;
+    applyPlayerDamage(30, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
     SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
     gs.flawlessThisWave = false;
     triggerSFP = true;
@@ -1218,7 +1218,7 @@ if (ai.hatState === 'IDLE') {
     Math.hypot(pos.x - ai.hatDiveTarget.x, pos.y - ai.hatDiveTarget.y) < 20;
   if (hitPlayer || reachedTarget || ai.hatTimer <= 0) {
     if (hitPlayer && gs.invincible <= 0) {
-      applyPlayerDamage(18); gs.invincible = CFG.INVINCIBLE_FRAMES;
+      applyPlayerDamage(18, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
       SFX.playAt('clippyDamage', pos.x, pos.y, 0.55);
       gs.shakeX = 14; gs.shakeY = 14; gs.flawlessThisWave = false;
       triggerSFPHit(); updateHUD();
@@ -1322,8 +1322,9 @@ const BT_CAKEBOSS = new BTSelector(
       if (ai.antipieBoss) {
         ai.windowOrbitTimer++;
         const windowSide = ai.bossWindowDirection || 1;
-        pos.x = ai.bossHomeX + windowSide * Math.abs(Math.sin(ai.windowOrbitTimer * 0.018)) * 34;
-        pos.y = ai.bossHomeY + Math.sin(ai.windowOrbitTimer * 0.026) * 18;
+        const movementScale = taskManagerMovementMultiplier(ECS.get(id, 'enemy')?.type);
+        pos.x = ai.bossHomeX + windowSide * Math.abs(Math.sin(ai.windowOrbitTimer * 0.018)) * 34 * movementScale;
+        pos.y = ai.bossHomeY + Math.sin(ai.windowOrbitTimer * 0.026) * 18 * movementScale;
         vel.vx = 0;
         vel.vy = 0;
       } else {
@@ -1425,7 +1426,7 @@ const BT_CAKEBOSS = new BTSelector(
 
       // Player contact damage during spin
       if (gs.invincible <= 0 && Math.hypot(pos.x - pp.x, pos.y - pp.y) < 44) {
-        applyPlayerDamage(28);
+        applyPlayerDamage(28, id);
         SFX.playAt('clippyDamage', pos.x, pos.y, 0.6);
         gs.invincible = CFG.INVINCIBLE_FRAMES;
         gs.shakeX = 20; gs.shakeY = 20;
@@ -1620,6 +1621,7 @@ const BT_BOSS2 = new BTSelector(
         ECS.add(sid,'enemy',{type:stype}); ECS.add(sid,'pos',{x:sx,y:sy,angle:0});
         ECS.add(sid,'vel',{vx:0,vy:0}); ECS.add(sid,'hp',{hp:Math.ceil(baseHp2*def2.hpMult),maxHp:Math.ceil(baseHp2*def2.hpMult),hitFlash:0});
         ECS.add(sid,'physics',{speed:(1.2+Math.random()*0.6+gs.wave*0.1)*def2.speedMult});
+        taskManagerApplySpawnNerf(sid, stype);
         ECS.add(sid,'ai',{shootCooldown:120,chargeTimer:0,phaseTimer:0,phased:false});
         spawnParticles(sx,sy,'#ff4400',10);
       }
@@ -1694,7 +1696,7 @@ const BT_CANNONBALL = new BTSelector(
       if (hitWall || ai.chargeTimer <= 0) {
         const ppos2 = ECS.get(gs.playerId, 'pos');
         if (Math.hypot(pos.x - ppos2.x, pos.y - ppos2.y) < 80 && gs.invincible <= 0) {
-          applyPlayerDamage(15); gs.invincible = CFG.INVINCIBLE_FRAMES;
+          applyPlayerDamage(15, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
           SFX.playAt('clippyDamage', pos.x, pos.y, 0.55);
           gs.shakeX = 14; gs.shakeY = 14;
           gs.flawlessThisWave = false;
@@ -1929,8 +1931,9 @@ const BT_MINI_CLOWN = new BTSelector(
       const ty = hpos.y + Math.sin(slotAngle) * ORBIT_R;
       vel.vx = (vel.vx || 0) * 0.7 + (tx - pos.x) * 0.28;
       vel.vy = (vel.vy || 0) * 0.7 + (ty - pos.y) * 0.28;
-      pos.x += vel.vx;
-      pos.y += vel.vy;
+      const movementScale = taskManagerMovementMultiplier(ECS.get(id, 'enemy')?.type);
+      pos.x += vel.vx * movementScale;
+      pos.y += vel.vy * movementScale;
 
       // Apply buff to host each tick (sysAI reads these flags)
       const hai = ECS.get(ai.attachedTo, 'ai');
