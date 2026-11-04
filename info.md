@@ -27,7 +27,7 @@
 
 ### Desktop
 
-- Use MS Sans Serif for most UI, and Fixedsys sparingly for code-like or legacy text areas.
+- Use MS Sans Serif for most UI, and Fixedsys sparingly for code-like or legacy text areas. 
 - Keep the humorous minimize behavior: the game closes down to a tiny tab in the middle of the screen.
 - The MGW (main game window) and the simulated offscreen windows are part of the game world, not separate OS windows or separate game simulations.
 - **Hotbar** means the Windows-style taskbar along the bottom edge of the full-screen desktop (Start, app buttons, active-window button, audio/settings controls, and clock). It does not mean the MGW's bottom bar; that is only a thin window border/status strip.
