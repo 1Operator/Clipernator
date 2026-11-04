@@ -25,7 +25,7 @@
 - This document should be updated after any signifcant changes
 - Sometimes game states are modified for play testing. I'm not playing 30 minutes until wave 19 to see if mirror maze is reflectable with bowling balls.
 
-### Desktop model
+### Desktop
 
 - Use MS Sans Serif for most UI, and Fixedsys sparingly for code-like or legacy text areas.
 - Keep the humorous minimize behavior: the game closes down to a tiny tab in the middle of the screen.
