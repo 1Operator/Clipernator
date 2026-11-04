@@ -799,78 +799,81 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-page {
-  padding: 0 0 10px;
-  color: #222;
+  padding: 0 0 8px;
+  color: #333;
   background: #fff;
-  font-family: 'MS Sans Serif', Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .clipshop-logo {
-  min-height: 48px;
-  padding: 4px 8px;
-  background: #fff;
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 8px;
+  background: linear-gradient(#f7f8f8, #e5e8e9);
 }
 
 .clipshop-logo img {
   display: block;
-  width: 150px;
-  height: 56px;
+  width: 126px;
+  height: 39px;
   object-fit: contain;
   object-position: left center;
 }
 
 .clipshop-breadcrumb {
-  padding: 5px 8px;
-  color: #fff;
+  padding: 4px 9px;
+  color: #38536a;
   font-size: 10px;
-  background: #367ba5;
-  border-top: 1px solid #b5d0df;
-  border-bottom: 2px solid #9fc5d7;
+  background: linear-gradient(#d9e3e9, #c8d5dc);
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #aebec7;
 }
 
 .clipshop-masthead {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 230px;
-  gap: 9px;
-  padding: 10px 9px 8px;
-  background: linear-gradient(#edf5f8, #dce9ef);
-  border-bottom: 1px solid #9cb1bd;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 10px;
+  padding: 9px 10px 7px;
+  background: linear-gradient(#f3f3f1, #e5e5e2);
+  border-bottom: 1px solid #c5c6c5;
 }
 
 .clipshop-title {
-  color: #193e54;
-  font: 20px 'Bitwise', Arial, sans-serif;
-  line-height: 1.15;
+  color: #59636a;
+  font: normal 21px Arial, Helvetica, sans-serif;
+  line-height: 1.2;
 }
 
 .clipshop-tagline {
   margin-top: 4px;
-  color: #526977;
-  font: 12px 'Ariel', Arial, sans-serif;
+  color: #777;
+  font: 12px Arial, Helvetica, sans-serif;
 }
 
 .clipshop-wallet {
-  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   align-content: center;
   justify-content: flex-start;
-  gap: 4px 10px;
-  color: #173a53;
-  font-size: 10px;
+  gap: 3px 8px;
+  color: #4b5358;
+  font-size: 9px;
   font-weight: bold;
-  text-align: right;
+  text-align: left;
 }
 
 .clipshop-ad {
   display: flex;
-  min-height: 54px;
+  min-height: 55px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 5px 8px;
-  color: #081b1a;
-  border: 2px solid #111;
+  padding: 5px 7px;
+  color: #633d2c;
+  border: 1px solid #d5b39f;
   text-align: center;
 }
 
@@ -878,11 +881,12 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .clipshop-ad-copy {
   flex: 1;
-  font: bold 10px 'Ariel', Arial, sans-serif;
+  font: bold 10px Arial, Helvetica, sans-serif;
 }
 
 .clipshop-ad-discount {
-  font: bold 17px 'Bitwise', Arial, sans-serif;
+  color: #d45d2b;
+  font: bold 16px Arial, Helvetica, sans-serif;
   white-space: nowrap;
 }
 
@@ -891,16 +895,14 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   flex-wrap: wrap;
   gap: 0;
   margin: 0;
-  padding: 5px 4px;
-  background: #f0f1f1;
-  border-top: 1px solid #fff;
-  border-bottom: 1px solid #b5b5b5;
+  padding: 0;
+  background: transparent;
 }
 
 .clipshop-nav button {
-  padding: 1px 7px;
-  color: #164d74;
-  font: 10px 'MS Sans Serif', Arial, sans-serif;
+  padding: 2px 5px;
+  color: #245a7c;
+  font: 10px Arial, Helvetica, sans-serif;
   background: transparent;
   border: 0;
   border-right: 1px solid #9a9a9a;
@@ -915,10 +917,10 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 5px 8px;
+  padding: 4px 8px;
   color: #fff;
-  background: #397fa6;
-  border-bottom: 1px solid #245776;
+  background: linear-gradient(#6f8b9b, #5b7788);
+  border-bottom: 1px solid #465f6d;
 }
 
 .clipshop-floor {
@@ -931,13 +933,13 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   padding: 3px 7px;
   color: #173a53;
   font: bold 10px 'MS Sans Serif', Arial, sans-serif;
-  background: linear-gradient(#fff, #dceaf2);
-  border: 1px solid #577b91;
+  background: linear-gradient(#fff, #e1e7ea);
+  border: 1px solid #9aa8ae;
   cursor: pointer;
 }
 
 .clipshop-button:active {
-  background: #c9dce6;
+  background: #d6dfe3;
 }
 
 .clipshop-button:disabled {
@@ -949,30 +951,30 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 .clipshop-notice {
   min-height: 18px;
   margin: 0;
-  padding: 5px 8px;
-  color: #48535a;
+  padding: 4px 8px;
+  color: #596168;
   font-size: 10px;
-  background: #f4f7f8;
-  border-bottom: 1px solid #c5d0d5;
+  background: #f6f6f4;
+  border-bottom: 1px solid #d2d2ce;
 }
 
 .clipshop-columns {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 205px;
+  grid-template-columns: minmax(0, 1fr) 190px;
   align-items: stretch;
   gap: 0;
-  background: #f5f7f9;
-  border: 1px solid #9cadb5;
+  background: #f5f5f3;
+  border: 1px solid #c2c6c8;
 }
 
 .clipshop-store-title {
   margin: 0;
-  padding: 6px 7px;
-  color: #fff;
+  padding: 5px 8px;
+  color: #3e4d56;
   font-size: 10px;
   font-weight: bold;
-  background: #34789f;
-  border-bottom: 1px solid #245776;
+  background: linear-gradient(#e9ebeb, #dce0e1);
+  border-bottom: 1px solid #c4c8c9;
 }
 
 .clipshop-listings {
@@ -982,12 +984,12 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .clipshop-card {
   display: grid;
-  min-height: 94px;
-  grid-template-columns: 76px minmax(0, 1fr) 94px;
+  min-height: 91px;
+  grid-template-columns: 72px minmax(0, 1fr) 112px;
   align-items: center;
-  gap: 7px;
-  padding: 7px 6px;
-  border-bottom: 1px solid #c8c8c8;
+  gap: 8px;
+  padding: 7px 8px;
+  border-bottom: 1px solid #d5d5d2;
 }
 
 .clipshop-card:last-child { border-bottom: 0; }
@@ -1013,7 +1015,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   height: 56px;
   object-fit: contain;
   image-rendering: pixelated;
-  filter: drop-shadow(1px 2px 1px rgba(0,0,0,.35));
+  filter: drop-shadow(1px 2px 1px rgba(0,0,0,.25));
 }
 
 .clipshop-item-preview.is-bundle img:first-child {
@@ -1034,7 +1036,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   height: 56px;
   object-fit: contain;
   image-rendering: pixelated;
-  filter: drop-shadow(1px 2px 1px rgba(0,0,0,.3));
+  filter: drop-shadow(1px 2px 1px rgba(0,0,0,.25));
 }
 
 .clipshop-upgrade-placeholder {
@@ -1055,9 +1057,9 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 .clipshop-item-name {
   display: inline-block;
   margin-bottom: 5px;
-  color: #064e87;
+  color: #174e73;
   font-weight: bold;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.25;
   text-align: left;
   text-decoration: underline;
@@ -1066,7 +1068,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .clipshop-item-detail {
   margin: 2px 0;
-  color: #333;
+  color: #51565a;
   font-size: 9px;
   line-height: 1.35;
 }
@@ -1078,7 +1080,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-price-new {
-  color: #b31f22;
+  color: #c25337;
   font-weight: bold;
 }
 
@@ -1087,28 +1089,46 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   min-width: 0;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
+  gap: 5px;
+}
+
+.clipshop-product-action .clipshop-button {
+  color: #fff;
+  background: linear-gradient(#84b8e3, #4288c1);
+  border: 1px solid #3475a8;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+}
+
+.clipshop-product-action .clipshop-button:active {
+  background: #3475a8;
+}
+
+.clipshop-product-action .clipshop-button:disabled {
+  color: #e5e5e5;
 }
 
 .clipshop-part-number {
   color: #555;
-  font: 9px 'Ariel', Arial, sans-serif;
+  font: 9px Arial, Helvetica, sans-serif;
   text-align: right;
 }
 
 .clipshop-cart {
   min-width: 0;
   padding: 7px;
-  background: #f5f7f9;
-  border-left: 1px solid #9cadb5;
+  background: #f4f5f6;
+  border-left: 1px solid #c2c6c8;
 }
 
 .clipshop-cart h3,
 .clipshop-profile h3,
 .clipshop-help h3 {
   margin: 0 0 6px;
-  color: #173f59;
+  padding-bottom: 5px;
+  color: #384b58;
   font-size: 11px;
+  border-bottom: 1px solid #d7dadd;
 }
 
 .clipshop-cart-empty,
@@ -1127,7 +1147,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 .clipshop-cart-item {
   padding: 5px;
   background: #fff;
-  border: 1px solid #ccd3d8;
+  border: 1px solid #d4d7d8;
 }
 
 .clipshop-cart-item-title {
@@ -1195,7 +1215,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 @media (max-width: 560px) {
   .clipshop-masthead { grid-template-columns: minmax(0, 1fr) 140px; }
   .clipshop-columns { grid-template-columns: minmax(0, 1fr) 155px; gap: 0; }
-  .clipshop-card { grid-template-columns: 58px minmax(0, 1fr) 76px; gap: 4px; }
+  .clipshop-card { grid-template-columns: 54px minmax(0, 1fr) 82px; gap: 4px; }
   .clipshop-product-image { transform: scale(.85); }
   .clipshop-card .clipshop-button { padding: 3px 4px; font-size: 9px; }
 }
@@ -2497,7 +2517,14 @@ canvas {
           </div>
         </section>
         <section id="wonderweb-page-clipshop" class="wonderweb-page clipshop-page" role="tabpanel" aria-labelledby="wonderweb-tab-clipshop" data-wonderweb-page="clipshop" hidden>
-          <div class="clipshop-logo"><img src="sprites/ui/ChipShop/ChipShopLogo.png" alt="ChipShop"></div>
+          <div class="clipshop-logo">
+            <img src="sprites/ui/ChipShop/ChipShopLogo.png" alt="ChipShop">
+            <nav class="clipshop-nav" aria-label="ChipShop navigation">
+              <button type="button" data-clipshop-view="profile">Customer Profile</button>
+              <button type="button" data-clipshop-view="help">Help</button>
+              <button type="button" data-clipshop-view="home">Shop Home</button>
+            </nav>
+          </div>
           <div class="clipshop-breadcrumb">Store Home &gt; Program Upgrades/Integrations</div>
           <div class="clipshop-masthead">
             <div>
@@ -2513,11 +2540,6 @@ canvas {
               <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
             </div>
           </div>
-          <nav class="clipshop-nav" aria-label="ChipShop navigation">
-            <button type="button" data-clipshop-view="profile">Customer Profile</button>
-            <button type="button" data-clipshop-view="help">Help</button>
-            <button type="button" data-clipshop-view="home">Shop Home</button>
-          </nav>
           <div class="clipshop-toolbar">
             <span id="clipshop-floor" class="clipshop-floor">Floor 1</span>
             <button id="clipshop-refresh" class="clipshop-button" type="button">Restock · 5 chips</button>
