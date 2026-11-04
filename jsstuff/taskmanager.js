@@ -11,7 +11,7 @@
   let selectedProcessType = null;
   let appAnchorId = null;
   let appPointer = null;
-  let suppressAppClickId = null;
+  let suppressNextAppClick = false;
   let appsSignature = '';
   let processesSignature = '';
   let observingWindows = false;
@@ -202,20 +202,34 @@
     }
   });
 
-  appRows.addEventListener('pointerup', () => {
-    if (appPointer?.dragging) suppressAppClickId = appPointer.id;
+  appRows.addEventListener('pointerup', event => {
+    if (!appPointer) return;
+    const pointer = appPointer;
     appPointer = null;
+    const row = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-app-id]')
+      || appRows.querySelector(`[data-app-id="${pointer.id}"]`);
+    if (pointer.dragging) {
+      suppressNextAppClick = true;
+    } else if (row && appRows.contains(row)) {
+      suppressNextAppClick = true;
+      makeAppSelection(row, event);
+    }
+    if (suppressNextAppClick) {
+      setTimeout(() => {
+        suppressNextAppClick = false;
+      }, 0);
+    }
   });
   appRows.addEventListener('pointercancel', () => { appPointer = null; });
 
   appRows.addEventListener('click', event => {
-    const row = event.target.closest('[data-app-id]');
-    if (!row) return;
-    if (suppressAppClickId === row.dataset.appId) {
-      suppressAppClickId = null;
+    if (suppressNextAppClick) {
+      suppressNextAppClick = false;
       event.preventDefault();
       return;
     }
+    const row = event.target.closest('[data-app-id]');
+    if (!row) return;
     makeAppSelection(row, event);
   });
 
