@@ -1052,6 +1052,43 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   white-space: nowrap;
 }
 
+.virus-ad-window {
+  width: 136px;
+  height: 152px;
+  padding: 2px;
+  overflow: hidden;
+  background: #d4d0c8;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 1px 1px 0 #000, 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.virus-ad-titlebar {
+  display: flex;
+  height: 22px;
+  flex: 0 0 22px;
+  justify-content: flex-end;
+  padding: 1px;
+  background: linear-gradient(to right, #0a246a, #3a6ea8);
+}
+
+.virus-ad-titlebar .desktop-window-close-button {
+  width: 22px;
+  height: 20px;
+  padding: 0;
+}
+
+.virus-ad-window > img {
+  display: block;
+  width: 100%;
+  height: calc(100% - 22px);
+  object-fit: contain;
+  image-rendering: pixelated;
+  user-select: none;
+}
+
 .clipshop-nav {
   display: flex;
   flex-wrap: wrap;
@@ -2839,6 +2876,7 @@ canvas {
   </div>
 </div>
 <div id="utensil-window-layer">
+  <div id="virus-ad-window-host" style="display: none" aria-label="Virus advertisement pop-ups"></div>
   <section id="task-manager-window" class="independent-window task-manager-window" data-window-title="Task Manager" aria-label="Task Manager">
     <header class="desktop-window-titlebar task-manager-titlebar">
       <span class="task-manager-title"><img src="sprites/ui/TaskManager.png" alt="">Task Manager</span>
@@ -3151,7 +3189,8 @@ canvas {
   <script src="jsstuff/sounds.js"></script>
    <script src="jsstuff/email.js"></script>
 <script src="jsstuff/trash.js"></script>
-   <script src="jsstuff/clipshop.js"></script>
+  <script src="jsstuff/virusads.js"></script>
+     <script src="jsstuff/clipshop.js"></script>
       <script src="jsstuff/wonderweb.js"></script>
 <script src="jsstuff/taskmanager.js"></script>
 

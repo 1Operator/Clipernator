@@ -5,6 +5,7 @@
 const SFX = {
   _cache: {},
   _loops: {},
+  _instanceLoops: new Set(),
   _activeAudio: new Set(),
   _entityAudio: new Map(),
   _giftBoxAudio: new Map(),
@@ -20,13 +21,23 @@ const SFX = {
 
   setMuted(muted) {
     this._muted = Boolean(muted);
-    if (!this._muted) return;
+    if (!this._muted) {
+      for (const audio of this._instanceLoops) {
+        audio.play().catch(error => console.warn('Unable to resume looping sound.', error));
+      }
+      return;
+    }
 
     for (const audio of this._activeAudio) {
       audio.pause();
       audio.currentTime = 0;
     }
     this._activeAudio.clear();
+
+    for (const audio of this._instanceLoops) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
 
     for (const key of Object.keys(this._loops)) {
       const audio = this._cache[key];
@@ -280,6 +291,29 @@ const SFX = {
     });
   },
 
+  playLoopInstance(key, volumeOverride) {
+    if (this._muted) return null;
+    const source = this._cache[key];
+    if (!source) return null;
+    const audio = source.cloneNode();
+    audio.loop = true;
+    audio.volume = volumeOverride !== undefined ? volumeOverride : 0.6;
+    this._instanceLoops.add(audio);
+    audio.play().catch(error => {
+      if (this._instanceLoops.has(audio)) {
+        console.warn(`Unable to play looping ${key} sound.`, error);
+      }
+    });
+    return audio;
+  },
+
+  stopLoopInstance(audio) {
+    if (!audio || !this._instanceLoops.delete(audio)) return;
+    audio.pause();
+    audio.currentTime = 0;
+    audio.loop = false;
+  },
+
   // THIS was outside the object before — now it's inside
   playAt(key, sourceX, sourceY, volumeOverride) {
     if (this._muted) return;
@@ -362,6 +396,7 @@ SFX.load('EmailOpen',        'sounds/soundeffects/UI/Email/EmailOpen.mp3');
 SFX.load('trashOpen',        'sounds/soundeffects/UI/Trash/TrashOpen.mp3');
 SFX.load('trashUse',         'sounds/soundeffects/UI/Trash/TrashUse.mp3');
 SFX.load('partyExplosion',   'sounds/soundeffects/misc/Explosions/PartyExplosion.mp3');
+SFX.load('virus',            'sounds/soundeffects/misc/Virus.mp3');
 SFX.load('waveComplete',     'sounds/soundeffects/misc/Waves/WaveComplete.mp3');
 SFX.load('waveOverload',     'sounds/soundeffects/misc/Waves/WaveOverload.mp3');
 SFX.load('omini',            'sounds/soundeffects/misc/OMINI.mp3');

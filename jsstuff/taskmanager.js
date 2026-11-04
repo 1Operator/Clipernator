@@ -55,6 +55,14 @@
       },
     },
     {
+      id: 'virus-ad',
+      name: 'Virus Pop-ups',
+      icon: 'sprites/ui/Virus.png',
+      window: () => document.getElementById('virus-ad-window-host'),
+      isRunning: () => window.virusAdPopupCount() > 0,
+      close: () => window.closeVirusAdPopups(),
+    },
+    {
       id: 'task-manager',
       name: 'Task Manager',
       icon: 'sprites/ui/TaskManager.png',
@@ -137,12 +145,16 @@
   }
 
   function renderApplications() {
-    const signature = applications.map(app => `${app.id}:${stoppedApplications.has(app.id)}`).join('|');
+    const signature = applications.map(app => {
+      const running = app.isRunning ? app.isRunning() : !stoppedApplications.has(app.id);
+      return `${app.id}:${running}`;
+    }).join('|');
     if (signature === appsSignature) return;
     appsSignature = signature;
     appRows.replaceChildren();
 
     for (const app of applications) {
+      const running = app.isRunning ? app.isRunning() : !stoppedApplications.has(app.id);
       const row = document.createElement('button');
       row.type = 'button';
       row.className = 'task-manager-row task-manager-app-row';
@@ -151,7 +163,7 @@
       row.setAttribute('aria-selected', String(appSelection.has(app.id)));
       row.tabIndex = 0;
       if (appSelection.has(app.id)) row.classList.add('is-selected');
-      if (stoppedApplications.has(app.id)) row.classList.add('is-stopped');
+      if (!running) row.classList.add('is-stopped');
 
       const task = document.createElement('span');
       task.className = 'task-manager-cell task-manager-program';
@@ -160,7 +172,7 @@
       name.className = 'task-manager-cell';
       name.textContent = app.name;
       task.append(name);
-      row.append(task, makeCell('task-manager-status', stoppedApplications.has(app.id) ? 'Not running' : 'Running'));
+      row.append(task, makeCell('task-manager-status', running ? 'Running' : 'Not running'));
       appRows.append(row);
     }
 
@@ -252,7 +264,8 @@
   document.getElementById('task-manager-end-task').addEventListener('click', () => {
     for (const appId of appSelection) {
       const app = applications.find(candidate => candidate.id === appId);
-      if (!app || stoppedApplications.has(appId)) continue;
+      const running = app?.isRunning ? app.isRunning() : !stoppedApplications.has(appId);
+      if (!app || !running) continue;
       app.close();
       stoppedApplications.add(appId);
     }
@@ -487,8 +500,9 @@
   const windowObserver = new MutationObserver(records => {
     if (!observingWindows) return;
     for (const record of records) {
-      const app = applications.find(candidate => candidate.window() === record.target);
+      const app = applications.find(candidate => candidate.window?.() === record.target);
       if (!app) continue;
+      if (app.isRunning) continue;
       if (visibleWindow(record.target)) stoppedApplications.delete(app.id);
       else stoppedApplications.add(app.id);
     }
@@ -496,7 +510,8 @@
     if (visibleWindow(taskManagerWindow)) renderApplications();
   });
   for (const app of applications) {
-    windowObserver.observe(app.window(), { attributes: true, attributeFilter: ['style'] });
+    const element = app.window?.();
+    if (element) windowObserver.observe(element, { attributes: true, attributeFilter: ['style'] });
   }
   setTimeout(() => { observingWindows = true; }, 0);
   window.openTaskManager = openTaskManager;

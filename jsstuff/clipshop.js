@@ -176,6 +176,7 @@ function clipShopMakeAd(stock) {
     listingId: listing.id,
     discount: 10 * (1 + Math.floor(Math.random() * 5)),
     color: clipShopRandomFrom(['#aaff77', '#8ee7f2', '#fff18a', '#ffadd2', '#ffad6e']),
+    effect: Math.random() < 0.2 ? 'virus' : 'discount',
   };
 }
 
@@ -345,7 +346,9 @@ function clipShopRenderAd(element, ad) {
   if (!ad || !listing) return;
   element.style.backgroundColor = ad.color;
   element.setAttribute('aria-label',
-    `Apply ${ad.discount}% off ${clipShopListingName(listing)}`);
+    ad.effect === 'virus'
+      ? `Click the ad for ${clipShopListingName(listing)}; it may open moving virus pop-up windows.`
+      : `Apply ${ad.discount}% off ${clipShopListingName(listing)}`);
 
   const image = document.createElement('span');
   image.className = 'clipshop-ad-image';
@@ -392,6 +395,26 @@ function clipShopApplyAd(element) {
   const ad = gs.clipShopAds?.[slot];
   const listing = ad && gs.clipShopStock?.find(candidate => candidate.id === ad.listingId);
   if (!ad || !listing) return;
+
+  if (ad.effect === 'virus') {
+    gs.clipShopAds[slot] = null;
+    clipShopRender();
+    const opened = window.openVirusAdPopups();
+    if (!opened) {
+      listing.listPrice = listing.price;
+      listing.discountPercent = ad.discount;
+      listing.price = Math.max(1, Math.floor(
+        listing.listPrice * (100 - ad.discount) / 100
+      ));
+      clipShopRender();
+      document.getElementById('clipshop-notice').textContent =
+        `All virus pop-up windows are already open; ${ad.discount}% off ${clipShopListingName(listing)} was applied instead.`;
+      return;
+    }
+    document.getElementById('clipshop-notice').textContent =
+      `The ${clipShopListingName(listing)} ad opened some unexpected windows!`;
+    return;
+  }
 
   listing.listPrice = listing.price;
   listing.discountPercent = ad.discount;

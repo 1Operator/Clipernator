@@ -36,9 +36,9 @@
 
 ### Desktop applications
 
-- WonderWeb opens a resizable, draggable local browser window with Home and ChipShop tabs. Email and Trash can also be opened as browser tabs, and dragging a tab outside the browser detaches it into its own window.
+- WonderWeb opens a resizable, draggable local browser window with Home and ChipShop tabs. Its Home shortcuts open Email and Trash as tabs; opening those apps from their desktop/taskbar icons opens individual windows. Dragging any tab, including ChipShop, outside the browser detaches it into its own window.
 - ChipShop is WonderWeb's retro software store. Listings are added to a cart first; installing one charges its chips and applies it to the current run. Customer Profile lists installed listings for that run, and Help explains the shop flow. Health, damage, and speed upgrades use floppy-disk art (blue, red, and amber respectively); other listings use item art or placeholders.
-- ChipShop's catalog displays random part numbers and occasional discounts. Listings for items acquired as field pickups are removed from stock after a brief red fade. Two banner slots independently have a 30% chance to show a promotion for a listed item; clicking an ad applies its discount to that listing.
+- ChipShop's catalog displays random part numbers and occasional discounts. Listings for items acquired as field pickups are removed from stock after a brief red fade. Two banner slots independently have a 30% chance to show a promotion for a listed item. Ads show the promoted item's or upgrade's sprite; clicking a normal ad applies its discount, while 20% of ads instead open up to five moving, Virus-sprite windows with looping audio. The pop-ups can be closed individually or ended from Task Manager, and their audio stops when they close.
 - Opening-sequence item-draft selections use the BIOS confirmation sound; `ItemConfirm` is reserved for in-game item choices, pickups, and relic unlocks.
 - Email is a draggable inbox window when opened from the desktop and does not pause an active run. Opening it from WonderWeb embeds it in a browser tab. Offers expire after 20–60 seconds of active gameplay; random mail is checked once per active minute with a 50% chance.
 - New email plays a notification chime, bounces the Email hotbar icon briefly, and shows a blinking unread count. Hovering the icon shows the unread total; opening the inbox plays its open cue.
@@ -55,7 +55,7 @@
 
 The Task Manager is a draggable HTML desktop window opened from its hotbar icon. It does not pause gameplay and has three tabs:
 
-- **Applications** lists Email, WonderWeb, Trash, and Task Manager with a Running/Not running status. Click rows to select them; Ctrl/Cmd-click, Shift-click, and dragging support multi-selection. **End Task** closes selected applications. The game window, enemies, and world objects are intentionally not endable from this tab.
+- **Applications** lists Email, WonderWeb, Trash, Virus Pop-ups, and Task Manager with a Running/Not running status. Click rows to select them; Ctrl/Cmd-click, Shift-click, and dragging support multi-selection. **End Task** closes selected applications. The game window, enemies, and world objects are intentionally not endable from this tab.
 - **Processes** shows one row per active enemy type, plus Clippy and active system objects (Chippy, chips, and field items). Rows include a single-sprite icon, program name, user category, and damage attributed to Clippy's health loss where the source enemy is known. Enemies are `LOCAL`, CORs and objects are `SYSTEM`, and Clippy is `USER`.
 - **Performance** reports current health, chips, active enemy count, and the next process-patch cost.
 
@@ -226,6 +226,7 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | `items/ItemReveal.mp3` | Wired: plays at normal speed when in-game item choices appear; cards reveal immediately, at about +0.67 seconds, and at about +1.33 seconds, each with a 1.5-second impact-scale animation. The fourth Floor 2 card reveals with the third. |
 | `misc/CandleLight.mp3` | Wired: plays whenever one of the player's Cursed Candles relights. Reuse this cue for future boss-candle lighting events. |
 | `misc/Explosions/PartyExplosion.mp3` | Wired: plays on explosive projectiles, Gift Box explosions, and the full Shake Fizzle Pop shockwave, with slight randomized pitch variation. |
+| `misc/Virus.mp3` | Wired as an independent loop for each Virus-ad pop-up; each loop stops when its window closes. |
 
 ### Interface and Opening Sequence
 
