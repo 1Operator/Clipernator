@@ -10,7 +10,7 @@
 
   const addresses = {
     home: 'drawa.local/home',
-    clipshop: 'drawa.local/clipshop',
+    clipshop: 'drawa.local/chipshop',
   };
 
   function selectTab(name, focus = false) {

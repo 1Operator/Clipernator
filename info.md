@@ -15,6 +15,8 @@
 - The post-boot desktop and its taskbar are HTML UI. The BIOS, loading, bluescreen, and other intro sequences continue to use canvas for their animation.
 - Desktop icons and error dialogs are HTML elements so their text, buttons, and click targets are independent of canvas drawing.
 - WonderWeb opens a draggable local browser window with working Home, Golden Chips, and About tabs. Golden Chips are earned from Chippy or rare drops and currently only accumulate/display; they do not have a spending use yet.
+- ChipShop is WonderWeb's retro software store. Listings are added to a cart first; installing one charges its chips and applies it to the current run. Customer Profile lists installed listings for that run, and Help explains the shop flow. Health, damage, and speed upgrades use floppy-disk art (blue, red, and amber respectively); other listings use item art or placeholders.
+- ChipShop's catalog displays random part numbers and occasional discounts. Its small banner ads are decorative promotions with randomized listings, discount percentages, and preset colors; they do not change the listing's actual price.
 - Opening-sequence item-draft selections use the BIOS confirmation sound; `ItemConfirm` is reserved for in-game item choices, pickups, and relic unlocks.
 - Email is a draggable inbox overlay and does not pause an active run. Offers expire after 20–60 seconds of active gameplay; random mail is checked once per active minute with a 50% chance.
 - New email plays a notification chime, bounces the Email hotbar icon briefly, and shows a blinking unread count. Hovering the icon shows the unread total; opening the inbox plays its open cue.

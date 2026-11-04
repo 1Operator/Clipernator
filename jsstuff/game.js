@@ -149,7 +149,8 @@ function initGameState(applyIntroChoices = true) {
   gs = {
     score: 0, wave: 1,
     chips: 0, goldenChips: 0, chipDrops: [], flawlessWaveStreak: 0,
-    clipShopStock: [], clipShopRefreshCost: 5, clipShopRefreshCount: 0,
+    clipShopStock: [], clipShopCart: [], clipShopPurchases: [], clipShopAds: {},
+    clipShopView: 'home', clipShopRefreshCost: 5, clipShopRefreshCount: 0,
     clipShopRestockCount: 0, clipShopNextListingId: 1,
     clipShopSpeedBonus: 0, clipShopSpeedMultiplier: 1,
     clipShopDamageBonus: 0, clipShopDamageMultiplier: 1,

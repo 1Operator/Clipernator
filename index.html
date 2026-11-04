@@ -15,6 +15,16 @@
   src: url('fonts/FSEX300.ttf') format('truetype');
 }
 
+  @font-face {
+  font-family: 'Bitwise';
+  src: url('fonts/Bitwise-m19x.ttf') format('truetype');
+}
+
+  @font-face {
+  font-family: 'Ariel';
+  src: url('fonts/ARIAL.TTF') format('truetype');
+}
+
   :root {
     --bg: #0a0a0f;
     --green: #00ff66;
@@ -780,87 +790,147 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-page {
-  padding: 10px;
-  background:
-    repeating-linear-gradient(135deg, rgba(22, 73, 132, .035) 0 3px, transparent 3px 8px),
-    #f7f4e8;
-}
-
-.clipshop-banner {
-  display: flex;
-  min-height: 56px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 7px 10px;
-  color: #fff;
-  background: linear-gradient(110deg, #102d65, #1766a5 58%, #1a9cbb);
-  border-top: 2px solid #83d9ec;
-  border-left: 2px solid #83d9ec;
-  border-right: 2px solid #16345d;
-  border-bottom: 2px solid #16345d;
-  box-shadow: 2px 2px 0 #a89d78;
+  padding: 8px;
+  color: #222;
+  background: #fff;
+  font-family: 'MS Sans Serif', Arial, sans-serif;
 }
 
 .clipshop-logo {
-  color: #ffec76;
-  font: bold 22px 'Fixedsys', 'MS Sans Serif', monospace;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 6px 2px;
+  color: #064b83;
+  font: bold 24px 'Bitwise', 'MS Sans Serif', sans-serif;
   letter-spacing: 1px;
-  text-shadow: 2px 2px #09204b;
+  text-shadow: 1px 1px #b5d7ed;
+}
+
+.clipshop-logo::before {
+  content: '✦';
+  color: #f0a000;
+  font: 20px Arial, sans-serif;
+}
+
+.clipshop-breadcrumb {
+  padding: 4px 8px;
+  color: #fff;
+  font-size: 10px;
+  background: #367ba5;
+  border-bottom: 2px solid #9fc5d7;
+}
+
+.clipshop-masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 9px;
+  padding: 10px 8px;
+  background: #e7f0f5;
+  border-bottom: 1px solid #9cb1bd;
+}
+
+.clipshop-title {
+  color: #193e54;
+  font: 20px 'Bitwise', Arial, sans-serif;
+  line-height: 1.15;
 }
 
 .clipshop-tagline {
-  margin-top: 3px;
-  color: #e7f8ff;
-  font-size: 10px;
+  margin-top: 4px;
+  color: #526977;
+  font: 12px 'Ariel', Arial, sans-serif;
 }
 
 .clipshop-wallet {
+  grid-column: 1 / -1;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 5px 7px;
-  color: #442d00;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: flex-start;
+  gap: 4px 10px;
+  color: #173a53;
+  font-size: 10px;
   font-weight: bold;
-  white-space: nowrap;
-  background: linear-gradient(#fff7cf, #ebc94e);
-  border: 1px solid #ad8b24;
-  box-shadow: inset 1px 1px 0 #fff;
+  text-align: right;
 }
+
+.clipshop-ad {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  color: #081b1a;
+  border: 2px solid #111;
+  text-align: center;
+}
+
+.clipshop-ad[hidden] { display: none; }
+
+.clipshop-ad-copy {
+  flex: 1;
+  font: bold 10px 'Ariel', Arial, sans-serif;
+}
+
+.clipshop-ad-discount {
+  font: bold 17px 'Bitwise', Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.clipshop-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 7px 0;
+  padding: 4px 2px;
+  background: #f4f4f4;
+  border-top: 1px solid #b5b5b5;
+  border-bottom: 1px solid #b5b5b5;
+}
+
+.clipshop-nav button {
+  padding: 1px 7px;
+  color: #164d74;
+  font: 10px 'MS Sans Serif', Arial, sans-serif;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid #9a9a9a;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.clipshop-nav button:last-child { border-right: 0; }
 
 .clipshop-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin: 10px 0 7px;
+  padding: 5px 7px;
+  color: #fff;
+  background: #397fa6;
+  border: 1px solid #245776;
 }
 
 .clipshop-floor {
-  color: #18395d;
+  font-size: 10px;
   font-weight: bold;
 }
 
 .clipshop-button {
-  min-height: 24px;
-  padding: 4px 9px;
-  color: #122443;
-  font: bold 11px 'MS Sans Serif', Arial, sans-serif;
-  background: linear-gradient(#fff, #d8e6f5);
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-right: 2px solid #536a85;
-  border-bottom: 2px solid #536a85;
-  box-shadow: 1px 1px 0 #a69e87;
+  min-height: 22px;
+  padding: 3px 7px;
+  color: #173a53;
+  font: bold 10px 'MS Sans Serif', Arial, sans-serif;
+  background: linear-gradient(#fff, #dceaf2);
+  border: 1px solid #577b91;
   cursor: pointer;
 }
 
 .clipshop-button:active {
-  transform: translate(1px, 1px);
-  border-top-color: #536a85;
-  border-left-color: #536a85;
-  border-right-color: #fff;
-  border-bottom-color: #fff;
+  background: #c9dce6;
 }
 
 .clipshop-button:disabled {
@@ -871,52 +941,64 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .clipshop-notice {
   min-height: 18px;
-  margin: 4px 0 8px;
-  color: #4b3b0d;
+  margin: 5px 0;
+  color: #48535a;
   font-size: 10px;
 }
 
-.clipshop-listings {
+.clipshop-columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-  align-content: start;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 205px;
+  align-items: start;
+  gap: 9px;
+}
+
+.clipshop-store-title {
+  margin-bottom: 4px;
+  padding: 5px 7px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  background: #34789f;
+}
+
+.clipshop-listings {
+  display: block;
+  background: #fff;
+  border: 1px solid #d5d5d5;
 }
 
 .clipshop-card {
-  display: flex;
-  min-height: 154px;
-  flex-direction: column;
+  display: grid;
+  min-height: 100px;
+  grid-template-columns: 76px minmax(0, 1fr) 94px;
   align-items: center;
-  padding: 7px;
-  background: linear-gradient(#fff, #f3f5f8);
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-right: 2px solid #8a9ab0;
-  border-bottom: 2px solid #8a9ab0;
-  box-shadow: 1px 2px 0 #c4b998;
+  gap: 7px;
+  padding: 7px 6px;
+  border-bottom: 1px solid #c8c8c8;
 }
 
-.clipshop-card-golden {
-  background: linear-gradient(#fffbea, #f3d982);
-  border-right-color: #a58220;
-  border-bottom-color: #a58220;
+.clipshop-card:last-child { border-bottom: 0; }
+
+.clipshop-product-image {
+  display: grid;
+  min-width: 0;
+  min-height: 64px;
+  place-items: center;
 }
 
 .clipshop-item-preview {
   position: relative;
   display: grid;
-  width: 78px;
-  height: 68px;
-  flex: 0 0 68px;
+  width: 70px;
+  height: 64px;
   place-items: center;
-  margin-bottom: 4px;
 }
 
 .clipshop-item-preview img {
   position: absolute;
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(1px 2px 1px rgba(0,0,0,.35));
@@ -936,49 +1018,223 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-upgrade-icon {
-  display: grid;
-  width: 58px;
+  position: relative;
+  width: 52px;
   height: 58px;
-  flex: 0 0 58px;
+  padding: 25px 3px 3px;
+  color: #263d50;
+  font: bold 8px 'MS Sans Serif', Arial, sans-serif;
+  background: linear-gradient(90deg, transparent 0 8px, rgba(255,255,255,.35) 8px 11px, transparent 11px), #266ca1;
+  border: 2px solid #174b75;
+  border-radius: 2px 2px 5px 5px;
+  box-shadow: 2px 2px 0 #bbb;
+  text-align: center;
+}
+
+.clipshop-upgrade-icon::before {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  width: 31px;
+  height: 16px;
+  content: '';
+  background: linear-gradient(#dce8ed 0 4px, #29495c 4px 7px, #dce8ed 7px 100%);
+  border: 1px solid #173b57;
+}
+
+.clipshop-upgrade-icon::after {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 5px;
+  height: 5px;
+  content: '';
+  background: #f8f2d9;
+  border: 1px solid #8d835d;
+}
+
+.clipshop-upgrade-icon.is-damage {
+  background-color: #bb3030;
+  border-color: #7c1d1d;
+}
+
+.clipshop-upgrade-icon.is-speed {
+  background-color: #d79a16;
+  border-color: #91620b;
+}
+
+.clipshop-upgrade-icon.is-placeholder {
+  display: grid;
   place-items: center;
-  margin: 5px 0 9px;
+  padding: 0;
   color: #fff;
-  font: bold 25px 'Fixedsys', monospace;
-  background: radial-gradient(circle at 30% 25%, #f9e879, #e77e27 68%, #923c1d);
-  border: 2px solid #9a5522;
-  border-radius: 50%;
-  box-shadow: inset 2px 2px 0 rgba(255,255,255,.75), 2px 2px 0 #b8a783;
+  font-size: 18px;
+  background: #777;
+  border-color: #444;
+}
+
+.clipshop-product-info {
+  min-width: 0;
 }
 
 .clipshop-item-name {
-  min-height: 27px;
-  color: #14365d;
+  display: inline-block;
+  margin-bottom: 5px;
+  color: #064e87;
   font-weight: bold;
-  text-align: center;
-  line-height: 13px;
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: left;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
 }
 
 .clipshop-item-detail {
-  min-height: 26px;
-  margin: 3px 0 5px;
-  color: #555;
-  font-size: 10px;
-  text-align: center;
-  line-height: 12px;
+  margin: 2px 0;
+  color: #333;
+  font-size: 9px;
+  line-height: 1.35;
 }
 
-.clipshop-card .clipshop-button {
+.clipshop-price {
+  color: #222;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.clipshop-price-new {
+  color: #b31f22;
+  font-weight: bold;
+}
+
+.clipshop-product-action {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.clipshop-part-number {
+  color: #555;
+  font: 9px 'Ariel', Arial, sans-serif;
+  text-align: right;
+}
+
+.clipshop-cart {
+  padding: 7px;
+  background: #f5f7f9;
+  border: 1px solid #b7c5ce;
+}
+
+.clipshop-cart h3,
+.clipshop-profile h3,
+.clipshop-help h3 {
+  margin: 0 0 6px;
+  color: #173f59;
+  font-size: 11px;
+}
+
+.clipshop-cart-empty,
+.clipshop-cart-description {
+  color: #555;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.clipshop-cart-list {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.clipshop-cart-item {
+  padding: 5px;
+  background: #fff;
+  border: 1px solid #ccd3d8;
+}
+
+.clipshop-cart-item-title {
+  margin-bottom: 3px;
+  color: #064e87;
+  font-size: 9px;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.clipshop-cart-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.clipshop-cart-actions .clipshop-button {
+  min-height: 20px;
+  padding: 2px 4px;
+  font-size: 9px;
+}
+
+.clipshop-cart-total {
+  margin: 7px 0;
+  color: #222;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.clipshop-cart-install {
   width: 100%;
-  margin-top: auto;
+}
+
+.clipshop-content-view {
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #d5d5d5;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.clipshop-history-item {
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.clipshop-bottom-ad {
+  margin-top: 10px;
+}
+
+.clipshop-bottom-ad:not([hidden]) {
+  display: flex;
 }
 
 .clipshop-empty {
-  grid-column: 1 / -1;
   padding: 20px 10px;
   color: #555;
   text-align: center;
   background: #fff;
   border: 1px inset #bbb;
+}
+
+@media (max-width: 560px) {
+  .clipshop-masthead { grid-template-columns: minmax(0, 1fr) 140px; }
+  .clipshop-columns { grid-template-columns: minmax(0, 1fr) 155px; gap: 6px; }
+  .clipshop-card { grid-template-columns: 58px minmax(0, 1fr) 76px; gap: 4px; }
+  .clipshop-product-image { transform: scale(.85); }
+  .clipshop-card .clipshop-button { padding: 3px 4px; font-size: 9px; }
+}
+
+@media (max-width: 520px) {
+  .clipshop-masthead { grid-template-columns: 1fr; }
+  .clipshop-wallet { justify-content: flex-start; text-align: left; }
+  .clipshop-columns { grid-template-columns: 1fr; }
+  .clipshop-cart { order: -1; }
+}
+
+@media (max-width: 390px) {
+  .clipshop-card { grid-template-columns: 50px minmax(0, 1fr) 72px; }
+  .clipshop-product-image { transform: scale(.75); }
+  .clipshop-title { font-size: 16px; }
 }
 
 @media (max-width: 520px) {
@@ -2238,7 +2494,7 @@ canvas {
     <div class="wonderweb-browser">
       <div class="wonderweb-tabs" role="tablist" aria-label="WonderWeb pages">
         <button id="wonderweb-tab-home" class="wonderweb-tab" type="button" role="tab" aria-selected="true" aria-controls="wonderweb-page-home" data-wonderweb-tab="home">Home</button>
-        <button id="wonderweb-tab-clipshop" class="wonderweb-tab" type="button" role="tab" aria-selected="false" aria-controls="wonderweb-page-clipshop" data-wonderweb-tab="clipshop" hidden>ClipShop</button>
+        <button id="wonderweb-tab-clipshop" class="wonderweb-tab" type="button" role="tab" aria-selected="false" aria-controls="wonderweb-page-clipshop" data-wonderweb-tab="clipshop" hidden>ChipShop</button>
       </div>
       <div class="wonderweb-address" aria-label="Address">
         <span class="wonderweb-site-icon" aria-hidden="true">
@@ -2258,7 +2514,7 @@ canvas {
           <div class="wonderweb-shortcuts" aria-label="Home shortcuts">
             <button class="wonderweb-shortcut" type="button" data-wonderweb-open-tab="clipshop">
               <span class="wonderweb-shortcut-icon" aria-hidden="true">🛍️</span>
-              <span><strong>ClipShop</strong><small>Items and upgrades</small></span>
+              <span><strong>ChipShop</strong><small>Items and upgrades</small></span>
             </button>
             <button class="wonderweb-shortcut" type="button" data-wonderweb-open-app="email">
               <span class="wonderweb-shortcut-icon" aria-hidden="true">✉️</span>
@@ -2271,22 +2527,49 @@ canvas {
           </div>
         </section>
         <section id="wonderweb-page-clipshop" class="wonderweb-page clipshop-page" role="tabpanel" aria-labelledby="wonderweb-tab-clipshop" data-wonderweb-page="clipshop" hidden>
-          <div class="clipshop-banner">
+          <div class="clipshop-logo">ChipShop</div>
+          <div class="clipshop-breadcrumb">Store Home &gt; Program Upgrades/Integrations</div>
+          <div class="clipshop-masthead">
             <div>
-              <div class="clipshop-logo">ClipShop</div>
-              <div class="clipshop-tagline">DRAWa'S INTERNET DEALS · EVERY FLOOR, A FRESH STOCK</div>
+              <div class="clipshop-title">Computer Software Upgrades/Integrations</div>
+              <div class="clipshop-tagline">Quality Software, Quality Prices</div>
+            </div>
+            <div id="clipshop-ad-top" class="clipshop-ad" aria-label="ChipShop special offer" hidden>
+              <span class="clipshop-ad-copy"></span>
+              <span class="clipshop-ad-discount"></span>
             </div>
             <div class="clipshop-wallet" aria-label="Your balances">
               <span>CHIPS: <b id="clipshop-chip-balance">0</b></span>
               <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
             </div>
           </div>
+          <nav class="clipshop-nav" aria-label="ChipShop navigation">
+            <button type="button" data-clipshop-view="profile">Customer Profile</button>
+            <button type="button" data-clipshop-view="help">Help</button>
+            <button type="button" data-clipshop-view="home">Shop Home</button>
+          </nav>
           <div class="clipshop-toolbar">
             <span id="clipshop-floor" class="clipshop-floor">Floor 1</span>
             <button id="clipshop-refresh" class="clipshop-button" type="button">Restock · 5 chips</button>
           </div>
           <div id="clipshop-notice" class="clipshop-notice" role="status" aria-live="polite">Start a run to browse today's listings.</div>
-          <div id="clipshop-listings" class="clipshop-listings" aria-label="ClipShop listings"></div>
+          <div class="clipshop-columns">
+            <div class="clipshop-catalog-column">
+              <div class="clipshop-store-title">COMPUTERS &amp; UPGRADES — CURRENT FLOOR STOCK</div>
+              <div id="clipshop-listings" class="clipshop-listings" aria-label="ChipShop listings"></div>
+              <div id="clipshop-content-view" class="clipshop-content-view" hidden></div>
+            </div>
+            <aside class="clipshop-cart" aria-label="Shopping cart">
+              <h3>Shopping Cart</h3>
+              <div id="clipshop-cart-list" class="clipshop-cart-list"></div>
+              <div id="clipshop-cart-total" class="clipshop-cart-total"></div>
+              <button id="clipshop-install-all" class="clipshop-button clipshop-cart-install" type="button">Install Everything</button>
+            </aside>
+          </div>
+          <div id="clipshop-ad-bottom" class="clipshop-ad clipshop-bottom-ad" aria-label="ChipShop special offer" hidden>
+            <span class="clipshop-ad-copy"></span>
+            <span class="clipshop-ad-discount"></span>
+          </div>
         </section>
       </div>
     </div>
