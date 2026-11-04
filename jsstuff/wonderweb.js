@@ -44,11 +44,7 @@
   function removeTab(name) {
     const tab = tabs().find(candidate => candidate.dataset.wonderwebTab === name);
     const page = pages().find(candidate => candidate.dataset.wonderwebPage === name);
-    if (tab) {
-      const entry = tab.closest('.wonderweb-tab-entry');
-      if (entry) entry.remove();
-      else tab.remove();
-    }
+    tab?.remove();
     page?.remove();
 
     const nextTab = tabs()[0];
@@ -79,8 +75,6 @@
     page.appendChild(appWindow);
     pagesContainer.appendChild(page);
 
-    const entry = document.createElement('span');
-    entry.className = 'wonderweb-tab-entry';
     const tab = document.createElement('button');
     tab.className = 'wonderweb-tab';
     tab.type = 'button';
@@ -91,14 +85,7 @@
     tab.dataset.wonderwebTab = name;
     tab.textContent = name === 'email' ? 'Email' : 'Trash';
     wireTab(tab);
-    const close = document.createElement('button');
-    close.className = 'wonderweb-tab-close';
-    close.type = 'button';
-    close.setAttribute('aria-label', `Close ${tab.textContent} tab`);
-    close.textContent = '×';
-    close.addEventListener('click', () => closeAppTab(name));
-    entry.append(tab, close);
-    tabList.appendChild(entry);
+    tabList.appendChild(tab);
     return tab;
   }
 
@@ -217,6 +204,7 @@
   }
 
   function wireTab(tab) {
+    tab.title = 'Drag this tab outside WonderWeb to open it in its own window.';
     tab.addEventListener('click', () => selectTab(tab.dataset.wonderwebTab));
     tab.addEventListener('keydown', event => {
       const visibleTabs = tabs().filter(candidate => !candidate.hidden);
@@ -253,7 +241,7 @@
   let tabDrag = null;
   tabList.addEventListener('pointerdown', event => {
     const tab = event.target.closest('[data-wonderweb-tab]');
-    if (!tab || event.button !== 0 || event.target.closest('.wonderweb-tab-close')) return;
+    if (!tab || event.button !== 0) return;
     if (tab.setPointerCapture) tab.setPointerCapture(event.pointerId);
     tabDrag = {
       name: tab.dataset.wonderwebTab,

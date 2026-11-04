@@ -1621,6 +1621,26 @@ else if (type==='partyHat')    drawPartyHat(epos, ehp, ai, frozen);
     else if (type === 'clownCar')  drawClownCar(epos, ehp, ai, frozen);
 else if (type === 'miniClown') drawMiniClown(epos, ehp, ai, frozen);
 
+if (ehp.repairingUntil > emailActiveMs) {
+  const repairPulse = 0.22 + (Math.sin(Date.now() / 120) + 1) * 0.14;
+  const repairRadius = (ENEMY_DEFS[type]?.size || 28) * sizeScale + 3;
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.globalAlpha = repairPulse;
+  ctx.fillStyle = '#80ff80';
+  ctx.beginPath();
+  ctx.ellipse(epos.x, epos.y, repairRadius, repairRadius, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 0.55 + repairPulse;
+  ctx.strokeStyle = '#38ff68';
+  ctx.shadowColor = '#38ff68';
+  ctx.shadowBlur = 10 + repairPulse * 12;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+}
+
 // Confused tint — blue overlay directly on the sprite
 if (ai && ai.confused) {
   const confuseR = (ENEMY_DEFS[type]?.size || 28) + 4;

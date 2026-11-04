@@ -630,6 +630,9 @@ function emailOnWaveCompleted(completedWave) {
 
 function tickEmailEnemyRepairing() {
   if (emailActiveMs >= emailRepairUntil) return;
+  for (const id of ECS.query('enemy', 'hp', 'pos')) {
+    ECS.get(id, 'hp').repairingUntil = emailRepairUntil;
+  }
   if (emailActiveMs < emailRepairNextTick) return;
   emailRepairNextTick += 1000;
   for (const id of ECS.query('enemy', 'hp', 'pos')) {

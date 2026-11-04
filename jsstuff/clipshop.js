@@ -538,6 +538,7 @@ function clipShopRender() {
   const hasRun = clipShopHasRun();
   const page = document.getElementById('wonderweb-page-clipshop');
   if (page) {
+    page.dataset.floor = String(hasRun ? gs.floor : 1);
     clipShopRenderAd(document.getElementById('clipshop-ad-top'),
       hasRun ? gs.clipShopAds?.top : null);
     clipShopRenderAd(document.getElementById('clipshop-ad-bottom'),
