@@ -40,6 +40,7 @@
     popup.style.left = `${x}px`;
     popup.style.top = `${y}px`;
     popup.style.transform = 'none';
+    popup.style.display = 'flex';
     popup.addEventListener('pointerenter', () => {
       popup.dataset.pointerOver = 'true';
     });

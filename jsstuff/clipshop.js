@@ -167,8 +167,8 @@ function clipShopListingName(listing) {
   return listing.itemIds.map(clipShopItemName).join(' + ');
 }
 
-function clipShopMakeAd(stock) {
-  if (Math.random() >= 0.3) return null;
+function clipShopMakeAd(stock, chance = 0.5) {
+  if (Math.random() >= chance) return null;
   const listings = stock.filter(listing => listing.kind !== 'golden');
   if (!listings.length) return null;
   const listing = clipShopRandomFrom(listings);
@@ -193,9 +193,15 @@ function clipShopGenerateStock() {
 
   gs.clipShopStock = stock;
   gs.clipShopAds = {
-    top: clipShopMakeAd(stock),
-    bottom: clipShopMakeAd(stock),
+    top: clipShopMakeAd(stock, 0.5),
+    bottom: clipShopMakeAd(stock, 0.5),
   };
+}
+
+function clipShopMaybeGeneratePurchaseAd() {
+  if (!gs.clipShopStock.length || Math.random() >= 0.5) return;
+  const slot = clipShopRandomFrom(['top', 'bottom']);
+  gs.clipShopAds[slot] = clipShopMakeAd(gs.clipShopStock, 1);
 }
 
 function clipShopRestockNotice(reason) {
@@ -720,6 +726,7 @@ function clipShopInstallListing(listing) {
       ? `${listing.price} Golden Chip`
       : `${listing.price} chips`,
   });
+  clipShopMaybeGeneratePurchaseAd();
   return null;
 }
 

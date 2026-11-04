@@ -90,6 +90,7 @@
     tab.setAttribute('aria-controls', page.id);
     tab.dataset.wonderwebTab = name;
     tab.textContent = name === 'email' ? 'Email' : 'Trash';
+    wireTab(tab);
     const close = document.createElement('button');
     close.className = 'wonderweb-tab-close';
     close.type = 'button';
@@ -154,10 +155,7 @@
     close.setAttribute('aria-label', `Close ${title.textContent}`);
     close.textContent = 'r';
     close.addEventListener('click', () => {
-      pagesContainer.appendChild(page);
-      addStaticTab(name);
-      popout.remove();
-      selectTab(name);
+      restorePopout(name, page, popout);
       if (typeof updateTaskbarActiveWindow === 'function') updateTaskbarActiveWindow();
     });
     titlebar.append(title, close);
@@ -169,6 +167,34 @@
     if (typeof registerIndependentWindow === 'function') {
       registerIndependentWindow(popout);
     }
+  }
+
+  function restorePopout(name, page, popout) {
+    page.classList.remove('wonderweb-detached-page');
+    page.hidden = true;
+    pagesContainer.appendChild(page);
+    addStaticTab(name);
+    popout.remove();
+    selectTab(name);
+  }
+
+  function openTab(name) {
+    let tab = tabs().find(candidate => candidate.dataset.wonderwebTab === name);
+    if (!tab) {
+      const page = document.querySelector(`[data-wonderweb-page="${name}"]`);
+      const popout = page?.closest('.wonderweb-popout-window');
+      if (page && popout) {
+        restorePopout(name, page, popout);
+      } else if (page) {
+        addStaticTab(name);
+      } else if (name === 'email' || name === 'trash') {
+        tab = makeAppTab(name);
+      }
+      tab = tabs().find(candidate => candidate.dataset.wonderwebTab === name);
+    }
+    if (!tab) return;
+    tab.hidden = false;
+    selectTab(name);
   }
 
   function addStaticTab(name) {
@@ -228,8 +254,10 @@
   tabList.addEventListener('pointerdown', event => {
     const tab = event.target.closest('[data-wonderweb-tab]');
     if (!tab || event.button !== 0 || event.target.closest('.wonderweb-tab-close')) return;
+    if (tab.setPointerCapture) tab.setPointerCapture(event.pointerId);
     tabDrag = {
       name: tab.dataset.wonderwebTab,
+      pointerId: event.pointerId,
       x: event.clientX,
       y: event.clientY,
       moved: false,
@@ -242,7 +270,7 @@
     }
   });
   document.addEventListener('pointerup', event => {
-    if (!tabDrag) return;
+    if (!tabDrag || event.pointerId !== tabDrag.pointerId) return;
     const drag = tabDrag;
     tabDrag = null;
     const bounds = browser.getBoundingClientRect();
@@ -256,11 +284,7 @@
 
   browser.querySelectorAll('[data-wonderweb-open-tab]').forEach(shortcut => {
     shortcut.addEventListener('click', () => {
-      const name = shortcut.dataset.wonderwebOpenTab;
-      const tab = tabs().find(candidate => candidate.dataset.wonderwebTab === name);
-      if (!tab) return;
-      tab.hidden = false;
-      selectTab(name);
+      openTab(shortcut.dataset.wonderwebOpenTab);
     });
   });
 
