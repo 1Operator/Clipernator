@@ -681,9 +681,10 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .wonderweb-site-icon {
   display: block;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  object-fit: contain;
 }
 
 .wonderweb-address span {
@@ -778,6 +779,14 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   border: 1px solid #aeb8c7;
 }
 
+.wonderweb-shortcut-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
 .wonderweb-shortcut strong,
 .wonderweb-shortcut small {
   display: block;
@@ -790,34 +799,32 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-page {
-  padding: 8px;
+  padding: 0 0 10px;
   color: #222;
   background: #fff;
   font-family: 'MS Sans Serif', Arial, sans-serif;
 }
 
 .clipshop-logo {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin: 0 0 6px 2px;
-  color: #064b83;
-  font: bold 24px 'Bitwise', 'MS Sans Serif', sans-serif;
-  letter-spacing: 1px;
-  text-shadow: 1px 1px #b5d7ed;
+  min-height: 48px;
+  padding: 4px 8px;
+  background: #fff;
 }
 
-.clipshop-logo::before {
-  content: '✦';
-  color: #f0a000;
-  font: 20px Arial, sans-serif;
+.clipshop-logo img {
+  display: block;
+  width: 150px;
+  height: 56px;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .clipshop-breadcrumb {
-  padding: 4px 8px;
+  padding: 5px 8px;
   color: #fff;
   font-size: 10px;
   background: #367ba5;
+  border-top: 1px solid #b5d0df;
   border-bottom: 2px solid #9fc5d7;
 }
 
@@ -825,8 +832,8 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   display: grid;
   grid-template-columns: minmax(0, 1fr) 230px;
   gap: 9px;
-  padding: 10px 8px;
-  background: #e7f0f5;
+  padding: 10px 9px 8px;
+  background: linear-gradient(#edf5f8, #dce9ef);
   border-bottom: 1px solid #9cb1bd;
 }
 
@@ -883,10 +890,10 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   display: flex;
   flex-wrap: wrap;
   gap: 0;
-  margin: 7px 0;
-  padding: 4px 2px;
-  background: #f4f4f4;
-  border-top: 1px solid #b5b5b5;
+  margin: 0;
+  padding: 5px 4px;
+  background: #f0f1f1;
+  border-top: 1px solid #fff;
   border-bottom: 1px solid #b5b5b5;
 }
 
@@ -908,10 +915,10 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 5px 7px;
+  padding: 5px 8px;
   color: #fff;
   background: #397fa6;
-  border: 1px solid #245776;
+  border-bottom: 1px solid #245776;
 }
 
 .clipshop-floor {
@@ -941,36 +948,41 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 .clipshop-notice {
   min-height: 18px;
-  margin: 5px 0;
+  margin: 0;
+  padding: 5px 8px;
   color: #48535a;
   font-size: 10px;
+  background: #f4f7f8;
+  border-bottom: 1px solid #c5d0d5;
 }
 
 .clipshop-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 205px;
-  align-items: start;
-  gap: 9px;
+  align-items: stretch;
+  gap: 0;
+  background: #f5f7f9;
+  border: 1px solid #9cadb5;
 }
 
 .clipshop-store-title {
-  margin-bottom: 4px;
-  padding: 5px 7px;
+  margin: 0;
+  padding: 6px 7px;
   color: #fff;
   font-size: 10px;
   font-weight: bold;
   background: #34789f;
+  border-bottom: 1px solid #245776;
 }
 
 .clipshop-listings {
   display: block;
   background: #fff;
-  border: 1px solid #d5d5d5;
 }
 
 .clipshop-card {
   display: grid;
-  min-height: 100px;
+  min-height: 94px;
   grid-template-columns: 76px minmax(0, 1fr) 94px;
   align-items: center;
   gap: 7px;
@@ -1018,59 +1030,22 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-upgrade-icon {
-  position: relative;
-  width: 52px;
-  height: 58px;
-  padding: 25px 3px 3px;
-  color: #263d50;
-  font: bold 8px 'MS Sans Serif', Arial, sans-serif;
-  background: linear-gradient(90deg, transparent 0 8px, rgba(255,255,255,.35) 8px 11px, transparent 11px), #266ca1;
-  border: 2px solid #174b75;
-  border-radius: 2px 2px 5px 5px;
-  box-shadow: 2px 2px 0 #bbb;
-  text-align: center;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 2px 1px rgba(0,0,0,.3));
 }
 
-.clipshop-upgrade-icon::before {
-  position: absolute;
-  top: 4px;
-  left: 8px;
-  width: 31px;
-  height: 16px;
-  content: '';
-  background: linear-gradient(#dce8ed 0 4px, #29495c 4px 7px, #dce8ed 7px 100%);
-  border: 1px solid #173b57;
-}
-
-.clipshop-upgrade-icon::after {
-  position: absolute;
-  right: 3px;
-  bottom: 3px;
-  width: 5px;
-  height: 5px;
-  content: '';
-  background: #f8f2d9;
-  border: 1px solid #8d835d;
-}
-
-.clipshop-upgrade-icon.is-damage {
-  background-color: #bb3030;
-  border-color: #7c1d1d;
-}
-
-.clipshop-upgrade-icon.is-speed {
-  background-color: #d79a16;
-  border-color: #91620b;
-}
-
-.clipshop-upgrade-icon.is-placeholder {
+.clipshop-upgrade-placeholder {
   display: grid;
+  width: 52px;
+  height: 52px;
   place-items: center;
-  padding: 0;
   color: #fff;
   font-size: 18px;
   background: #777;
-  border-color: #444;
+  border: 2px solid #444;
 }
 
 .clipshop-product-info {
@@ -1122,9 +1097,10 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-cart {
+  min-width: 0;
   padding: 7px;
   background: #f5f7f9;
-  border: 1px solid #b7c5ce;
+  border-left: 1px solid #9cadb5;
 }
 
 .clipshop-cart h3,
@@ -1201,7 +1177,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-bottom-ad {
-  margin-top: 10px;
+  margin-top: 0;
 }
 
 .clipshop-bottom-ad:not([hidden]) {
@@ -1218,7 +1194,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 
 @media (max-width: 560px) {
   .clipshop-masthead { grid-template-columns: minmax(0, 1fr) 140px; }
-  .clipshop-columns { grid-template-columns: minmax(0, 1fr) 155px; gap: 6px; }
+  .clipshop-columns { grid-template-columns: minmax(0, 1fr) 155px; gap: 0; }
   .clipshop-card { grid-template-columns: 58px minmax(0, 1fr) 76px; gap: 4px; }
   .clipshop-product-image { transform: scale(.85); }
   .clipshop-card .clipshop-button { padding: 3px 4px; font-size: 9px; }
@@ -1228,7 +1204,7 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   .clipshop-masthead { grid-template-columns: 1fr; }
   .clipshop-wallet { justify-content: flex-start; text-align: left; }
   .clipshop-columns { grid-template-columns: 1fr; }
-  .clipshop-cart { order: -1; }
+  .clipshop-cart { order: -1; border-left: 0; border-bottom: 1px solid #9cadb5; }
 }
 
 @media (max-width: 390px) {
@@ -2497,13 +2473,7 @@ canvas {
         <button id="wonderweb-tab-clipshop" class="wonderweb-tab" type="button" role="tab" aria-selected="false" aria-controls="wonderweb-page-clipshop" data-wonderweb-tab="clipshop" hidden>ChipShop</button>
       </div>
       <div class="wonderweb-address" aria-label="Address">
-        <span class="wonderweb-site-icon" aria-hidden="true">
-          <svg viewBox="0 0 18 18" width="18" height="18">
-            <circle cx="9" cy="9" r="7.5" fill="#278ab8" stroke="#173b69"/>
-            <path d="M2.2 7h13.6M2.6 11h12.8M9 1.5c-2.1 2-3.1 4.5-3.1 7.5s1 5.5 3.1 7.5M9 1.5c2.1 2 3.1 4.5 3.1 7.5s-1 5.5-3.1 7.5" fill="none" stroke="#fff" stroke-width=".8"/>
-            <path d="m5.2 6.2 1 4 1.4-2 1.4 2 1-4" fill="none" stroke="#ffeb73" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
+        <img class="wonderweb-site-icon" src="sprites/ui/WonderWeb.png" alt="" aria-hidden="true">
         <span id="wonderweb-address-text" class="wonderweb-address-label">drawa.local/home</span>
         <span class="wonderweb-address-brand" aria-hidden="true">WonderWeb</span>
       </div>
@@ -2513,21 +2483,21 @@ canvas {
           <p>Your local Drawa portal. Pick a shortcut to get started.</p>
           <div class="wonderweb-shortcuts" aria-label="Home shortcuts">
             <button class="wonderweb-shortcut" type="button" data-wonderweb-open-tab="clipshop">
-              <span class="wonderweb-shortcut-icon" aria-hidden="true">🛍️</span>
+              <span class="wonderweb-shortcut-icon" aria-hidden="true"><img src="sprites/ui/ChipShop/ChipShopIcon.png" alt=""></span>
               <span><strong>ChipShop</strong><small>Items and upgrades</small></span>
             </button>
             <button class="wonderweb-shortcut" type="button" data-wonderweb-open-app="email">
-              <span class="wonderweb-shortcut-icon" aria-hidden="true">✉️</span>
+              <span class="wonderweb-shortcut-icon" aria-hidden="true"><img src="sprites/ui/Email.png" alt=""></span>
               <span><strong>Email Inbox</strong><small>Read system notices</small></span>
             </button>
             <button class="wonderweb-shortcut" type="button" data-wonderweb-open-app="trash">
-              <span class="wonderweb-shortcut-icon" aria-hidden="true">🗑️</span>
+              <span class="wonderweb-shortcut-icon" aria-hidden="true"><img src="sprites/ui/Trash.png" alt=""></span>
               <span><strong>Recycle Bin</strong><small>Manage installed items</small></span>
             </button>
           </div>
         </section>
         <section id="wonderweb-page-clipshop" class="wonderweb-page clipshop-page" role="tabpanel" aria-labelledby="wonderweb-tab-clipshop" data-wonderweb-page="clipshop" hidden>
-          <div class="clipshop-logo">ChipShop</div>
+          <div class="clipshop-logo"><img src="sprites/ui/ChipShop/ChipShopLogo.png" alt="ChipShop"></div>
           <div class="clipshop-breadcrumb">Store Home &gt; Program Upgrades/Integrations</div>
           <div class="clipshop-masthead">
             <div>

@@ -18,6 +18,11 @@ const CLIPSHOP_PRICE_RANGES = {
 };
 
 const CLIPSHOP_PERCENTAGES = [10, 15, 20, 25, 30];
+const CLIPSHOP_UPGRADE_SPRITES = {
+  health: 'FloppyDisk.png',
+  speed: 'AmberFloppyDisk.png',
+  damage: 'RedFloppyDisk.png',
+};
 let clipShopRunSequence = 0;
 let clipShopCurrentView = 'home';
 
@@ -431,20 +436,19 @@ function clipShopRender() {
     const productImage = document.createElement('div');
     productImage.className = 'clipshop-product-image';
     if (listing.kind === 'upgrade') {
-      const icon = document.createElement('div');
-      icon.className = 'clipshop-upgrade-icon';
-      if (listing.upgrade.stat === 'health') icon.textContent = 'HEALTH';
-      else if (listing.upgrade.stat === 'speed') {
-        icon.textContent = 'SPEED';
-        icon.classList.add('is-speed');
-      } else if (listing.upgrade.stat === 'damage') {
-        icon.textContent = 'DAMAGE';
-        icon.classList.add('is-damage');
+      const sprite = CLIPSHOP_UPGRADE_SPRITES[listing.upgrade.stat];
+      if (sprite) {
+        const icon = document.createElement('img');
+        icon.className = 'clipshop-upgrade-icon';
+        icon.src = `sprites/ui/ChipShop/${sprite}`;
+        icon.alt = '';
+        productImage.appendChild(icon);
       } else {
-        icon.textContent = '?';
-        icon.classList.add('is-placeholder');
+        const placeholder = document.createElement('span');
+        placeholder.className = 'clipshop-upgrade-placeholder';
+        placeholder.textContent = '?';
+        productImage.appendChild(placeholder);
       }
-      productImage.appendChild(icon);
     } else {
       clipShopAddItemPreview(productImage, listing.itemIds);
     }
