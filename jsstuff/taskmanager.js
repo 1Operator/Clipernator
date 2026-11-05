@@ -55,14 +55,6 @@
       },
     },
     {
-      id: 'virus-ad',
-      name: 'Virus Pop-ups',
-      icon: 'sprites/ui/Virus.png',
-      window: () => document.getElementById('virus-ad-window-host'),
-      isRunning: () => window.virusAdPopupCount() > 0,
-      close: () => window.closeVirusAdPopups(),
-    },
-    {
       id: 'task-manager',
       name: 'Task Manager',
       icon: 'sprites/ui/TaskManager.png',
@@ -101,6 +93,18 @@
     corRed: 'sprites/enemies/COR/RedCOR.png',
     corBlue: 'sprites/enemies/COR/BlueCOR.png',
   };
+
+  function getApplications() {
+    const virusWindows = window.virusAdPopupIds().map(id => ({
+      id: `virus-ad-${id}`,
+      name: `Virus ${id}`,
+      icon: 'sprites/ui/Virus.png',
+      window: () => document.querySelector(`[data-virus-ad-id="${id}"]`),
+      isRunning: () => !!document.querySelector(`[data-virus-ad-id="${id}"]`),
+      close: () => window.closeVirusAdPopup(id),
+    }));
+    return [...applications, ...virusWindows];
+  }
 
   function closeTaskManager() {
     taskManagerWindow.style.display = 'none';
@@ -145,7 +149,12 @@
   }
 
   function renderApplications() {
-    const signature = applications.map(app => {
+    const currentApplications = getApplications();
+    const currentIds = new Set(currentApplications.map(app => app.id));
+    for (const appId of appSelection) {
+      if (!currentIds.has(appId)) appSelection.delete(appId);
+    }
+    const signature = currentApplications.map(app => {
       const running = app.isRunning ? app.isRunning() : !stoppedApplications.has(app.id);
       return `${app.id}:${running}`;
     }).join('|');
@@ -153,7 +162,7 @@
     appsSignature = signature;
     appRows.replaceChildren();
 
-    for (const app of applications) {
+    for (const app of currentApplications) {
       const running = app.isRunning ? app.isRunning() : !stoppedApplications.has(app.id);
       const row = document.createElement('button');
       row.type = 'button';
@@ -262,8 +271,9 @@
   });
 
   document.getElementById('task-manager-end-task').addEventListener('click', () => {
+    const currentApplications = getApplications();
     for (const appId of appSelection) {
-      const app = applications.find(candidate => candidate.id === appId);
+      const app = currentApplications.find(candidate => candidate.id === appId);
       const running = app?.isRunning ? app.isRunning() : !stoppedApplications.has(appId);
       if (!app || !running) continue;
       app.close();
@@ -500,7 +510,7 @@
   const windowObserver = new MutationObserver(records => {
     if (!observingWindows) return;
     for (const record of records) {
-      const app = applications.find(candidate => candidate.window?.() === record.target);
+      const app = getApplications().find(candidate => candidate.window?.() === record.target);
       if (!app) continue;
       if (app.isRunning) continue;
       if (visibleWindow(record.target)) stoppedApplications.delete(app.id);

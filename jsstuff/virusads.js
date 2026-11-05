@@ -4,7 +4,7 @@
 
 (() => {
   const host = document.getElementById('virus-ad-window-host');
-  const maxPopups = 5;
+  const maxPopups = 15;
   const popups = new Map();
   let nextPopupId = 0;
   let animationFrame = null;
@@ -14,10 +14,13 @@
     const popup = document.createElement('section');
     popup.className = 'independent-window virus-ad-window';
     popup.dataset.windowTitle = 'Virus';
+    popup.dataset.virusAdId = String(id);
     popup.setAttribute('aria-label', 'Virus pop-up window');
 
     const titlebar = document.createElement('header');
     titlebar.className = 'desktop-window-titlebar virus-ad-titlebar';
+    const title = document.createElement('span');
+    title.textContent = `Virus ${id}`;
     const close = document.createElement('button');
     close.className = 'desktop-window-close-button';
     close.type = 'button';
@@ -30,7 +33,7 @@
     image.alt = 'Virus';
     image.draggable = false;
 
-    titlebar.appendChild(close);
+    titlebar.append(title, close);
     popup.append(titlebar, image);
 
     const width = 136;
@@ -57,11 +60,11 @@
       audio: SFX.playLoopInstance('virus', 0.35),
       x,
       y,
-      vx: (Math.random() - 0.5) * 260,
-      vy: (Math.random() - 0.5) * 260,
+      vx: (Math.random() - 0.5) * 820,
+      vy: (Math.random() - 0.5) * 820,
       width,
       height,
-      turnIn: 0.5 + Math.random(),
+      turnIn: 0.35 + Math.random() * 0.45,
     };
   }
 
@@ -89,7 +92,7 @@
       if (popup.turnIn <= 0) {
         popup.vx = (Math.random() - 0.5) * 260;
         popup.vy = (Math.random() - 0.5) * 260;
-        popup.turnIn = 0.5 + Math.random();
+        popup.turnIn = 0.35 + Math.random() * 0.45;
       }
 
       const maxX = Math.max(0, window.innerWidth - popup.width);
@@ -112,7 +115,7 @@
   }
 
   window.openVirusAdPopups = () => {
-    const count = Math.min(3 + Math.floor(Math.random() * 3), maxPopups - popups.size);
+    const count = Math.min(6 + Math.floor(Math.random() * 5), maxPopups - popups.size);
     if (count <= 0) {
       return false;
     }
@@ -132,4 +135,6 @@
     for (const id of [...popups.keys()]) closePopup(id);
   };
   window.virusAdPopupCount = () => popups.size;
+  window.virusAdPopupIds = () => [...popups.keys()];
+  window.closeVirusAdPopup = closePopup;
 })();
