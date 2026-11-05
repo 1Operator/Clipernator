@@ -790,11 +790,14 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   max-height: 100%;
 }
 
-.wonderweb-popout-window {
+#utensil-window-layer .independent-window.wonderweb-popout-window {
   width: min(620px, calc(100vw - 20px));
   height: min(430px, calc(100vh - 60px));
   min-width: min(360px, calc(100vw - 20px));
   min-height: min(280px, calc(100vh - 20px));
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 20px);
+  resize: both;
   overflow: hidden;
   background: #d4d0c8;
   border-top: 2px solid #fff;

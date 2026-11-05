@@ -112,7 +112,7 @@
     }
   }
 
-  function makePopout(name) {
+  function makePopout(name, pointerX, pointerY) {
     const tab = tabs().find(candidate => candidate.dataset.wonderwebTab === name);
     const page = pages().find(candidate => candidate.dataset.wonderwebPage === name);
     if (!tab || !page) return;
@@ -123,6 +123,7 @@
       removeTab(name);
       appWindow.classList.remove('wonderweb-embedded-app');
       appWindow.style.display = 'flex';
+      positionWindowAtPointer(appWindow, pointerX, pointerY);
       if (typeof bringFloatingWindowToFront === 'function') {
         bringFloatingWindowToFront(appWindow);
       }
@@ -154,6 +155,17 @@
     if (typeof registerIndependentWindow === 'function') {
       registerIndependentWindow(popout);
     }
+    positionWindowAtPointer(popout, pointerX, pointerY);
+  }
+
+  function positionWindowAtPointer(windowElement, pointerX, pointerY) {
+    windowElement.style.transform = 'none';
+    const width = windowElement.offsetWidth;
+    const titlebarHeight = windowElement.querySelector('.desktop-window-titlebar')?.offsetHeight || 22;
+    const maxLeft = Math.max(0, window.innerWidth - width);
+    const maxTop = Math.max(0, window.innerHeight - titlebarHeight);
+    windowElement.style.left = `${Math.max(0, Math.min(maxLeft, pointerX - width / 2))}px`;
+    windowElement.style.top = `${Math.max(0, Math.min(maxTop, pointerY - titlebarHeight / 2))}px`;
   }
 
   function restorePopout(name, page, popout) {
@@ -264,7 +276,7 @@
     const bounds = browser.getBoundingClientRect();
     const outside = event.clientX < bounds.left || event.clientX > bounds.right
       || event.clientY < bounds.top || event.clientY > bounds.bottom;
-    if (drag.moved && outside) makePopout(drag.name);
+    if (drag.moved && outside) makePopout(drag.name, event.clientX, event.clientY);
   });
   document.addEventListener('pointercancel', () => {
     tabDrag = null;
