@@ -55,7 +55,8 @@
       bringFloatingWindowToFront(popup);
     }
 
-    return {
+    const popupState = {
+      id,
       element: popup,
       audio: SFX.playLoopInstance('virus', 0.35),
       x,
@@ -65,12 +66,28 @@
       width,
       height,
       turnIn: 0.35 + Math.random() * 0.45,
+      replicationTimer: null,
     };
+    scheduleReplication(popupState);
+    return popupState;
+  }
+
+  function scheduleReplication(popup) {
+    popup.replicationTimer = setTimeout(() => {
+      if (!popups.has(popup.id)) return;
+      if (popups.size < maxPopups) {
+        const id = ++nextPopupId;
+        popups.set(id, makePopup(id));
+        if (typeof window.taskManagerRefresh === 'function') window.taskManagerRefresh();
+      }
+      scheduleReplication(popup);
+    }, 1000);
   }
 
   function closePopup(id) {
     const popup = popups.get(id);
     if (!popup) return;
+    clearTimeout(popup.replicationTimer);
     SFX.stopLoopInstance(popup.audio);
     popup.element.remove();
     popups.delete(id);
@@ -90,8 +107,8 @@
       if (popup.element.dataset.pointerOver === 'true') continue;
       popup.turnIn -= delta;
       if (popup.turnIn <= 0) {
-        popup.vx = (Math.random() - 0.5) * 260;
-        popup.vy = (Math.random() - 0.5) * 260;
+        popup.vx = (Math.random() - 0.5) * 820;
+        popup.vy = (Math.random() - 0.5) * 820;
         popup.turnIn = 0.35 + Math.random() * 0.45;
       }
 
@@ -115,16 +132,10 @@
   }
 
   window.openVirusAdPopups = () => {
-    const count = Math.min(6 + Math.floor(Math.random() * 5), maxPopups - popups.size);
-    if (count <= 0) {
-      return false;
-    }
-
+    if (popups.size >= maxPopups) return false;
     host.style.display = 'contents';
-    for (let index = 0; index < count; index++) {
-      const id = ++nextPopupId;
-      popups.set(id, makePopup(id));
-    }
+    const id = ++nextPopupId;
+    popups.set(id, makePopup(id));
     lastFrameTime = 0;
     if (animationFrame === null) animationFrame = requestAnimationFrame(animatePopups);
     if (typeof window.taskManagerRefresh === 'function') window.taskManagerRefresh();
