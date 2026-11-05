@@ -81,7 +81,7 @@
         if (typeof window.taskManagerRefresh === 'function') window.taskManagerRefresh();
       }
       scheduleReplication(popup);
-    }, 2500);
+    }, 2000);
   }
 
   function closePopup(id) {
