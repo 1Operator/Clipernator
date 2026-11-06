@@ -101,6 +101,15 @@
   }
 
   function openAppTab(name) {
+    const existing = tabs().find(tab => tab.dataset.wonderwebTab === name);
+    const appWindow = document.getElementById(`${name}-window`);
+    if (existing && appWindow?.classList.contains('wonderweb-embedded-app')) {
+      detachAppWindow(appWindow);
+      if (name === 'email') toggleEmailInbox();
+      else openTrashWindow();
+      return;
+    }
+
     const tab = makeAppTab(name);
     if (name === 'email') toggleEmailInbox(true);
     else openTrashWindow(true);

@@ -500,7 +500,6 @@ function renderPauseMenu() {
                           gs.hasDoubleCake ? '2x (40% dud)' : '1x';
   const shopDamageMultiplier = (1 + (gs.clipShopDamageBonus || 0))
     * (gs.clipShopDamageMultiplier || 1);
-  const dmgLabel = `${cakeDamageLabel} · ${shopDamageMultiplier.toFixed(2)}x shop`;
   const baseSpeedMult = gs.speedBoostTimer > 0 ? (gs.speedBoostMult || CFG.SPEED_BOOST_MULT) :
                         gs.hasTightropeBoots ? 3.00 : 1;
   const speedMult = baseSpeedMult
@@ -512,7 +511,9 @@ function renderPauseMenu() {
   let lines = [
     `HP .............. ${Math.max(0,gs.health)} / ${gs.maxHealth}`,
     `Wave ............ ${gs.wave}`,
-    `Damage .......... ${dmgLabel}`,
+    `Damage .......... ${cakeDamageLabel}`,
+    '',
+    `Shop Damage ..... ${shopDamageMultiplier.toFixed(2)}x`,
     `Speed ........... ${speedVal}`,
     `Clip Size ....... ${emailAmmoCapacity()}`,
     `Bullets/Shot .... ${bulletsPerShot}`,
@@ -1539,6 +1540,9 @@ function offerItemChoice() {
     SFX.play('itemConfirm', 0.65);
     gs.unlockedItems.push(id);
     def.effect(gs);
+    if (typeof clipShopHandleItemAcquired === 'function') {
+      clipShopHandleItemAcquired(id);
+    }
     choiceEl.style.display = 'none';
     gs.pendingChoice = false;
     cancelAnimationFrame(animId);

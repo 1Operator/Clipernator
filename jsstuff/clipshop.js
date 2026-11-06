@@ -26,6 +26,7 @@ const CLIPSHOP_UPGRADE_SPRITES = {
 let clipShopRunSequence = 0;
 let clipShopCurrentView = 'home';
 let clipShopRemovalTimer = null;
+const CLIPSHOP_INVALIDATION_DURATION = 650;
 
 function clipShopHasRun() {
   return typeof gs !== 'undefined'
@@ -274,7 +275,7 @@ function clipShopHandleItemAcquired(itemId) {
   clipShopRemovalTimer = setTimeout(() => {
     clipShopRemovalTimer = null;
     clipShopRender();
-  }, 520);
+  }, CLIPSHOP_INVALIDATION_DURATION);
 }
 
 function clipShopStartFloor() {
@@ -441,19 +442,27 @@ function clipShopSetView(view) {
 }
 
 function clipShopRenderContentView() {
-  const listings = document.getElementById('clipshop-listings');
+  const home = document.getElementById('clipshop-home-view');
   const content = document.getElementById('clipshop-content-view');
-  if (!listings || !content) return;
+  if (!home || !content) return;
   const view = typeof gs !== 'undefined'
     ? gs.clipShopView || clipShopCurrentView
     : clipShopCurrentView;
-  listings.hidden = view !== 'home';
+  home.hidden = view !== 'home';
   content.hidden = view === 'home';
   if (content.hidden) return;
 
   content.replaceChildren();
-  const heading = document.createElement('h3');
+  const header = document.createElement('header');
+  header.className = 'clipshop-content-header';
+  const heading = document.createElement('h2');
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.className = 'clipshop-content-back';
+  back.dataset.clipshopView = 'home';
+  back.textContent = 'Back to Shop';
   const body = document.createElement('div');
+  body.className = 'clipshop-content-body';
   if (view === 'profile') {
     heading.textContent = 'Customer Profile — Installed Listings';
     const purchases = typeof gs !== 'undefined' && Array.isArray(gs.clipShopPurchases)
@@ -473,7 +482,8 @@ function clipShopRenderContentView() {
     heading.textContent = 'ChipShop Help';
     body.textContent = 'Add a listing to your Shopping Cart, then install it here or use Install Everything. Chips are charged when a listing is installed. Installed items and upgrades apply to this run only; new stock appears when you reach another floor or pay to restock.';
   }
-  content.append(heading, body);
+  header.append(heading, back);
+  content.append(header, body);
 }
 
 function clipShopRenderCart() {
@@ -810,6 +820,10 @@ document.querySelectorAll('[data-clipshop-ad]').forEach(ad => {
   ad.addEventListener('click', () => clipShopApplyAd(ad));
 });
 document.querySelector('.clipshop-nav').addEventListener('click', event => {
+  const button = event.target.closest('[data-clipshop-view]');
+  if (button) clipShopSetView(button.dataset.clipshopView);
+});
+document.getElementById('clipshop-content-view').addEventListener('click', event => {
   const button = event.target.closest('[data-clipshop-view]');
   if (button) clipShopSetView(button.dataset.clipshopView);
 });

@@ -1205,15 +1205,16 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-card.is-invalidating {
-  animation: clipshop-stock-invalidating 520ms ease-in forwards;
+  transform-origin: center;
+  animation: clipshop-stock-invalidating 650ms cubic-bezier(0.4, 0, 0.6, 1) forwards;
   pointer-events: none;
 }
 
 @keyframes clipshop-stock-invalidating {
-  0% { background-color: #fff; }
-  28% { background-color: #ff7777; }
-  62% { background-color: #e33; }
-  100% { background-color: #b00; opacity: 0; }
+  0% { background-color: #fff; opacity: 1; transform: scaleY(1); }
+  24% { background-color: #f66; opacity: 1; transform: scaleY(1); }
+  58% { background-color: #d22; opacity: 1; transform: scaleY(1); }
+  100% { background-color: #d22; opacity: 0; transform: scaleY(0.92); }
 }
 
 .clipshop-card:last-child { border-bottom: 0; }
@@ -1390,11 +1391,47 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
 }
 
 .clipshop-content-view {
+  min-height: 100%;
+  padding: 12px;
+  color: #222;
+  background: #f8fafb;
+  border: 1px solid #9cadb5;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.clipshop-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -12px -12px 12px;
+  padding: 9px 12px;
+  color: #fff;
+  background: linear-gradient(#397fa6, #245776);
+  border-bottom: 1px solid #173f59;
+}
+
+.clipshop-content-header h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.clipshop-content-body {
+  max-width: 62ch;
   padding: 10px;
   background: #fff;
-  border: 1px solid #d5d5d5;
-  font-size: 10px;
-  line-height: 1.5;
+  border: 1px solid #ccd3d8;
+}
+
+.clipshop-content-back {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  color: #173a53;
+  font: bold 10px 'MS Sans Serif', Arial, sans-serif;
+  background: linear-gradient(#fff, #dceaf2);
+  border: 1px solid #b5d0df;
+  cursor: pointer;
 }
 
 .clipshop-history-item {
@@ -2485,7 +2522,17 @@ canvas {
   .task-manager-panels { min-height: 0; flex: 1; display: flex; }
   .task-manager-panel { min-height: 0; flex: 1; flex-direction: column; background: #fff; }
   .task-manager-panel:not([hidden]) { display: flex; }
-  .task-manager-hint { margin: 0 0 6px; color: #333; }
+  .task-manager-hint {
+    display: block;
+    flex: 0 0 auto;
+    margin: 0 0 7px;
+    padding: 5px 8px;
+    color: #334653;
+    font: 10px/1.35 'MS Sans Serif', Arial, sans-serif;
+    background: linear-gradient(#f7fafc, #eaf1f5);
+    border: 1px solid #c1ccd4;
+    border-left: 3px solid #3a6ea8;
+  }
 
   .task-manager-table {
     min-height: 0;
@@ -3005,43 +3052,45 @@ canvas {
           </div>
         </section>
         <section id="wonderweb-page-clipshop" class="wonderweb-page clipshop-page" role="tabpanel" aria-labelledby="wonderweb-tab-clipshop" data-wonderweb-page="clipshop" hidden>
-          <div class="clipshop-logo"><img src="sprites/ui/ChipShop/ChipShopLogo.png" alt="ChipShop"></div>
-          <div class="clipshop-breadcrumb">Store Home &gt; Program Upgrades/Integrations</div>
-          <div class="clipshop-masthead">
-            <div>
-              <div class="clipshop-title">Computer Software Upgrades/Integrations</div>
-              <div class="clipshop-tagline">Quality Software, Quality Prices</div>
+          <div id="clipshop-home-view">
+            <div class="clipshop-logo"><img src="sprites/ui/ChipShop/ChipShopLogo.png" alt="ChipShop"></div>
+            <div class="clipshop-breadcrumb">Store Home &gt; Program Upgrades/Integrations</div>
+            <div class="clipshop-masthead">
+              <div>
+                <div class="clipshop-title">Computer Software Upgrades/Integrations</div>
+                <div class="clipshop-tagline">Quality Software, Quality Prices</div>
+              </div>
+              <button id="clipshop-ad-top" class="clipshop-ad" type="button" data-clipshop-ad="top" aria-label="ChipShop special offer" hidden></button>
+              <div class="clipshop-wallet" aria-label="Your balances">
+                <span>CHIPS: <b id="clipshop-chip-balance">0</b></span>
+                <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
+              </div>
             </div>
-            <button id="clipshop-ad-top" class="clipshop-ad" type="button" data-clipshop-ad="top" aria-label="ChipShop special offer" hidden></button>
-            <div class="clipshop-wallet" aria-label="Your balances">
-              <span>CHIPS: <b id="clipshop-chip-balance">0</b></span>
-              <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
+            <nav class="clipshop-nav" aria-label="ChipShop navigation">
+              <button type="button" data-clipshop-view="profile">Customer Profile</button>
+              <button type="button" data-clipshop-view="help">Help</button>
+              <button type="button" data-clipshop-view="home">Shop Home</button>
+            </nav>
+            <div class="clipshop-toolbar">
+              <span id="clipshop-floor" class="clipshop-floor">Floor 1</span>
+              <button id="clipshop-refresh" class="clipshop-button" type="button">Restock · 5 chips</button>
             </div>
-          </div>
-          <nav class="clipshop-nav" aria-label="ChipShop navigation">
-            <button type="button" data-clipshop-view="profile">Customer Profile</button>
-            <button type="button" data-clipshop-view="help">Help</button>
-            <button type="button" data-clipshop-view="home">Shop Home</button>
-          </nav>
-          <div class="clipshop-toolbar">
-            <span id="clipshop-floor" class="clipshop-floor">Floor 1</span>
-            <button id="clipshop-refresh" class="clipshop-button" type="button">Restock · 5 chips</button>
-          </div>
-          <div id="clipshop-notice" class="clipshop-notice" role="status" aria-live="polite">Start a run to browse today's listings.</div>
-          <div class="clipshop-columns">
-            <div class="clipshop-catalog-column">
-              <div class="clipshop-store-title">COMPUTERS &amp; UPGRADES — CURRENT FLOOR STOCK</div>
-              <div id="clipshop-listings" class="clipshop-listings" aria-label="ChipShop listings"></div>
-              <div id="clipshop-content-view" class="clipshop-content-view" hidden></div>
+            <div id="clipshop-notice" class="clipshop-notice" role="status" aria-live="polite">Start a run to browse today's listings.</div>
+            <div class="clipshop-columns">
+              <div class="clipshop-catalog-column">
+                <div class="clipshop-store-title">COMPUTERS &amp; UPGRADES — CURRENT FLOOR STOCK</div>
+                <div id="clipshop-listings" class="clipshop-listings" aria-label="ChipShop listings"></div>
+              </div>
+              <aside class="clipshop-cart" aria-label="Shopping cart">
+                <h3>Shopping Cart</h3>
+                <div id="clipshop-cart-list" class="clipshop-cart-list"></div>
+                <div id="clipshop-cart-total" class="clipshop-cart-total"></div>
+                <button id="clipshop-install-all" class="clipshop-button clipshop-cart-install" type="button">Install Everything</button>
+              </aside>
             </div>
-            <aside class="clipshop-cart" aria-label="Shopping cart">
-              <h3>Shopping Cart</h3>
-              <div id="clipshop-cart-list" class="clipshop-cart-list"></div>
-              <div id="clipshop-cart-total" class="clipshop-cart-total"></div>
-              <button id="clipshop-install-all" class="clipshop-button clipshop-cart-install" type="button">Install Everything</button>
-            </aside>
+            <button id="clipshop-ad-bottom" class="clipshop-ad clipshop-bottom-ad" type="button" data-clipshop-ad="bottom" aria-label="ChipShop special offer" hidden></button>
           </div>
-          <button id="clipshop-ad-bottom" class="clipshop-ad clipshop-bottom-ad" type="button" data-clipshop-ad="bottom" aria-label="ChipShop special offer" hidden></button>
+          <section id="clipshop-content-view" class="clipshop-content-view" aria-live="polite" hidden></section>
         </section>
       </div>
     </div>
