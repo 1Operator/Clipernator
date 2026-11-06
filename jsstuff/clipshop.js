@@ -239,26 +239,34 @@ function clipShopStartRun() {
 }
 
 function clipShopHandleItemAcquired(itemId) {
-  if (!Array.isArray(gs.clipShopStock)) return;
-  const removed = gs.clipShopStock.filter(listing =>
+  const stock = Array.isArray(gs.clipShopStock) ? gs.clipShopStock : [];
+  const cart = Array.isArray(gs.clipShopCart) ? gs.clipShopCart : [];
+  const removedStock = stock.filter(listing =>
     listing.kind !== 'upgrade' && listing.itemIds?.includes(itemId)
   );
-  if (!removed.length) return;
-
-  const removedIds = new Set(removed.map(listing => listing.id));
-  gs.clipShopStock = gs.clipShopStock.filter(listing => !removedIds.has(listing.id));
-  gs.clipShopCart = (gs.clipShopCart || []).filter(listing =>
-    !listing.itemIds?.includes(itemId)
+  const removedCart = cart.filter(listing =>
+    listing.kind !== 'upgrade' && listing.itemIds?.includes(itemId)
   );
+  if (!removedStock.length && !removedCart.length) return;
+
+  const removedStockIds = new Set(removedStock.map(listing => listing.id));
+  const removedCartIds = new Set(removedCart.map(listing => listing.id));
+  const removedIds = new Set([...removedStockIds, ...removedCartIds]);
+  gs.clipShopStock = stock.filter(listing => !removedStockIds.has(listing.id));
+  gs.clipShopCart = cart.filter(listing => !removedCartIds.has(listing.id));
   for (const slot of ['top', 'bottom']) {
     if (removedIds.has(gs.clipShopAds?.[slot]?.listingId)) {
       gs.clipShopAds[slot] = null;
     }
   }
 
-  const listings = document.getElementById('clipshop-listings');
-  if (listings) {
-    for (const card of listings.querySelectorAll('.clipshop-card')) {
+  for (const [containerId, selector] of [
+    ['clipshop-listings', '.clipshop-card'],
+    ['clipshop-cart-list', '.clipshop-cart-item'],
+  ]) {
+    const container = document.getElementById(containerId);
+    if (!container) continue;
+    for (const card of container.querySelectorAll(selector)) {
       if (!removedIds.has(card.dataset.clipshopListingId)) continue;
       card.classList.add('is-invalidating');
       card.querySelectorAll('button').forEach(button => {
@@ -510,6 +518,7 @@ function clipShopRenderCart() {
 
     const item = document.createElement('div');
     item.className = 'clipshop-cart-item';
+    item.dataset.clipshopListingId = listing.id;
     const name = document.createElement('div');
     name.className = 'clipshop-cart-item-title';
     name.textContent = clipShopListingName(listing);
