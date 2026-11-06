@@ -402,7 +402,7 @@
     const activeProjectiles = typeof gs !== 'undefined' && Array.isArray(gs.enemyBullets) ? gs.enemyBullets.length : 0;
     const objectCount = groups.reduce((total, group) => total + (group.kind === 'object' ? group.count : 0), 0);
     document.getElementById('task-manager-statusbar').textContent =
-      `Processes: ${processCount}  |  Enemies: ${enemyCount}  |  Objects: ${objectCount} (${activeProjectiles} projectiles)`;
+      `${processCount} process types  ·  ${enemyCount} enemies  ·  ${objectCount} objects  ·  ${activeProjectiles} projectiles`;
   }
 
   processRows.addEventListener('click', event => {
@@ -422,6 +422,7 @@
 
     if (!process) {
       processMessage.textContent = 'Select an enemy process. System objects and Clippy cannot be patched.';
+      processMessage.title = processMessage.textContent;
       damageButton.title = 'Select an enemy process to continue.';
       return;
     }
@@ -447,6 +448,7 @@
         ? `Patch movement and damage by 30% for the rest of this run. CORs have no health pool. Cost: ${nextCost} chips (${gs.chips} available).`
         : `Patch movement, damage, and health by 30% for the rest of this run. Cost: ${nextCost} chips (${gs.chips} available).`;
     processMessage.textContent = `${process.name}: ${currentCount} active · ${health} · ${speed}. ${patchText}`;
+    processMessage.title = processMessage.textContent;
     damageButton.title = isNerfed
       ? 'This enemy type has already been patched this run.'
       : gs.chips < nextCost

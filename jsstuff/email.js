@@ -713,7 +713,7 @@ function initializeEmailSystem() {
   const list = document.getElementById('email-list');
   const preview = document.getElementById('email-preview');
   const inbox = document.getElementById('email-window');
-  document.getElementById('taskbar-email').addEventListener('click', toggleEmailInbox);
+  document.getElementById('taskbar-email').addEventListener('click', () => toggleEmailInbox());
   document.getElementById('email-actions').addEventListener('click', event => {
     const button = event.target.closest('[data-email-action]');
     if (button && !button.disabled) emailHandleAction(button.dataset.emailAction);

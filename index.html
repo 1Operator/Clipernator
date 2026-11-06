@@ -2615,38 +2615,64 @@ canvas {
   .task-manager-process-row .task-manager-cell:last-child { padding-left: 6px; }
 
   .task-manager-footer {
-    min-height: 43px;
-    display: flex;
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 5px 2px 0;
+    gap: 8px;
+    padding: 7px;
+    background: #e7e4dc;
+    border: 1px solid #b6b2aa;
   }
 
-  .task-manager-footer-copy { flex: 1; color: #222; line-height: 1.4; }
+  .task-manager-footer-copy {
+    display: -webkit-box;
+    min-width: 0;
+    max-height: 34px;
+    overflow: hidden;
+    padding: 5px 7px;
+    color: #34434c;
+    background: #fff;
+    border: 1px inset #b8b8b8;
+    font: 10px/1.35 'MS Sans Serif', Arial, sans-serif;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 
   .task-manager-button {
-    min-width: 98px;
-    padding: 5px 10px;
+    min-width: 116px;
+    min-height: 30px;
+    padding: 4px 9px;
     color: #000;
-    font: 12px 'MS Sans Serif', Arial, sans-serif;
-    background: #c0c0c0;
-    border: 2px outset #fff;
+    font: 11px 'MS Sans Serif', Arial, sans-serif;
+    background: linear-gradient(#f4f3ef, #d6d3cb);
+    border: 1px solid;
+    border-color: #fff #404040 #404040 #fff;
+    box-shadow: inset 1px 1px #e8e8e0, inset -1px -1px #808080;
     cursor: pointer;
   }
 
-  .task-manager-button:active:not(:disabled) { border-style: inset; }
-  .task-manager-button:disabled { color: #777; cursor: default; }
+  .task-manager-button:active:not(:disabled) {
+    background: #d6d3cb;
+    border-color: #404040 #fff #fff #404040;
+    box-shadow: inset 1px 1px #808080, inset -1px -1px #e8e8e0;
+  }
+  .task-manager-button:disabled { color: #777; cursor: default; filter: grayscale(.35); }
 
   .task-manager-statusbar {
     flex: 0 0 20px;
     display: flex;
+    min-width: 0;
     align-items: center;
     padding: 2px 6px;
     color: #222;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: #d4d0c8;
     border-top: 1px solid #888;
     box-shadow: inset 0 1px #fff;
-    font-size: 11px;
+    font: 10px 'MS Sans Serif', Arial, sans-serif;
   }
 
   .task-manager-info {
@@ -2981,7 +3007,7 @@ canvas {
         </section>
       </div>
     </div>
-    <div class="task-manager-statusbar" id="task-manager-statusbar">Processes: 0 &nbsp; | &nbsp; CPU Usage: — &nbsp; | &nbsp; Memory: —</div>
+    <div class="task-manager-statusbar" id="task-manager-statusbar">0 process types  ·  0 enemies  ·  0 objects  ·  0 projectiles</div>
   </section>
   <section id="email-window" class="independent-window" data-window-title="Email - Inbox" aria-label="Email inbox">
     <header class="desktop-window-titlebar">
@@ -3052,25 +3078,25 @@ canvas {
           </div>
         </section>
         <section id="wonderweb-page-clipshop" class="wonderweb-page clipshop-page" role="tabpanel" aria-labelledby="wonderweb-tab-clipshop" data-wonderweb-page="clipshop" hidden>
-          <div id="clipshop-home-view">
-            <div class="clipshop-logo"><img src="sprites/ui/ChipShop/ChipShopLogo.png" alt="ChipShop"></div>
-            <div class="clipshop-breadcrumb">Store Home &gt; Program Upgrades/Integrations</div>
-            <div class="clipshop-masthead">
-              <div>
-                <div class="clipshop-title">Computer Software Upgrades/Integrations</div>
-                <div class="clipshop-tagline">Quality Software, Quality Prices</div>
-              </div>
-              <button id="clipshop-ad-top" class="clipshop-ad" type="button" data-clipshop-ad="top" aria-label="ChipShop special offer" hidden></button>
-              <div class="clipshop-wallet" aria-label="Your balances">
-                <span>CHIPS: <b id="clipshop-chip-balance">0</b></span>
-                <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
-              </div>
+          <div class="clipshop-logo"><img src="sprites/ui/ChipShop/ChipShopLogo.png" alt="ChipShop"></div>
+          <div class="clipshop-breadcrumb">Store Home &gt; Program Upgrades/Integrations</div>
+          <div class="clipshop-masthead">
+            <div>
+              <div class="clipshop-title">Computer Software Upgrades/Integrations</div>
+              <div class="clipshop-tagline">Quality Software, Quality Prices</div>
             </div>
-            <nav class="clipshop-nav" aria-label="ChipShop navigation">
-              <button type="button" data-clipshop-view="profile">Customer Profile</button>
-              <button type="button" data-clipshop-view="help">Help</button>
-              <button type="button" data-clipshop-view="home">Shop Home</button>
-            </nav>
+            <button id="clipshop-ad-top" class="clipshop-ad" type="button" data-clipshop-ad="top" aria-label="ChipShop special offer" hidden></button>
+            <div class="clipshop-wallet" aria-label="Your balances">
+              <span>CHIPS: <b id="clipshop-chip-balance">0</b></span>
+              <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
+            </div>
+          </div>
+          <nav class="clipshop-nav" aria-label="ChipShop navigation">
+            <button type="button" data-clipshop-view="profile">Customer Profile</button>
+            <button type="button" data-clipshop-view="help">Help</button>
+            <button type="button" data-clipshop-view="home">Shop Home</button>
+          </nav>
+          <div id="clipshop-home-view">
             <div class="clipshop-toolbar">
               <span id="clipshop-floor" class="clipshop-floor">Floor 1</span>
               <button id="clipshop-refresh" class="clipshop-button" type="button">Restock · 5 chips</button>
