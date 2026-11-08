@@ -132,7 +132,7 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 
 ### Floor 1
 - **Utensil** (fork/knife/spoon) — body drifts toward player; orbiting utensil launches at player on a timer; knife bleeds, spoon knocks back, fork grabs and slows
-- **Water Balloon** — moves around randomly and fires gravity-affected bullets at the player
+- **Water Balloon** — wanders but steers back toward Clippy when beyond its leash distance; periodically fires tears at Clippy. When ridden by a Party Hat, it occasionally circles in toward Clippy while firing a red homing volley.
 - **Gift Box** — slow wind-up explosion on proximity; player can grab and throw it
 - **Party Hat** — fast, periodically speed-dives at player
 - **Cake Boss** (wave 11) — multi-phase: candle shots, spin bounce, frosting arc balls; loses a candle per HP threshold; at 1 candle enters permanent spiral

@@ -535,6 +535,8 @@ if (!hatrider && ai.hatrider) ai.hatrider = null; // rider died, clear flag
     if (ai.wbShootTick    === undefined) ai.wbShootTick    = 0;
     if (ai.wbFiredShots   === undefined) ai.wbFiredShots   = 0;
     if (ai.orientAngle    === undefined) ai.orientAngle    = 0;
+    if (ai.wbOrbitTimer   === undefined) ai.wbOrbitTimer   = 180 + Math.random() * 180;
+    if (ai.wbOrbitDuration === undefined) ai.wbOrbitDuration = 0;
 
     const dx = pp.x - pos.x, dy = pp.y - pos.y, dist = Math.hypot(dx,dy)||1;
 
@@ -599,7 +601,9 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
       }
 
     } else if (ai.wbState === 'SHOOTING') {
-      vel.vx *= 0.88; vel.vy *= 0.88;
+      if (!hatrider || ai.wbOrbitDuration <= 0) {
+        vel.vx *= 0.88; vel.vy *= 0.88;
+      }
 
       ai.wbShootTick++;
       const SHOOT_SPD = 5; // ticks per frame
@@ -684,6 +688,59 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
           ai.wbAnimFrame = 0;
           ai.wbShootTimer = (ai.hatrider && ECS.has(ai.hatrider, 'pos')) ? 80 + Math.random()*60 : 180 + Math.random()*120;
         }
+      }
+    }
+
+    if (hatrider) {
+      if (ai.wbOrbitDuration > 0) {
+        ai.wbOrbitDuration--;
+        const orbitDx = pos.x - pp.x;
+        const orbitDy = pos.y - pp.y;
+        const orbitDistance = Math.hypot(orbitDx, orbitDy) || 1;
+        const radialX = orbitDx / orbitDistance;
+        const radialY = orbitDy / orbitDistance;
+        const targetRadius = ai.wbOrbitRadius;
+        const radialSpeed = Math.max(
+          -phy.speed * 0.65,
+          Math.min(phy.speed * 0.65, (targetRadius - orbitDistance) * 0.035)
+        );
+        const tangentSpeed = phy.speed * 0.75;
+        const direction = ai.wbOrbitDirection;
+        vel.vx = radialX * radialSpeed - radialY * tangentSpeed * direction;
+        vel.vy = radialY * radialSpeed + radialX * tangentSpeed * direction;
+        if (ai.wbOrbitDuration === 0) {
+          ai.wbOrbitTimer = 240 + Math.random() * 240;
+        }
+      } else {
+        ai.wbOrbitTimer--;
+        if (ai.wbOrbitTimer <= 0) {
+          ai.wbOrbitDuration = 220 + Math.floor(Math.random() * 61);
+          ai.wbOrbitRadius = CFG.WATER_BALLOON_ORBIT_MIN_RADIUS
+            + Math.random() * (CFG.WATER_BALLOON_ORBIT_MAX_RADIUS - CFG.WATER_BALLOON_ORBIT_MIN_RADIUS);
+          ai.wbOrbitDirection = Math.random() < 0.5 ? -1 : 1;
+          if (ai.wbState === 'ROAM' || ai.wbState === 'UNTURN') {
+            ai.wbState = 'TURNING';
+            ai.wbTurnFrame = 0;
+            ai.wbTurnTick = 0;
+            ai.wbFiredShots = 0;
+            ai.wbShootFrame = 0;
+            ai.wbShootTick = 0;
+          }
+        }
+      }
+    } else {
+      ai.wbOrbitDuration = 0;
+    }
+
+    const leashDistance = CFG.WATER_BALLOON_LEASH_DISTANCE;
+    if (ai.wbOrbitDuration <= 0 && dist > leashDistance) {
+      const leashStrength = Math.min(0.8, 0.35 + (dist - leashDistance) / leashDistance);
+      vel.vx = vel.vx * (1 - leashStrength) + (dx / dist) * phy.speed * leashStrength;
+      vel.vy = vel.vy * (1 - leashStrength) + (dy / dist) * phy.speed * leashStrength;
+      const speed = Math.hypot(vel.vx, vel.vy);
+      if (speed > phy.speed) {
+        vel.vx = vel.vx / speed * phy.speed;
+        vel.vy = vel.vy / speed * phy.speed;
       }
     }
 
