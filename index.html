@@ -58,8 +58,8 @@ body::before { display: none; }
   flex-direction: column;
   width: 704px;
   height: 508px;
-  min-width: 424px;
-  min-height: 260px;
+  min-width: min(424px, calc(100vw - 16px));
+  min-height: min(260px, calc(100vh - 16px));
   max-width: calc(100vw - 16px);
   max-height: calc(100vh - 16px);
   resize: both;
@@ -1973,6 +1973,10 @@ body.desktop-ready #desktop-taskbar { visibility: visible; }
   cursor: default;
 }
 
+.chip-window .utensil-window-title {
+  cursor: default;
+}
+
 .utensil-window-body {
   height: 164px;
   overflow: hidden;
@@ -3176,9 +3180,35 @@ canvas {
 
   window.addEventListener('resize', function() {
     if (isMaximized) applyMaximize();
+    else if (!minimized && wrapper.style.position === 'fixed') {
+      const rect = wrapper.getBoundingClientRect();
+      const position = clampWrapperToViewport(rect.left, rect.top);
+      const deltaX = position.left - rect.left;
+      const deltaY = position.top - rect.top;
+      wrapper.style.left = `${position.left}px`;
+      wrapper.style.top = `${position.top}px`;
+      if (typeof moveGameWindowWorld === 'function') moveGameWindowWorld(deltaX, deltaY);
+    }
   });
 
   let dragState = null;
+  function clampWrapperToViewport(left, top) {
+    return {
+      left: Math.max(0, Math.min(window.innerWidth - wrapper.offsetWidth, left)),
+      top: Math.max(0, Math.min(window.innerHeight - wrapper.offsetHeight, top)),
+    };
+  }
+  new ResizeObserver(() => {
+    if (isMaximized || minimized || wrapper.style.position !== 'fixed') return;
+    const rect = wrapper.getBoundingClientRect();
+    const position = clampWrapperToViewport(rect.left, rect.top);
+    const deltaX = position.left - rect.left;
+    const deltaY = position.top - rect.top;
+    wrapper.style.left = `${position.left}px`;
+    wrapper.style.top = `${position.top}px`;
+    if (typeof moveGameWindowWorld === 'function') moveGameWindowWorld(deltaX, deltaY);
+  }).observe(wrapper);
+
   document.getElementById('hud').addEventListener('pointerdown', function(e) {
     if (isMaximized || minimized || e.target.closest('button')) return;
     const rect = wrapper.getBoundingClientRect();
@@ -3195,11 +3225,22 @@ canvas {
 
   document.getElementById('hud').addEventListener('pointermove', function(e) {
     if (!dragState) return;
-    wrapper.style.left = `${dragState.left + e.clientX - dragState.x}px`;
-    wrapper.style.top = `${dragState.top + e.clientY - dragState.y}px`;
+    const position = clampWrapperToViewport(
+      dragState.left + e.clientX - dragState.x,
+      dragState.top + e.clientY - dragState.y
+    );
+    const rect = wrapper.getBoundingClientRect();
+    const deltaX = position.left - rect.left;
+    const deltaY = position.top - rect.top;
+    wrapper.style.left = `${position.left}px`;
+    wrapper.style.top = `${position.top}px`;
+    if (typeof moveGameWindowWorld === 'function') moveGameWindowWorld(deltaX, deltaY);
   });
 
   document.getElementById('hud').addEventListener('pointerup', function() {
+    dragState = null;
+  });
+  document.getElementById('hud').addEventListener('pointercancel', function() {
     dragState = null;
   });
 

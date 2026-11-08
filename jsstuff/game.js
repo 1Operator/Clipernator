@@ -790,7 +790,59 @@ function loop(timestamp = performance.now()) {
 
 const offscreenWindowElements = new Map();
 const chippyWindowElements = new Map();
+const chipWindowElements = new Map();
 let clippyWindowElement = null;
+
+function moveGameWindowWorld(screenDeltaX, screenDeltaY) {
+  if (!gameRunning || gs?.playerId == null || (!screenDeltaX && !screenDeltaY)) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = rect.width / worldW;
+  const scaleY = rect.height / worldH;
+  if (!scaleX || !scaleY) return;
+  const worldDeltaX = screenDeltaX / scaleX;
+  const worldDeltaY = screenDeltaY / scaleY;
+  const moveExternalPoint = point => {
+    if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return false;
+    if (point.x >= 0 && point.x <= worldW && point.y >= 0 && point.y <= worldH) return false;
+    point.x -= worldDeltaX;
+    point.y -= worldDeltaY;
+    return true;
+  };
+  const movePair = (x, y) => {
+    const point = { x, y };
+    if (!moveExternalPoint(point)) return [x, y];
+    return [point.x, point.y];
+  };
+
+  for (const id of ECS.query('pos')) {
+    moveExternalPoint(ECS.get(id, 'pos'));
+    const ai = ECS.get(id, 'ai');
+    if (!ai) continue;
+    for (const [xKey, yKey] of [['bossHomeX', 'bossHomeY'], ['corOriginX', 'corOriginY'], ['uTipX', 'uTipY']]) {
+      if (!Number.isFinite(ai[xKey]) || !Number.isFinite(ai[yKey])) continue;
+      [ai[xKey], ai[yKey]] = movePair(ai[xKey], ai[yKey]);
+    }
+    for (const key of ['hatDiveTarget', 'uForkTarget']) {
+      if (ai[key]) moveExternalPoint(ai[key]);
+    }
+  }
+
+  for (const key of [
+    'bullets', 'enemyBullets', 'particles', 'fieldItems', 'chipDrops',
+    'ragingRingBullets', 'popcornKernels', 'clownSoundWaves', 'mirrorShards',
+  ]) {
+    for (const point of gs[key] || []) {
+      if (!point) continue;
+      moveExternalPoint(point);
+      for (const trailPoint of point.trail || []) moveExternalPoint(trailPoint);
+      for (const [xKey, yKey] of [['targetX', 'targetY'], ['startX', 'startY'], ['shadowX', 'shadowY']]) {
+        if (!Number.isFinite(point[xKey]) || !Number.isFinite(point[yKey])) continue;
+        [point[xKey], point[yKey]] = movePair(point[xKey], point[yKey]);
+      }
+    }
+  }
+  if (gs.dashBurst) moveExternalPoint(gs.dashBurst);
+}
 
 function getAimWorldPosition(clientX, clientY, target) {
   let miniCanvas = target instanceof HTMLCanvasElement
@@ -946,18 +998,12 @@ function initializeIndependentWindows() {
 initializeIndependentWindows();
 
 function positionWindowWithEntity(card, worldX, worldY, rect, width, height) {
-  if (!card.dataset.worldAnchorX) {
-    card.dataset.worldAnchorX = String(worldX);
-    card.dataset.worldAnchorY = String(worldY);
-    card.dataset.screenAnchorX = String(rect.left + worldX * rect.width / worldW);
-    card.dataset.screenAnchorY = String(rect.top + worldY * rect.height / worldH);
-    card.dataset.trackScaleX = String(rect.width / worldW);
-    card.dataset.trackScaleY = String(rect.height / worldH);
-  }
-  const centerX = Number(card.dataset.screenAnchorX)
-    + (worldX - Number(card.dataset.worldAnchorX)) * Number(card.dataset.trackScaleX);
-  const centerY = Number(card.dataset.screenAnchorY)
-    + (worldY - Number(card.dataset.worldAnchorY)) * Number(card.dataset.trackScaleY);
+  const scaleX = rect.width / worldW;
+  const scaleY = rect.height / worldH;
+  const centerX = rect.left + worldX * scaleX;
+  const centerY = rect.top + worldY * scaleY;
+  card.dataset.trackScaleX = String(scaleX);
+  card.dataset.trackScaleY = String(scaleY);
   const left = Math.max(8, Math.min(window.innerWidth - width - 8, centerX - width / 2));
   const top = Math.max(8, Math.min(window.innerHeight - height - 8, centerY - height / 2));
   card.dataset.trackedLeft = String(left);
@@ -973,6 +1019,7 @@ function renderOffscreenWindows() {
     layer.querySelectorAll('.utensil-window').forEach(windowElement => windowElement.remove());
     offscreenWindowElements.clear();
     chippyWindowElements.clear();
+    chipWindowElements.clear();
     clippyWindowElement = null;
     updateTaskbarActiveWindow();
     return;
@@ -1065,29 +1112,42 @@ function renderOffscreenWindows() {
       offscreenWindowElements.set(groupId, card);
     }
 
-    const title = members.map(member => {
+    const entityTitle = members.map(member => {
       const type = member.enemy.type;
       if (type === 'cakeBoss') return 'ANTIPIE — THE CAKE BOSS';
       if (type === 'utensil') return 'Utensil';
       if (type === 'miniClown') return 'Mini Clown';
       return type.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, char => char.toUpperCase());
     }).join(', ');
+    const screenDistance = Math.max(...members.map(member =>
+      desktopDistanceBeyondViewport(member.pos.x, member.pos.y, canvasRect)
+    ));
+    const distanceLabel = screenDistance > 0
+      ? `${Math.ceil(screenDistance / 50) * 50}px off-screen — `
+      : '';
+    const title = `${distanceLabel}${entityTitle}`;
     const titleElement = card.firstElementChild;
     if (titleElement.textContent !== title) {
       titleElement.textContent = title;
+      card.dataset.windowTitle = title;
       updateTaskbarActiveWindow();
     }
     titleElement.title = title;
 
     const preview = card.lastElementChild.firstElementChild;
     const isCakeBossWindow = members.some(member => member.enemy.type === 'cakeBoss');
-    const width = isCakeBossWindow ? 440 : Math.min(560, Math.max(220, members.length * 112 + 108));
-    const height = isCakeBossWindow ? 340 : 190;
+    const fade = Math.max(0, Math.min(1, screenDistance / CFG.OFFSCREEN_WINDOW_FADE_DISTANCE));
+    const windowScale = 1 - fade * (1 - CFG.OFFSCREEN_WINDOW_MIN_SCALE);
+    const width = Math.round((isCakeBossWindow ? 440 : Math.min(560, Math.max(220, members.length * 112 + 108))) * windowScale);
+    const height = Math.round((isCakeBossWindow ? 340 : 190) * windowScale);
     const dpr = window.devicePixelRatio || 1;
     const bodyHeight = height - 26;
     const bodyWidth = width - 8;
     card.style.width = `${width}px`;
     card.style.height = `${height}px`;
+    card.lastElementChild.style.height = `${bodyHeight}px`;
+    card.style.backgroundColor = `color-mix(in srgb, #d4d0c8 ${100 - fade * 75}%, #777 ${fade * 75}%)`;
+    titleElement.style.filter = `grayscale(${fade * 100}%)`;
     const previewWidth = Math.round(bodyWidth * dpr);
     const previewHeight = Math.round(bodyHeight * dpr);
     if (preview.width !== previewWidth) preview.width = previewWidth;
@@ -1177,6 +1237,70 @@ function renderOffscreenWindows() {
     if (groups.has(groupId)) continue;
     card.remove();
     offscreenWindowElements.delete(groupId);
+    updateTaskbarActiveWindow();
+  }
+
+  for (const chip of gs.chipDrops) {
+    const outside = chip.x < 0 || chip.x > worldW || chip.y < 0 || chip.y > worldH;
+    let card = chipWindowElements.get(chip);
+    if (!outside) {
+      if (card) {
+        card.remove();
+        chipWindowElements.delete(chip);
+      }
+      continue;
+    }
+
+    if (!card) {
+      card = document.createElement('div');
+      card.className = 'utensil-window chip-window';
+      card.innerHTML = '<div class="utensil-window-title"></div><div class="utensil-window-body"><canvas></canvas></div>';
+      layer.appendChild(card);
+      bringFloatingWindowToFront(card);
+      chipWindowElements.set(chip, card);
+    }
+
+    const screenDistance = desktopDistanceBeyondViewport(chip.x, chip.y, canvasRect);
+    const distanceLabel = screenDistance > 0
+      ? `${Math.ceil(screenDistance / 50) * 50}px off-screen — `
+      : '';
+    const title = `${distanceLabel}${chip.golden ? 'Golden Chip' : 'Chip'}`;
+    const titleElement = card.firstElementChild;
+    if (titleElement.textContent !== title) {
+      titleElement.textContent = title;
+      card.dataset.windowTitle = title;
+      updateTaskbarActiveWindow();
+    }
+    titleElement.title = title;
+
+    const fade = Math.max(0, Math.min(1, screenDistance / CFG.OFFSCREEN_WINDOW_FADE_DISTANCE));
+    const scale = 1 - fade * (1 - CFG.OFFSCREEN_WINDOW_MIN_SCALE);
+    const width = Math.round(240 * scale);
+    const height = Math.round(190 * scale);
+    const bodyWidth = width - 8;
+    const bodyHeight = height - 26;
+    const preview = card.lastElementChild.firstElementChild;
+    const dpr = window.devicePixelRatio || 1;
+    card.style.width = `${width}px`;
+    card.style.height = `${height}px`;
+    card.lastElementChild.style.height = `${bodyHeight}px`;
+    card.style.backgroundColor = `color-mix(in srgb, #d4d0c8 ${100 - fade * 75}%, #777 ${fade * 75}%)`;
+    titleElement.style.filter = `grayscale(${fade * 100}%)`;
+    preview.width = Math.round(bodyWidth * dpr);
+    preview.height = Math.round(bodyHeight * dpr);
+    const previewCtx = preview.getContext('2d');
+    const cameraWidth = Math.max(280, 180 * bodyWidth / bodyHeight);
+    const cameraScale = Math.min(bodyWidth / cameraWidth, bodyHeight / (cameraWidth * bodyHeight / bodyWidth));
+    draw(previewCtx, preview, { x: chip.x, y: chip.y, scale: cameraScale }, false);
+    preview.dataset.cameraX = String(chip.x);
+    preview.dataset.cameraY = String(chip.y);
+    preview.dataset.cameraScale = String(cameraScale);
+    positionWindowWithEntity(card, chip.x, chip.y, canvasRect, width, height);
+  }
+  for (const [chip, card] of chipWindowElements) {
+    if (gs.chipDrops.includes(chip)) continue;
+    card.remove();
+    chipWindowElements.delete(chip);
     updateTaskbarActiveWindow();
   }
 

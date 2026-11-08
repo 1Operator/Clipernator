@@ -73,6 +73,10 @@ MINI_CLOWN_SPEED: 3.8,
   CHIP_MAX_SPEED: 8,
   CHIP_TRAIL_LENGTH: 9,
   GOLDEN_CHIP_WAVE_STREAK: 5,
+  OFFSCREEN_ENEMY_DAMAGE_DISTANCE: 500,
+  OFFSCREEN_ENEMY_DAMAGE: 3,
+  OFFSCREEN_WINDOW_FADE_DISTANCE: 1200,
+  OFFSCREEN_WINDOW_MIN_SCALE: 0.7,
 };
 
 let worldW = CFG.W;
@@ -81,6 +85,15 @@ let renderScale = 1.0;
 
 const canvas = document.getElementById('c');
 let ctx = canvas.getContext('2d');
+
+function desktopDistanceBeyondViewport(worldX, worldY, rect = canvas.getBoundingClientRect()) {
+  if (!rect.width || !rect.height) return 0;
+  const screenX = rect.left + worldX * rect.width / worldW;
+  const screenY = rect.top + worldY * rect.height / worldH;
+  const dx = screenX < 0 ? -screenX : Math.max(0, screenX - window.innerWidth);
+  const dy = screenY < 0 ? -screenY : Math.max(0, screenY - window.innerHeight);
+  return Math.hypot(dx, dy);
+}
 
 const playerImg = new Image();
 let playerCanvas = null;

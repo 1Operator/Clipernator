@@ -2127,8 +2127,29 @@ function sysOobCleanup() {
     if (enemy.type === 'cakeBoss' && ai.antipieBoss) continue;
     if (ai.windowActive) {
       ai._oobTimer = 0;
+      const screenDistance = desktopDistanceBeyondViewport(pos.x, pos.y);
+      const hp = ECS.get(id, 'hp');
+      if (hp && screenDistance >= CFG.OFFSCREEN_ENEMY_DAMAGE_DISTANCE) {
+        ai._desktopOutsideTimer = (ai._desktopOutsideTimer || 0) + 1;
+        if (ai._desktopOutsideTimer >= 60) {
+          ai._desktopOutsideTimer = 0;
+          hp.hp -= CFG.OFFSCREEN_ENEMY_DAMAGE;
+          hp.hitFlash = 16;
+          spawnParticles(pos.x, pos.y, '#aaaaaa', 6);
+          if (hp.hp <= 0) {
+            spawnParticles(pos.x, pos.y, '#ff2222', 14);
+            ECS.destroyEntity(id);
+            gs.waveKills++;
+            updateHUD();
+            setTimeout(() => checkWave(), 0);
+          }
+        }
+      } else {
+        ai._desktopOutsideTimer = 0;
+      }
       continue;
     }
+    ai._desktopOutsideTimer = 0;
     const oob = pos.x < -60 || pos.x > worldW + 60 || pos.y < -60 || pos.y > worldH + 60;
     if (oob) {
       ai._oobTimer = (ai._oobTimer || 0) + 1;

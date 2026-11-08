@@ -152,7 +152,10 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 
 - Enemies that move beyond the MGW's world bounds get an in-page floating window that renders the shared game scene around them. Enemies still update and interact through the normal simulation; the window is another camera/view, not a separate arena.
 - Nearby offscreen enemies can share a window. Their title lists the enemy types, and the camera frames the group. Enemy windows can be dragged; dragging moves the contained enemies and their world positions together.
-- When an enemy window overlaps the MGW, its enemies merge back into the MGW. Moving the MGW does not directly move offscreen windows or their entities.
+- The MGW can be dragged only while its full window remains inside the browser viewport. Entities and world objects inside it travel with the window; offscreen objects keep their desktop position and are rebased into MGW coordinates as the window moves over them.
+- Enemy windows show distance beyond the physical viewport edge, shrink, and gray progressively with distance. Non-boss enemies more than 500 screen pixels beyond an edge take 3 damage per second until they return or are defeated.
+- Chip drops outside the MGW get their own small camera window, so they remain visible after their source enemy is gone.
+- When an enemy window overlaps the MGW, its enemies merge back into the MGW.
 - Clippy gets a non-draggable window while outside the MGW. Clippy remains controllable and can aim/shoot using the offscreen view. Remaining outside costs 3 HP per second.
 - The utensil's launched attacks can travel beyond the MGW boundary, and fork-thrown enemies are not immediately clamped back into it. These changes are scoped to utensil attacks and fork throws; they do not yet guarantee that every projectile or enemy mechanic works seamlessly across all window boundaries.
 - Mini-window canvases have a black background. The grid is still drawn only over the MGW's world bounds; it does not extend across the full mini-window view.
