@@ -528,6 +528,12 @@
   setTimeout(() => { observingWindows = true; }, 0);
   window.openTaskManager = openTaskManager;
   window.taskManagerRefresh = taskManagerRefresh;
+  document.addEventListener('keydown', event => {
+    if (!event.ctrlKey || !event.shiftKey || event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openTaskManager();
+  }, true);
   setInterval(taskManagerRefresh, 500);
 })();
 
