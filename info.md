@@ -9,7 +9,7 @@
 - [Item pools](#item-pools)
 - [Glowsticks and melee](#glowsticks--melee)
 - [Enemy behaviors](#enemy-behaviors)
-- [Offscreen windows](#offscreen-windows-prototype)
+- [Offscreen windows](#offscreen-windows)
 - [Sound effects](#sound-effects)
 
 ---
@@ -149,7 +149,7 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 
 ---
 
-## Offscreen Windows (Prototype)
+## Offscreen Windows
 
 - Enemies that move beyond the MGW's world bounds get an in-page floating window that renders the shared game scene around them. Enemies still update and interact through the normal simulation; the window is another camera/view, not a separate arena.
 - Nearby offscreen enemies can share a window. Their title lists the enemy types, and the camera frames the group. Enemy windows can be dragged; dragging moves the contained enemies and their world positions together.
@@ -158,9 +158,12 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 - Chip drops outside the MGW get their own small camera window, so they remain visible after their source enemy is gone.
 - When an enemy window overlaps the MGW, its enemies merge back into the MGW.
 - Clippy gets a non-draggable window while outside the MGW. Clippy remains controllable and can aim/shoot using the offscreen view. Remaining outside costs 3 HP per second.
+
+The basic window, dragging, and off-screen-distance behaviors are implemented. Cross-window gameplay is still experimental:
+
 - The utensil's launched attacks can travel beyond the MGW boundary, and fork-thrown enemies are not immediately clamped back into it. These changes are scoped to utensil attacks and fork throws; they do not yet guarantee that every projectile or enemy mechanic works seamlessly across all window boundaries.
 - Mini-window canvases have a black background. The grid is still drawn only over the MGW's world bounds; it does not extend across the full mini-window view.
-- Treat cross-window behavior as experimental. Review mechanics that assume the MGW bounds are hard arena walls (projectile culling, collision, enemy cleanup, knockback, boss attacks, and merge positioning) before expanding this system to more enemy types or relying on it for balance.
+- Mechanics that assume the MGW bounds are hard arena walls (projectile culling, collision, enemy cleanup, knockback, boss attacks, and merge positioning) still need review before relying on cross-window interactions for balance.
 
 ---
 
