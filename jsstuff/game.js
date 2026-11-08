@@ -455,6 +455,7 @@ function gameOver() {
 
 function togglePause() {
   if (gs.pendingChoice) return;
+  if (!isPaused && window.virusAdPopupCount?.() > 0) return;
   if (!isPaused) SFX.play('pause', 0.75);
   isPaused = !isPaused;
   pauseEmailTimers();

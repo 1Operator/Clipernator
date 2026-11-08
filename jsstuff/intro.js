@@ -649,14 +649,6 @@ setTimeout(() => {
           c.fillStyle = '#555555';
           c.fillText('Use arrow keys to select, ENTER to confirm', textX, y + 8);
           y += lineH + 8;
-          const descriptions = [
-            '150 HP, 12 ammo | 0.85x speed, 0.7x damage | 0 start picks | item every 3 waves',
-            '100 HP, 8 ammo | 1.1x speed, normal damage | 1 start pick | item every 4 waves',
-            '70 HP, 6 ammo | 1.4x speed, 1.5x damage | 2 start picks | item every 5 waves | 2x enemy chip drops',
-          ];
-          c.fillStyle = '#aaaaaa';
-          c.fillText(descriptions[difficultySelected], textX, y + 8);
-          y += lineH + 8;
         }
       } else {
         c.fillStyle = line.color || '#aaaaaa';

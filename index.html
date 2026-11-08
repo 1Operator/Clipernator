@@ -3210,7 +3210,7 @@ canvas {
   }).observe(wrapper);
 
   document.getElementById('hud').addEventListener('pointerdown', function(e) {
-    if (isMaximized || minimized || e.target.closest('button')) return;
+    if (isMaximized || minimized || isPaused || e.target.closest('button')) return;
     const rect = wrapper.getBoundingClientRect();
     dragState = { x: e.clientX, y: e.clientY, left: rect.left, top: rect.top };
     wrapper.style.position = 'fixed';
@@ -3225,6 +3225,10 @@ canvas {
 
   document.getElementById('hud').addEventListener('pointermove', function(e) {
     if (!dragState) return;
+    if (isPaused) {
+      dragState = null;
+      return;
+    }
     const position = clampWrapperToViewport(
       dragState.left + e.clientX - dragState.x,
       dragState.top + e.clientY - dragState.y

@@ -11,6 +11,10 @@
   let lastFrameTime = 0;
 
   function makePopup(id) {
+    if (typeof isPaused !== 'undefined' && isPaused && typeof togglePause === 'function') {
+      togglePause();
+    }
+
     const popup = document.createElement('section');
     popup.className = 'independent-window virus-ad-window';
     popup.dataset.windowTitle = 'Virus';
