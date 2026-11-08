@@ -20,6 +20,7 @@
 
 - "Entities" usually refers to both the player and enemies, but can also refer to bosses or projectiles
 - Goal is to make floor 1 & 2 as good as possible before adding more floors
+- But right now focusing on floor 1
 - I am trying to make this a good game, I do not want to cut corners
 - When suggesting changes, tell me what part of the code to add or change, do not remake entire files unless necessary
 - This document should be updated after any signifcant changes
