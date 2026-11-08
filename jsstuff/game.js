@@ -1013,7 +1013,7 @@ function positionWindowWithEntity(card, worldX, worldY, rect, width, height) {
 }
 
 function formatOffscreenDistance(distance) {
-  return distance > 0 ? `${Math.max(1, Math.round(distance))} px beyond screen — ` : '';
+  return distance > 0 ? ` (${Math.ceil(distance / 50) * 50}px)` : '';
 }
 
 function renderOffscreenWindows() {
@@ -1126,8 +1126,7 @@ function renderOffscreenWindows() {
     const screenDistance = Math.max(...members.map(member =>
       desktopDistanceBeyondViewport(member.pos.x, member.pos.y, canvasRect)
     ));
-    const distanceLabel = formatOffscreenDistance(screenDistance);
-    const title = `${distanceLabel}${entityTitle}`;
+    const title = `${entityTitle}${formatOffscreenDistance(screenDistance)}`;
     const titleElement = card.firstElementChild;
     if (titleElement.textContent !== title) {
       titleElement.textContent = title;
@@ -1263,8 +1262,7 @@ function renderOffscreenWindows() {
     }
 
     const screenDistance = desktopDistanceBeyondViewport(chip.x, chip.y, canvasRect);
-    const distanceLabel = formatOffscreenDistance(screenDistance);
-    const title = `${distanceLabel}${chip.golden ? 'Golden Chip' : 'Chip'}`;
+    const title = `${chip.golden ? 'Golden Chip' : 'Chip'}${formatOffscreenDistance(screenDistance)}`;
     const titleElement = card.firstElementChild;
     if (titleElement.textContent !== title) {
       titleElement.textContent = title;
