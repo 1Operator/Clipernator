@@ -649,6 +649,14 @@ setTimeout(() => {
           c.fillStyle = '#555555';
           c.fillText('Use arrow keys to select, ENTER to confirm', textX, y + 8);
           y += lineH + 8;
+          const descriptions = [
+            '150 HP, 12 ammo | 0.85x speed, 0.7x damage | 0 start picks | item every 3 waves',
+            '100 HP, 8 ammo | 1.1x speed, normal damage | 1 start pick | item every 4 waves',
+            '70 HP, 6 ammo | 1.4x speed, 1.5x damage | 2 start picks | item every 5 waves | 2x enemy chip drops',
+          ];
+          c.fillStyle = '#aaaaaa';
+          c.fillText(descriptions[difficultySelected], textX, y + 8);
+          y += lineH + 8;
         }
       } else {
         c.fillStyle = line.color || '#aaaaaa';
@@ -1515,12 +1523,15 @@ function renderDesktopLoading() {
     const idx = window._introDifficulty !== undefined ? window._introDifficulty : 1;
     if (idx === 0) {
       gsRef.health = gsRef.maxHealth = 150; gsRef.maxAmmo = CFG.MAX_AMMO + 4; gsRef.ammo = gsRef.maxAmmo;
-      gsRef._difficultyLabel = 'EASY'; gsRef._enemyHpMult = 0.7; gsRef._enemyDmgMult = 0.7;
+      gsRef._difficultyLabel = 'EASY'; gsRef._enemySpeedMult = 0.85; gsRef._enemyDmgMult = 0.7;
+      gsRef._chipDropChanceMult = 1;
     } else if (idx === 2) {
       gsRef.health = gsRef.maxHealth = 70; gsRef.maxAmmo = Math.max(4, CFG.MAX_AMMO - 2); gsRef.ammo = gsRef.maxAmmo;
-      gsRef._difficultyLabel = 'HARD'; gsRef._enemyHpMult = 1.4; gsRef._enemyDmgMult = 1.4;
+      gsRef._difficultyLabel = 'HARD'; gsRef._enemySpeedMult = 1.4; gsRef._enemyDmgMult = 1.5;
+      gsRef._chipDropChanceMult = 2;
     } else {
-      gsRef._difficultyLabel = 'NORMAL'; gsRef._enemyHpMult = 1.0; gsRef._enemyDmgMult = 1.0;
+      gsRef._difficultyLabel = 'NORMAL'; gsRef._enemySpeedMult = 1.1; gsRef._enemyDmgMult = 1;
+      gsRef._chipDropChanceMult = 1;
     }
     if (tippyMode) {
       gsRef.wave = 9;

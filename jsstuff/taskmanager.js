@@ -536,7 +536,7 @@ function taskManagerDamageMultiplier(type) {
 }
 
 function taskManagerMovementMultiplier(type) {
-  return taskManagerDamageMultiplier(type);
+  return taskManagerDamageMultiplier(type) * (gs?._enemySpeedMult || 1);
 }
 
 function taskManagerReduceHealth(entityId) {

@@ -135,7 +135,7 @@ function applyPlayerDamage(amount, sourceEntityId = null, sourceType = null) {
   const source = sourceEntityId == null ? null : ECS.get(sourceEntityId, 'enemy');
   const sourceEnemyType = source?.type || sourceType;
   const adjustedAmount = sourceEnemyType
-    ? amount * taskManagerDamageMultiplier(sourceEnemyType)
+    ? amount * taskManagerDamageMultiplier(sourceEnemyType) * (gs._enemyDmgMult || 1)
     : amount;
   const scaledDamage = typeof emailIncomingDamage === 'function'
     ? emailIncomingDamage(adjustedAmount)
@@ -1012,6 +1012,10 @@ function positionWindowWithEntity(card, worldX, worldY, rect, width, height) {
   card.style.top = `${top}px`;
 }
 
+function formatOffscreenDistance(distance) {
+  return distance > 0 ? `${Math.max(1, Math.round(distance))} px beyond screen — ` : '';
+}
+
 function renderOffscreenWindows() {
   const layer = document.getElementById('utensil-window-layer');
   const canvasRect = canvas.getBoundingClientRect();
@@ -1122,9 +1126,7 @@ function renderOffscreenWindows() {
     const screenDistance = Math.max(...members.map(member =>
       desktopDistanceBeyondViewport(member.pos.x, member.pos.y, canvasRect)
     ));
-    const distanceLabel = screenDistance > 0
-      ? `${Math.ceil(screenDistance / 50) * 50}px off-screen — `
-      : '';
+    const distanceLabel = formatOffscreenDistance(screenDistance);
     const title = `${distanceLabel}${entityTitle}`;
     const titleElement = card.firstElementChild;
     if (titleElement.textContent !== title) {
@@ -1261,9 +1263,7 @@ function renderOffscreenWindows() {
     }
 
     const screenDistance = desktopDistanceBeyondViewport(chip.x, chip.y, canvasRect);
-    const distanceLabel = screenDistance > 0
-      ? `${Math.ceil(screenDistance / 50) * 50}px off-screen — `
-      : '';
+    const distanceLabel = formatOffscreenDistance(screenDistance);
     const title = `${distanceLabel}${chip.golden ? 'Golden Chip' : 'Chip'}`;
     const titleElement = card.firstElementChild;
     if (titleElement.textContent !== title) {

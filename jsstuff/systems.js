@@ -1558,8 +1558,7 @@ for (const cid of ECS.query('enemy','pos')) {
     break;
   }
 }
-const diffMult = (gs._enemyDmgMult || 1.0);
-applyPlayerDamage(Math.round(20 * contactMult * diffMult), id);
+applyPlayerDamage(Math.round(20 * contactMult), id);
 SFX.play('playerDamage', 0.5);
 SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 
@@ -1664,7 +1663,7 @@ if (eb.isFrosting && eb.spawnGiftBox) {
         spawnParticles(eb.x, eb.y, '#ff8800', Math.round(12 * scale));
         gs.shakeX = impactShake; gs.shakeY = impactShake;
         if (gs.invincible <= 0 && Math.hypot(eb.x - ppos.x, eb.y - ppos.y) < impactR) {
-applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMult || 1.0)), eb.sourceId, eb.sourceType);
+applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale), eb.sourceId, eb.sourceType);
          SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
           gs.invincible = CFG.INVINCIBLE_FRAMES;
           gs.shakeX = Math.round(16 * scale); gs.shakeY = Math.round(16 * scale);
@@ -1727,8 +1726,7 @@ applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale * (gs._enemyDmgMul
 
     if (!eb.friendlyFire&&gs.invincible<=0&&Math.hypot(eb.x-ppos.x,eb.y-ppos.y)<20) {
       const bulletDmg = Math.round(15 * (eb.rmDmgMult || 1));
-const diffMult = (gs._enemyDmgMult || 1.0);
-applyPlayerDamage(Math.round(bulletDmg * diffMult), eb.sourceId, eb.sourceType);
+applyPlayerDamage(bulletDmg, eb.sourceId, eb.sourceType);
       SFX.play('playerDamage', 0.5);
       SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 if (eb.isTear) SFX.playAt('tearHit', eb.x, eb.y, 0.5);
@@ -2322,8 +2320,7 @@ const total = [...ECS.query('enemy')].length;
 
   const isCor = type === 'corRed' || type === 'corBlue';
   if (!isCor) {
-    const hpMult = (gs._enemyHpMult || 1.0);
-    ECS.add(id,'hp',{hp:Math.ceil(baseHp*def.hpMult*hpMult), maxHp:Math.ceil(baseHp*def.hpMult*hpMult), hitFlash:0});
+    ECS.add(id,'hp',{hp:Math.ceil(baseHp*def.hpMult), maxHp:Math.ceil(baseHp*def.hpMult), hitFlash:0});
   }
 
   ECS.add(id,'physics',{speed:(1.2+Math.random()*0.6+gs.wave*0.12)*def.speedMult});
@@ -2538,6 +2535,9 @@ function checkWave() {
     updateHUD();
    
 gs.wave++;
+const itemChoiceWaveInterval = gs._difficultyLabel === 'EASY' ? 3
+  : gs._difficultyLabel === 'HARD' ? 5
+    : 4;
 
 if (gs.floor === 2 && gs.wave === CFG.BOSS2_WAVE) {
       // ... boss2 spawn 
@@ -2564,7 +2564,7 @@ if (gs.floor === 2 && gs.wave === CFG.BOSS2_WAVE) {
       
       gs.bossId = id;
       showMsg('THE RINGMASTER BOSS — WAVE ' + gs.wave + '!');
-    } else if (completed % 3 === 0) {
+    } else if (completed !== CFG.BOSS_WAVE && completed % itemChoiceWaveInterval === 0) {
       setTimeout(()=>offerItemChoice(),300);
     } else {
       showMsg(`WAVE ${gs.wave} - INCOMING!`); trySpawnFieldItems();
@@ -2603,7 +2603,8 @@ const GENERAL_ITEM_IDS=['paperCuts','extraClips'];
 
 
 function tryDropTicket(x, y) {
-  if (Number.isFinite(x) && Number.isFinite(y) && Math.random() < CFG.CHIP_DROP_CHANCE) {
+  const dropChance = Math.min(1, CFG.CHIP_DROP_CHANCE * (gs._chipDropChanceMult || 1));
+  if (Number.isFinite(x) && Number.isFinite(y) && Math.random() < dropChance) {
     gs.chipDrops.push({ x, y });
   }
   if (gs.floor!==2) return;
