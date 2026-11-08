@@ -537,6 +537,9 @@ if (!hatrider && ai.hatrider) ai.hatrider = null; // rider died, clear flag
     if (ai.orientAngle    === undefined) ai.orientAngle    = 0;
     if (ai.wbOrbitTimer   === undefined) ai.wbOrbitTimer   = 180 + Math.random() * 180;
     if (ai.wbOrbitDuration === undefined) ai.wbOrbitDuration = 0;
+    const hardMode = String(gs._difficultyLabel || '').toLowerCase() === 'hard';
+    if (!hardMode) ai.wbOrbitDuration = 0;
+    const orbitAttacking = hatrider && hardMode && ai.wbOrbitDuration > 0;
 
     const dx = pp.x - pos.x, dy = pp.y - pos.y, dist = Math.hypot(dx,dy)||1;
 
@@ -544,7 +547,7 @@ if (!hatrider && ai.hatrider) ai.hatrider = null; // rider died, clear flag
 const targetAngle = Math.atan2(dy, dx);    let ad = targetAngle - ai.orientAngle;
     while (ad >  Math.PI) ad -= Math.PI*2;
     while (ad < -Math.PI) ad += Math.PI*2;
-    ai.orientAngle += ad * 0.04;
+    ai.orientAngle += ad * (orbitAttacking ? 0.24 : 0.04);
     ai.balloonOrient = ai.orientAngle;
 
     // ── State machine ──
@@ -691,7 +694,7 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
       }
     }
 
-    if (hatrider) {
+    if (hatrider && hardMode) {
       if (ai.wbOrbitDuration > 0) {
         ai.wbOrbitDuration--;
         const orbitDx = pos.x - pp.x;
@@ -704,7 +707,7 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
           -phy.speed * 0.65,
           Math.min(phy.speed * 0.65, (targetRadius - orbitDistance) * 0.035)
         );
-        const tangentSpeed = phy.speed * 0.75;
+        const tangentSpeed = phy.speed * 1.65;
         const direction = ai.wbOrbitDirection;
         vel.vx = radialX * radialSpeed - radialY * tangentSpeed * direction;
         vel.vy = radialY * radialSpeed + radialX * tangentSpeed * direction;
