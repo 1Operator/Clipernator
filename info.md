@@ -75,7 +75,7 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 ## Item Rules
 1. Items can be permanent or temporary
 2. Items can affect the player, enemies, environment, or a combination
-3. Items can have only positive effects, or both positive and negative effects (never only negative)
+3. Items can have only positive effects, or both positive and negative effects (never only negative, unless the negative effect can be positive when combined with another item)
 4. Items can and should interact with each other
 5. Item names should be at least loosely related to their effect
 
