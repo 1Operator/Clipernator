@@ -14,6 +14,7 @@
 - General item pool needs at least 5 more items
 - Different shotgun/weapon variants could be considered, but they need to be unique while still being compatiable with items
 
+- Enemies killed from items, like paper cuts, should heal you
 
 
 - Clownish is still a bit iffy. wave radius should be expanded slightly. confused enemies should do 3x damage to other enemies (both from contact damage and bullets). confused enemies currently still dont do contact damage. cannonballs that are confused dont charge at enemies and explode. all enemeies when confused should attack other enenmies

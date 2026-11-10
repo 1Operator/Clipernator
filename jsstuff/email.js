@@ -317,7 +317,7 @@ function emailCreateRandomOffer() {
     emailDeliver({
       type: 'bounty',
       subject: goal.text.replace('the next complete waves', `${duration} complete wave${duration === 1 ? '' : 's'}`),
-      body: `Hello, player.\n\n${goal.text.replace('the next complete waves', `${duration} complete wave${duration === 1 ? '' : 's'}`)}\n\nAccepting starts with the next full wave. Any reload, damage, or physical position change during an eligible wave immediately fails the bounty. Failure has no penalty.\n\nOnly one bounty can be active at a time. Completing every wave pays chips scaled to the current difficulty.`,
+      body: `Hello, User! It seems like you want some chips... for a challenge?\n\n${goal.text.replace('the next complete waves', `${duration} complete wave${duration === 1 ? '' : 's'}`)}\n\nSay yes, and I'll watch your progress on next wave. Any reload, damage, or physical position change during an eligible wave immediately fails the bounty. \n\nIf you complete the bounty, you'll receive a reward of ${Math.ceil(2 + duration * 2 + Math.floor(gs.wave / 5))} chips. If you fail, the bounty is lost and no reward is given.\n\n You need to act fast User!This offer expires in ${Math.floor(duration * 60)} seconds.`,
       payload: { goal: goal.key, duration },
     });
   } else if (roll < 0.75) {
