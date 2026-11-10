@@ -1875,7 +1875,7 @@ function tickLeakingStatusEffects() {
     ai.leakingTickTimer -= LEAKING_TICK_FRAMES;
     const hp = ECS.get(id, 'hp');
     const pos = ECS.get(id, 'pos');
-    hp.hp -= gs.maxHealth * 0.05;
+    hp.hp -= hp.maxHp * 0.05;
     hp.hitFlash = 12;
     spawnParticles(pos.x, pos.y, '#999999', 5);
     if (hp.hp > 0) continue;
