@@ -629,11 +629,13 @@ function emailOnWaveCompleted(completedWave) {
 }
 
 function tickEmailEnemyRepairing() {
-  if (emailActiveMs >= emailRepairUntil) return;
-  for (const id of ECS.query('enemy', 'hp', 'pos')) {
-    ECS.get(id, 'hp').repairingUntil = emailRepairUntil;
+  if (!emailRepairUntil) return;
+  if (emailActiveMs < emailRepairUntil) {
+    for (const id of ECS.query('enemy', 'hp', 'pos')) {
+      ECS.get(id, 'hp').repairingUntil = emailRepairUntil;
+    }
   }
-  if (emailActiveMs < emailRepairNextTick) return;
+  if (emailActiveMs < emailRepairNextTick || emailRepairNextTick > emailRepairUntil) return;
   emailRepairNextTick += 1000;
   for (const id of ECS.query('enemy', 'hp', 'pos')) {
     const hp = ECS.get(id, 'hp');
