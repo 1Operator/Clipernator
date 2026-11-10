@@ -82,8 +82,8 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 ---
 
 ## Status Effects
-- **Leaking** — applied by the Utensil's knife; deals 5% of the player's max health once per second for 3 seconds. Reapplications add another 3 seconds. Affected entities are tinted grey, and active player status is shown in the pause menu.
-
+- **Leaking** — applied by the Utensil's knife; deals 5% of the entitiy's max health once per second for 3 seconds. Reapplications add another 3 seconds. Affected entities are tinted grey, and active player status is shown in the pause menu.
+- Repairing - heals 5% of an entity's max health once per second for 5 seconds. Reapplications add another 5 seconds. Affected entities pulse green, and active player status is shown in the pause menu.
 ---
 ## Item Pools
 
