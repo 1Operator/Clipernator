@@ -951,6 +951,42 @@ setTimeout(() => {
     requestAnimationFrame(desktopLoop);
   }
 
+  function triggerAntipieBossSequence() {
+    if (gs.antipieBossSequence || gs.bossActive) return;
+
+    const wrapper = document.getElementById('wrapper');
+    if (wrapper) {
+      wrapper.style.animation = 'antipie-window-shake 0.15s steps(2) infinite';
+      wrapper.style.transformOrigin = 'center center';
+    }
+
+    const startW = worldW;
+    const startH = worldH;
+    gs.antipieBossSequence = {
+      startW,
+      startH,
+      endW: Math.max(worldW * 1.9, 1500),
+      endH: Math.max(worldH * 1.9, 1200),
+      timer: 0,
+      shakeDuration: 95,
+      expandDuration: 45,
+      darkness: 0,
+    };
+
+    setTimeout(() => {
+      if (wrapper) wrapper.style.animation = 'antipie-window-expand 0.8s ease-in-out forwards';
+    }, 1500);
+
+    setTimeout(() => {
+      if (wrapper) {
+        wrapper.style.animation = '';
+        wrapper.style.transform = '';
+        wrapper.style.filter = '';
+      }
+      startAntipieBoss(true);
+    }, 2500);
+  }
+
   function handleDesktopAppClick(appId) {
     if (desktopPhase === 'loading_data') return;
 
@@ -968,7 +1004,7 @@ setTimeout(() => {
     } else if (app.id === 'internet') {
       if (typeof window.openWonderWeb === 'function') window.openWonderWeb();
     } else if (app.id === 'antipie' && _introDone) {
-      startAntipieBoss();
+      triggerAntipieBossSequence();
     } else if (app.sprite === 'folder') {
       desktopErrorVisible = true;
       desktopErrorApp = app.label;

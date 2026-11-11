@@ -1303,6 +1303,11 @@ function drawCurrentView(targetCanvas, camera, advanceVisualState) {
   ctx.fillRect(0, 0, worldW, worldH);
   ctx.restore();
 
+  if (gs.antipieDarkness > 0) {
+    ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(1, gs.antipieDarkness)})`;
+    ctx.fillRect(0, 0, worldW, worldH);
+  }
+
   // Party freeze tint
   if (gs.partyFreezeTimer > 0) {
     const alpha = Math.min(.18, gs.partyFreezeTimer/CFG.PARTY_FREEZE_FRAMES*.18);

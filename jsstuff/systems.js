@@ -1937,7 +1937,29 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
     }
   }
 
- 
+  if (gs.antipieBossSequence) {
+    const seq = gs.antipieBossSequence;
+    seq.timer += 1;
+    const total = seq.shakeDuration + seq.expandDuration;
+    if (seq.timer <= seq.shakeDuration) {
+      gs.antipieDarkness = Math.min(0.9, seq.timer / seq.shakeDuration * 0.9);
+    } else {
+      const expandT = (seq.timer - seq.shakeDuration) / seq.expandDuration;
+      const ease = expandT < 0.5 ? 2 * expandT * expandT : 1 - Math.pow(-2 * expandT + 2, 2) / 2;
+      worldW = seq.startW + (seq.endW - seq.startW) * ease;
+      worldH = seq.startH + (seq.endH - seq.startH) * ease;
+      gs.antipieDarkness = Math.min(1, 0.9 + ease * 0.1);
+      renderScale = canvas.clientWidth / worldW;
+    }
+
+    if (seq.timer >= total) {
+      worldW = seq.endW;
+      worldH = seq.endH;
+      gs.antipieDarkness = 1;
+      gs.antipieBossSequence = null;
+      renderScale = canvas.clientWidth / worldW;
+    }
+  }
 
   if (gs.partyFreezeTimer>0) gs.partyFreezeTimer--;
   if (gs.speedBoostTimer>0)  gs.speedBoostTimer--;
@@ -2374,13 +2396,13 @@ if (type === 'corRed') SFX.playAt('RedCORAppear', x, y, 0.65);
 if (type === 'corBlue') SFX.playAt('BlueCORAppear', x, y, 0.65);
 }
 
-function startAntipieBoss() {
+function startAntipieBoss(centered = false) {
   if (!gameRunning || gs.floor !== 1 || gs.wave <= CFG.BOSS_WAVE || gs.bossActive) return;
 
   const mainRect = canvas.getBoundingClientRect();
   const placeRight = window.innerWidth - mainRect.right >= mainRect.left;
-  const x = placeRight ? worldW + 220 : -220;
-  const y = worldH / 2;
+  const x = centered ? worldW / 2 : (placeRight ? worldW + 220 : -220);
+  const y = centered ? worldH / 2 : worldH / 2;
   const id = ECS.createEntity();
   const bossHp = CFG.BOSS_BASE_HP + gs.wave * 12;
   ECS.add(id, 'enemy', { type: 'cakeBoss' });
@@ -2398,7 +2420,7 @@ function startAntipieBoss() {
     diveTimer: 0, dashHit: false,
     antipieBoss: true,
     bossHomeX: x, bossHomeY: y,
-    bossWindowDirection: placeRight ? 1 : -1,
+    bossWindowDirection: centered ? 1 : (placeRight ? 1 : -1),
     windowActive: true,
     windowGroup: ++utensilWindowGroupSequence,
     windowOrbitTimer: 0,
@@ -2409,6 +2431,7 @@ function startAntipieBoss() {
   gs.bossId = id;
   gs.bossActive = true;
   gs.spawnTimer = 0;
+  gs.antipieDarkness = 1;
   showMsg('ANTIPIE HAS ENTERED THE DESKTOP!');
 }
 
