@@ -152,7 +152,16 @@ function playerPos(gs) {
 // ================================================================
 let gs = {};
 
-function applyPlayerDamage(amount, sourceEntityId = null, sourceType = null) {
+function playerDamageInvincibilityFrames(damage) {
+  const isEasy = String(gs._difficultyLabel || '').toLowerCase() === 'easy';
+  const takesHeavyHit = damage >= gs.maxHealth * 0.5;
+  const seconds = isEasy
+    ? (takesHeavyHit ? 1 : 0.66)
+    : (takesHeavyHit ? 0.5 : 0.33);
+  return Math.round(seconds * 60);
+}
+
+function applyPlayerDamage(amount, sourceEntityId = null, sourceType = null, grantInvincibility = false) {
   if (gs.antipieBossSequence) return;
   const source = sourceEntityId == null ? null : ECS.get(sourceEntityId, 'enemy');
   const sourceEnemyType = source?.type || sourceType;
@@ -164,7 +173,11 @@ function applyPlayerDamage(amount, sourceEntityId = null, sourceType = null) {
     : adjustedAmount;
   const healthBefore = gs.health;
   if (typeof notifyEmailPlayerDamaged === 'function') notifyEmailPlayerDamaged();
-  gs.health = Math.max(0, gs.health - scaledDamage);
+  const actualDamage = Math.min(healthBefore, Math.max(0, scaledDamage));
+  gs.health = Math.max(0, healthBefore - actualDamage);
+  if (grantInvincibility && actualDamage > 0) {
+    gs.invincible = playerDamageInvincibilityFrames(actualDamage);
+  }
   if (gs.health < healthBefore) {
     const playerPosition = ECS.get(gs.playerId, 'pos');
     if (playerPosition) SFX.playAt('clippyDamage', playerPosition.x, playerPosition.y, 0.55);

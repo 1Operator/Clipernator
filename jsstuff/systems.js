@@ -651,7 +651,7 @@ function _clownCarExplode(id, pos, gs, playerDriving) {
   if (!playerDriving) {
     const ppos = ECS.get(gs.playerId, 'pos');
     if (ppos && Math.hypot(pos.x - ppos.x, pos.y - ppos.y) < 120 && gs.invincible <= 0) {
-      applyPlayerDamage(25, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
+      applyPlayerDamage(25, id, null, true);
       gs.flawlessThisWave = false;
       triggerSFPHit(); updateHUD();
       if (gs.health <= 0) { gameOver(); return; }
@@ -1498,8 +1498,7 @@ function sysEnemyPlayerCollision() {
      const eaiCheck2 = ECS.get(id, 'ai');
 if (eaiCheck2 && eaiCheck2.thrownByFork) {
   eaiCheck2.thrownByFork = false;
-  applyPlayerDamage(30, id); // harder hit than normal contact
-  gs.invincible = CFG.INVINCIBLE_FRAMES;
+  applyPlayerDamage(30, id, null, true); // harder hit than normal contact
   gs.shakeX = 20; gs.shakeY = 20;
   gs.flawlessThisWave = false;
   triggerSFPHit();
@@ -1513,8 +1512,7 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
   if (!eaiCheck.explodeCooldown || eaiCheck.explodeCooldown <= 0) {
     eaiCheck.explodeCooldown = 120;
     detonateExplosiveBullet({damageMult: eaiCheck.rmDmgMult || 3, life:1, isExplosive:true}, epos.x, epos.y, false);
-    applyPlayerDamage(20, id);
-    gs.invincible = CFG.INVINCIBLE_FRAMES;
+    applyPlayerDamage(20, id, null, true);
     gs.flawlessThisWave = false;
     updateHUD();
     if (gs.health <= 0) { gameOver(); return; }
@@ -1528,7 +1526,7 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
       // Knocking Pins: reduced contact damage (8 instead of 20),
       // and the bowl itself damages the enemy it rams into
       if (gs.knockingPinsActive) {
-        applyPlayerDamage(2, id); gs.invincible=CFG.INVINCIBLE_FRAMES;
+        applyPlayerDamage(2, id, null, true);
         gs.shakeX=16;gs.shakeY=16; gs.flawlessThisWave=false;
         // Deal damage to the enemy being bowled into
         const ehp=ECS.get(id,'hp');
@@ -1563,9 +1561,7 @@ for (const cid of ECS.query('enemy','pos')) {
     break;
   }
 }
-applyPlayerDamage(Math.round(20 * contactMult), id);
-
-      gs.invincible=CFG.INVINCIBLE_FRAMES;
+applyPlayerDamage(Math.round(20 * contactMult), id, null, true);
       gs.shakeX=16;gs.shakeY=16; gs.flawlessThisWave=false;
       triggerSFPHit(); spawnParticles(ppos.x,ppos.y,'#ff3333',14); updateHUD();
       if (gs.health<=0){gameOver();return;} return;
@@ -1666,8 +1662,7 @@ if (eb.isFrosting && eb.spawnGiftBox) {
         spawnParticles(eb.x, eb.y, '#ff8800', Math.round(12 * scale));
         gs.shakeX = impactShake; gs.shakeY = impactShake;
         if (gs.invincible <= 0 && Math.hypot(eb.x - ppos.x, eb.y - ppos.y) < impactR) {
-applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale), eb.sourceId, eb.sourceType);
-          gs.invincible = CFG.INVINCIBLE_FRAMES;
+applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale), eb.sourceId, eb.sourceType, true);
           gs.shakeX = Math.round(16 * scale); gs.shakeY = Math.round(16 * scale);
           gs.flawlessThisWave = false;
           triggerSFPHit(); updateHUD();
@@ -1728,9 +1723,9 @@ applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale), eb.sourceId, eb.
 
     if (!eb.friendlyFire&&gs.invincible<=0&&Math.hypot(eb.x-ppos.x,eb.y-ppos.y)<20) {
       const bulletDmg = Math.round(15 * (eb.rmDmgMult || 1));
-applyPlayerDamage(bulletDmg, eb.sourceId, eb.sourceType);
+applyPlayerDamage(bulletDmg, eb.sourceId, eb.sourceType, true);
 if (eb.isTear) SFX.playAt('tearHit', eb.x, eb.y, 0.5);
-      gs.invincible=CFG.INVINCIBLE_FRAMES; gs.shakeX=10;gs.shakeY=10;
+      gs.shakeX=10;gs.shakeY=10;
       gs.flawlessThisWave=false; triggerSFPHit();
       spawnParticles(ppos.x,ppos.y,'#ff69b4',10); updateHUD();
       if (gs.health<=0){gameOver();return false;} return false;

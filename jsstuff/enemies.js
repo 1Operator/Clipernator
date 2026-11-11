@@ -432,7 +432,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
         ai.uHitTargets.add(gs.playerId);
         if (subtype === 'knife') {
           SFX.playAt('KnifeHit', ai.uTipX, ai.uTipY, 0.65);
-          gs.invincible = CFG.INVINCIBLE_FRAMES;
+          gs.invincible = playerDamageInvincibilityFrames(gs.maxHealth * 0.05);
           gs.shakeX = 16; gs.shakeY = 16; gs.flawlessThisWave = false;
           applyLeakingStatus(gs.playerId, gs, id); triggerSFPHit(); updateHUD();
           showMsg('KNIFE SLASH! YOU\'RE BLEEDING!');
@@ -440,7 +440,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
           if (gs.health <= 0) { gameOver(); return BT.FAILURE; }
         } else if (subtype === 'spoon') {
           SFX.playAt('SpoonHit', ai.uTipX, ai.uTipY, 0.65);
-          applyPlayerDamage(14, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
+          applyPlayerDamage(14, id, null, true);
           SFX.playAt('spoonDamage', ppos2.x, ppos2.y, 0.55);
           gs.shakeX = 22; gs.shakeY = 22; gs.flawlessThisWave = false;
           triggerSFPHit(); updateHUD();
@@ -1086,7 +1086,7 @@ function _giftBoxExplode(id, pos, gs) {
   let triggerSFP = false;
   const ppos = ECS.get(gs.playerId, 'pos');
   if (ppos && Math.hypot(pos.x - ppos.x, pos.y - ppos.y) < CFG.GIFT_BOX_EXPLOSION_RADIUS && gs.invincible <= 0) {
-    applyPlayerDamage(30, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
+    applyPlayerDamage(30, id, null, true);
     gs.flawlessThisWave = false;
     triggerSFP = true;
     updateHUD();
@@ -1284,7 +1284,7 @@ if (ai.hatState === 'IDLE') {
     Math.hypot(pos.x - ai.hatDiveTarget.x, pos.y - ai.hatDiveTarget.y) < 20;
   if (hitPlayer || reachedTarget || ai.hatTimer <= 0) {
     if (hitPlayer && gs.invincible <= 0) {
-      applyPlayerDamage(18, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
+      applyPlayerDamage(18, id, null, true);
       gs.shakeX = 14; gs.shakeY = 14; gs.flawlessThisWave = false;
       triggerSFPHit(); updateHUD();
       spawnParticles(pos.x, pos.y, '#ffdd00', 16);
@@ -1491,8 +1491,7 @@ const BT_CAKEBOSS = new BTSelector(
 
       // Player contact damage during spin
       if (gs.invincible <= 0 && Math.hypot(pos.x - pp.x, pos.y - pp.y) < 44) {
-        applyPlayerDamage(28, id);
-        gs.invincible = CFG.INVINCIBLE_FRAMES;
+        applyPlayerDamage(28, id, null, true);
         gs.shakeX = 20; gs.shakeY = 20;
         gs.flawlessThisWave = false;
         triggerSFPHit(); updateHUD();
@@ -1760,7 +1759,7 @@ const BT_CANNONBALL = new BTSelector(
       if (hitWall || ai.chargeTimer <= 0) {
         const ppos2 = ECS.get(gs.playerId, 'pos');
         if (Math.hypot(pos.x - ppos2.x, pos.y - ppos2.y) < 80 && gs.invincible <= 0) {
-          applyPlayerDamage(15, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
+          applyPlayerDamage(15, id, null, true);
           gs.shakeX = 14; gs.shakeY = 14;
           gs.flawlessThisWave = false;
           updateHUD(); if (gs.health <= 0) { gameOver(); return BT.FAILURE; }
