@@ -3251,7 +3251,7 @@ canvas {
     canvasEl.style.display  = 'none';
     bottombar.style.display = 'none';
     // Hide all overlays
-    ['overlay','item-choice','floor-transition','pause-menu','msg','keybind-screen'].forEach(id => {
+    ['overlay','item-choice','floor-transition','pause-menu','keybind-screen'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.dataset.wasVisible = el.style.display;
       if (el) el.style.display = 'none';

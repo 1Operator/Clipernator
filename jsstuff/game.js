@@ -83,6 +83,9 @@ destroyEntity(id) {
 add(id, type, data) {
   if (!this._comps[type]) this._comps[type] = new Map();
   this._comps[type].set(id, data);
+  if (type === 'enemy' && data?.type && gs.encounteredEnemyTypes instanceof Set) {
+    gs.encounteredEnemyTypes.add(data.type);
+  }
   this._queryCache.clear();  // simpler and correct
   return data;
 },
@@ -167,6 +170,7 @@ function initGameState(applyIntroChoices = true) {
     score: 0, wave: 1,
     chips: 0, goldenChips: 0, chipDrops: [], flawlessWaveStreak: 0,
     taskManagerNerfedTypes: {}, taskManagerDamageByType: {}, taskManagerNextNerfCost: 7,
+    encounteredEnemyTypes: new Set(),
     chipShopStock: [], chipShopCart: [], chipShopPurchases: [], chipShopAds: {},
     chipShopView: 'home', chipShopRefreshCost: 5, chipShopRefreshCount: 0,
     chipShopRestockCount: 0, chipShopNextListingId: 1,
@@ -618,21 +622,22 @@ function clippyExplainStatusEffect(statusId) {
 
 // Random idle Clippy tips shown in pause menu
 const CLIPPY_IDLE_TIPS = [
-  "It looks like you're paused! The enemies are waiting... patiently?",
-  "Did you know? Confused enemies deal 3x damage to other enemies!",
-  "Need help? Try clicking an item above to learn about it.",
-  "It looks like the Ringmaster is nearby! Stay away... he buffs all his friends.",
-  "Did you know? Glowstick reflects bullets back as explosives with no cooldown on success!",
-  "SHIFT dashes through enemies and damages them.",
-  "Did you know? Gift boxes can be grabbed with E and thrown at enemies!",
-  "Each candle you blow out makes it more aggressive.",
-  "Did you know? Bowling balls pierce ALL enemies and explode when they expire!",
-  "It looks like you're doing great! ...probably.",
+  { text: "It looks like you're paused! The enemies are waiting... patiently?", available: () => true },
+  { text: 'Did you know? Confused enemies deal 3x damage to other enemies!', available: () => gs.hasClownish },
+  { text: 'Need help? Try clicking an item above to learn about it.', available: () => gs.unlockedItems.length > 0 },
+  { text: 'It looks like the Ringmaster is nearby! Stay away... he buffs all his friends.', available: () => gs.encounteredEnemyTypes.has('ringmaster') },
+  { text: 'Did you know? Glowstick reflects bullets back as explosives with no cooldown on success!', available: () => gs.hasGlowsticks },
+  { text: 'SHIFT dashes through enemies and damages them.', available: () => gs.hasDash },
+  { text: 'Did you know? Gift boxes can be grabbed with E and thrown at enemies!', available: () => gs.encounteredEnemyTypes.has('giftBox') },
+  { text: 'Each candle you blow out makes it more aggressive.', available: () => gs.hasCursedCandles },
+  { text: 'Did you know? Bowling balls pierce ALL enemies and explode when they expire!', available: () => gs.hasBowlingBall },
+  { text: "It looks like you're doing great! ...probably.", available: () => true },
 ];
 
 let _clippyIdleIdx = 0;
 function clippyIdleTip() {
-  _clippyBubbleText = CLIPPY_IDLE_TIPS[_clippyIdleIdx % CLIPPY_IDLE_TIPS.length];
+  const availableTips = CLIPPY_IDLE_TIPS.filter(tip => tip.available());
+  _clippyBubbleText = availableTips[_clippyIdleIdx % availableTips.length].text;
   _clippyIdleIdx++;
   SFX.play('clippySpeak', 0.65);
 }

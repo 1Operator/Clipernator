@@ -1024,6 +1024,27 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
 
   const aimingLeft = Math.cos(gunAngle) < 0;
 
+  if (gs.hasCursedCandles) {
+    const t = Date.now() / 1200;
+    const orbitR = 44;
+    const headY = -22;
+    const candles = gs.cursedCandles || [];
+    for (let i = 0; i < candles.length; i++) {
+      const candle = candles[i];
+      const a = t + (i / candles.length) * Math.PI * 2;
+      const cx = x + Math.cos(a) * orbitR;
+      const cy = y + headY + Math.sin(a) * (orbitR * 0.35);
+      ctx.save();
+      ctx.shadowColor = candle.lit ? '#cc55ff' : '#551177';
+      ctx.shadowBlur = candle.lit ? 12 : 6;
+      drawSpriteSheetFrame(
+        candle.lit ? cursedCandleLitSpinImg : cursedCandleUnlitSpinImg,
+        4, 10, 100, cx, cy, 72, 72
+      );
+      ctx.restore();
+    }
+  }
+
   const sourceImg = playerCanvas || playerImg;
   if (sourceImg && (sourceImg.complete !== false)) {
 const BODY_W = 48;
@@ -1147,27 +1168,6 @@ if (gs.hasClownish) {
 
   ctx.globalAlpha = 1;
 
-  // ── Orbiting candles ──
-  if (gs.hasCursedCandles) {
-    const t = Date.now() / 1200;
-    const orbitR = 44;
-    const headY = -22;
-    const candles = gs.cursedCandles || [];
-    for (let i = 0; i < candles.length; i++) {
-      const candle = candles[i];
-      const a = t + (i / candles.length) * Math.PI * 2;
-      const cx = x + Math.cos(a) * orbitR;
-      const cy = y + headY + Math.sin(a) * (orbitR * 0.35);
-      ctx.save();
-      ctx.shadowColor = candle.lit ? '#cc55ff' : '#551177';
-      ctx.shadowBlur = candle.lit ? 12 : 6;
-      drawSpriteSheetFrame(
-        candle.lit ? cursedCandleLitSpinImg : cursedCandleUnlitSpinImg,
-        4, 10, 100, cx, cy, 72, 72
-      );
-      ctx.restore();
-    }
-  }
 }
 
 function drawBullet(b) {

@@ -48,7 +48,7 @@ const ITEM_DEFS = {
 
   cookie: {
     id: 'cookie', label: 'GOLDEN\nCOOKIE', icon: '🍪',
-    img: 'sprites/items/goldencookie/GoldenCookieSpin.png',
+    img: 'sprites/items/goldencookie/GoldenCookie.png',
     desc: '7x SPEED\n+ 7x FASTER RELOAD\nFOR 7 SECONDS',
     color: '#ffdd00', shadowColor: '#ffaa00', spawnCooldown: 17000,
     effect(gs) {
