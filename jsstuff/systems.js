@@ -1951,18 +1951,22 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
     const wrapper = document.getElementById('wrapper');
 
     if (elapsed < seq.shakeDuration && wrapper) {
-      wrapper.style.left = `${Math.round(seq.startLeft + (Math.random() * 2 - 1) * 14)}px`;
-      wrapper.style.top = `${Math.round(seq.startTop + (Math.random() * 2 - 1) * 12)}px`;
+      wrapper.style.left = `${Math.round(seq.startLeft + (Math.random() * 2 - 1) * 6)}px`;
+      wrapper.style.top = `${Math.round(seq.startTop + (Math.random() * 2 - 1) * 5)}px`;
     }
     if (expandProgress > 0 && wrapper) {
-      const endWidth = Math.max(window.innerWidth * 1.4, seq.startWidth);
-      const endHeight = Math.max(window.innerHeight * 1.4, seq.startHeight);
-      const width = seq.startWidth + (endWidth - seq.startWidth) * easedExpansion;
-      const height = seq.startHeight + (endHeight - seq.startHeight) * easedExpansion;
+      if (seq.expandStartLeft === undefined) {
+        const left = Number.parseFloat(wrapper.style.left);
+        const top = Number.parseFloat(wrapper.style.top);
+        seq.expandStartLeft = Number.isFinite(left) ? left : seq.startLeft;
+        seq.expandStartTop = Number.isFinite(top) ? top : seq.startTop;
+      }
+      const width = seq.startWidth + (seq.endWidth - seq.startWidth) * easedExpansion;
+      const height = seq.startHeight + (seq.endHeight - seq.startHeight) * easedExpansion;
       wrapper.style.width = `${width}px`;
       wrapper.style.height = `${height}px`;
-      wrapper.style.left = `${(window.innerWidth - width) / 2}px`;
-      wrapper.style.top = `${(window.innerHeight - height) / 2}px`;
+      wrapper.style.left = `${seq.expandStartLeft + (seq.endLeft - seq.expandStartLeft) * easedExpansion}px`;
+      wrapper.style.top = `${seq.expandStartTop + (seq.endTop - seq.expandStartTop) * easedExpansion}px`;
       resizeGameViewport();
     }
     gs.antipieDarkness = expandProgress;
@@ -1981,12 +1985,10 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
       gs.antipieDarkness = 1;
       gs.antipieBossSequence = null;
       if (wrapper) {
-        const width = Math.max(window.innerWidth * 1.4, seq.startWidth);
-        const height = Math.max(window.innerHeight * 1.4, seq.startHeight);
-        wrapper.style.width = `${width}px`;
-        wrapper.style.height = `${height}px`;
-        wrapper.style.left = `${(window.innerWidth - width) / 2}px`;
-        wrapper.style.top = `${(window.innerHeight - height) / 2}px`;
+        wrapper.style.width = `${seq.endWidth}px`;
+        wrapper.style.height = `${seq.endHeight}px`;
+        wrapper.style.left = `${seq.endLeft}px`;
+        wrapper.style.top = `${seq.endTop}px`;
         resizeGameViewport();
       }
       startAntipieBoss(true);

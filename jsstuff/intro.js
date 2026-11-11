@@ -957,13 +957,14 @@ setTimeout(() => {
     const wrapper = document.getElementById('wrapper');
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
-    document.body.classList.add('antipie-takeover');
     wrapper.classList.add('antipie-takeover');
     wrapper.style.left = `${Math.round(rect.left)}px`;
     wrapper.style.top = `${Math.round(rect.top)}px`;
     wrapper.style.width = `${Math.round(rect.width)}px`;
     wrapper.style.height = `${Math.round(rect.height)}px`;
 
+    const targetWidth = Math.max(window.innerWidth * 1.4, 1500);
+    const targetHeight = Math.max(window.innerHeight * 1.4, 1200);
     const startWidth = rect.width;
     const startHeight = rect.height;
     const enemyIds = [...ECS.query('enemy')];
@@ -977,6 +978,10 @@ setTimeout(() => {
       startTop: rect.top,
       startWidth,
       startHeight,
+      endLeft: (window.innerWidth - targetWidth) / 2,
+      endTop: (window.innerHeight - targetHeight) / 2,
+      endWidth: targetWidth,
+      endHeight: targetHeight,
       shakeDuration: 5000,
       expandDuration: 2600,
       enemyIds,
