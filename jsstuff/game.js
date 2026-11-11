@@ -145,6 +145,11 @@ function applyPlayerDamage(amount, sourceEntityId = null, sourceType = null) {
   const healthBefore = gs.health;
   if (typeof notifyEmailPlayerDamaged === 'function') notifyEmailPlayerDamaged();
   gs.health = Math.max(0, gs.health - scaledDamage);
+  if (gs.health < healthBefore) {
+    const playerPosition = ECS.get(gs.playerId, 'pos');
+    if (playerPosition) SFX.playAt('clippyDamage', playerPosition.x, playerPosition.y, 0.55);
+    else SFX.play('clippyDamage', 0.55);
+  }
   if (sourceEnemyType && gs.health < healthBefore) {
     gs.taskManagerDamageByType[sourceEnemyType] =
       (gs.taskManagerDamageByType[sourceEnemyType] || 0) + healthBefore - gs.health;

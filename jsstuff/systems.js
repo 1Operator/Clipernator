@@ -652,7 +652,6 @@ function _clownCarExplode(id, pos, gs, playerDriving) {
     const ppos = ECS.get(gs.playerId, 'pos');
     if (ppos && Math.hypot(pos.x - ppos.x, pos.y - ppos.y) < 120 && gs.invincible <= 0) {
       applyPlayerDamage(25, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
-      SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
       gs.flawlessThisWave = false;
       triggerSFPHit(); updateHUD();
       if (gs.health <= 0) { gameOver(); return; }
@@ -1269,6 +1268,9 @@ if (ai2&&ai2.reflectedByGlowstick&&ECS.has(id,'enemy')&&ECS.get(id,'enemy').type
           if (ehp.hp<=0) {
             const epos=ECS.get(id,'pos'); if (epos) spawnParticles(epos.x,epos.y,'#ff2222',10);
             ECS.destroyEntity(id); gs.waveKills++;
+            gs.score += Math.round(10 * gs.wave);
+            if (epos) tryDropTicket(epos.x, epos.y);
+            gs.health = Math.min(gs.maxHealth, gs.health + CFG.HEALTH_REGEN);
             updateHUD(); checkWave();
           }
         }
@@ -1469,7 +1471,7 @@ function sysDashCollision() {
     if (!ai.dashHit&&Math.hypot(ppos.x-epos.x,ppos.y-epos.y)<32) {
       ehp.hp-=baseBulletDamage()*2*speedScale; ehp.hitFlash=14; ai.dashHit=true;
       spawnParticles(epos.x,epos.y,'#ffaa00',10);
-      if (ehp.hp<=0){SFX.playAt('PartyPopperKill',epos.x,epos.y,0.7);spawnParticles(epos.x,epos.y,'#ff2222',16);ECS.destroyEntity(id);gs.score+=10*gs.wave;gs.waveKills++;tryDropTicket(epos.x,epos.y);gs.health=Math.min(gs.maxHealth,gs.health+CFG.HEALTH_REGEN);updateHUD();checkWave();}
+      if (ehp.hp<=0){SFX.play('PartyPopperKill',0.7);spawnParticles(epos.x,epos.y,'#ff2222',16);ECS.destroyEntity(id);gs.score+=10*gs.wave;gs.waveKills++;tryDropTicket(epos.x,epos.y);gs.health=Math.min(gs.maxHealth,gs.health+CFG.HEALTH_REGEN);updateHUD();checkWave();}
     }
   }
 }
@@ -1496,7 +1498,6 @@ function sysEnemyPlayerCollision() {
 if (eaiCheck2 && eaiCheck2.thrownByFork) {
   eaiCheck2.thrownByFork = false;
   applyPlayerDamage(30, id); // harder hit than normal contact
-  SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.65);
   gs.invincible = CFG.INVINCIBLE_FRAMES;
   gs.shakeX = 20; gs.shakeY = 20;
   gs.flawlessThisWave = false;
@@ -1512,7 +1513,6 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
     eaiCheck.explodeCooldown = 120;
     detonateExplosiveBullet({damageMult: eaiCheck.rmDmgMult || 3, life:1, isExplosive:true}, epos.x, epos.y, false);
     applyPlayerDamage(20, id);
-    SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
     gs.invincible = CFG.INVINCIBLE_FRAMES;
     gs.flawlessThisWave = false;
     updateHUD();
@@ -1528,7 +1528,6 @@ if (eaiCheck && eaiCheck.criticalMass && gs.invincible <= 0) {
       // and the bowl itself damages the enemy it rams into
       if (gs.knockingPinsActive) {
         applyPlayerDamage(2, id); gs.invincible=CFG.INVINCIBLE_FRAMES;
-       SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.45);
         gs.shakeX=16;gs.shakeY=16; gs.flawlessThisWave=false;
         // Deal damage to the enemy being bowled into
         const ehp=ECS.get(id,'hp');
@@ -1564,8 +1563,6 @@ for (const cid of ECS.query('enemy','pos')) {
   }
 }
 applyPlayerDamage(Math.round(20 * contactMult), id);
-SFX.play('playerDamage', 0.5);
-SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 
       gs.invincible=CFG.INVINCIBLE_FRAMES;
       gs.shakeX=16;gs.shakeY=16; gs.flawlessThisWave=false;
@@ -1669,7 +1666,6 @@ if (eb.isFrosting && eb.spawnGiftBox) {
         gs.shakeX = impactShake; gs.shakeY = impactShake;
         if (gs.invincible <= 0 && Math.hypot(eb.x - ppos.x, eb.y - ppos.y) < impactR) {
 applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale), eb.sourceId, eb.sourceType);
-         SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.6);
           gs.invincible = CFG.INVINCIBLE_FRAMES;
           gs.shakeX = Math.round(16 * scale); gs.shakeY = Math.round(16 * scale);
           gs.flawlessThisWave = false;
@@ -1732,8 +1728,6 @@ applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale), eb.sourceId, eb.
     if (!eb.friendlyFire&&gs.invincible<=0&&Math.hypot(eb.x-ppos.x,eb.y-ppos.y)<20) {
       const bulletDmg = Math.round(15 * (eb.rmDmgMult || 1));
 applyPlayerDamage(bulletDmg, eb.sourceId, eb.sourceType);
-      SFX.play('playerDamage', 0.5);
-      SFX.playAt('clippyDamage', ppos.x, ppos.y, 0.55);
 if (eb.isTear) SFX.playAt('tearHit', eb.x, eb.y, 0.5);
       gs.invincible=CFG.INVINCIBLE_FRAMES; gs.shakeX=10;gs.shakeY=10;
       gs.flawlessThisWave=false; triggerSFPHit();

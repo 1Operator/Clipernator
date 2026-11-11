@@ -174,7 +174,7 @@ const ITEM_DEFS = {
 
   dash: {
     id: 'dash', label: 'PARTY\nPOPPER', icon: '🎉',
-     img: 'sprites/items/dash/PartyPopper.png',
+    img: 'sprites/items/partypopper/PartyPopper.png',
     desc: 'PERMANENT:\nSHIFT TO DASH\nDAMAGES ENEMIES\n3 CHARGES',
     color: '#ff9900', shadowColor: '#ffcc00', spawnCooldown: 999999999,
     effect(gs) {
@@ -185,19 +185,13 @@ const ITEM_DEFS = {
       showMsg('SHIFT TO DASH! 3 CHARGES!');
     },
     draw(fi) {
-      const {x,y,phase}=fi, t=Date.now()/300, bob=Math.sin(t+phase)*5;
-      ctx.save(); ctx.translate(x,y+bob); ctx.rotate(Math.sin(t*.8+phase)*.12);
-      ctx.shadowColor='#ffaa00'; ctx.shadowBlur=20+Math.sin(t)*6;
-      ctx.save(); ctx.rotate(-0.7);
-      ctx.fillStyle='#ff6600'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-8,-28); ctx.lineTo(8,-28); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle='#ffdd00'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-4,-8); ctx.lineTo(-6,-20); ctx.stroke(); ctx.beginPath(); ctx.moveTo(2,-10); ctx.lineTo(1,-22); ctx.stroke();
-      ctx.fillStyle='#ffcc44'; ctx.fillRect(-10,-30,20,5); ctx.fillStyle='#cc4400'; ctx.fillRect(-4,0,8,14); ctx.restore();
-      const bc=['#ff69b4','#ffdd00','#00ff99','#ff4444','#aaddff','#ffffff'];
-      for(let i=0;i<10;i++){const ba=-1.2+i*.18+Math.sin(t*2+i)*.12,br=18+Math.sin(t*3+i*.7)*6; ctx.fillStyle=bc[i%bc.length]; ctx.shadowColor=bc[i%bc.length]; ctx.shadowBlur=4; ctx.fillRect(Math.cos(ba)*br-2+6,Math.sin(ba)*br-2-22,4,4);}
-      ctx.fillStyle='#ffdd00'; ctx.shadowColor='#ffdd00'; ctx.shadowBlur=8;
-      for(let i=0;i<3;i++){const sa=t*2+i*2.09,sr=26+Math.sin(t+i)*4; ctx.beginPath(); ctx.arc(Math.cos(sa)*sr+4,Math.sin(sa)*sr-14,2.5,0,Math.PI*2); ctx.fill();}
-      ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='8px "Fixedsys", monospace'; ctx.textAlign='center';
-      ctx.fillText('PARTY',0,24); ctx.fillText('POPPER',0,34); ctx.restore();
+      const {x,y,phase}=fi, bob=Math.sin(Date.now()/300+phase)*5;
+      ctx.save(); ctx.translate(x,y+bob); ctx.rotate(Math.sin(Date.now()/375+phase)*0.12);
+      ctx.shadowColor='#ffaa00'; ctx.shadowBlur=20;
+      if (partyPopperImg.complete && partyPopperImg.naturalWidth > 0) {
+        ctx.drawImage(partyPopperImg, -29, -29, 58, 58);
+      }
+      ctx.restore();
     }
   },
 

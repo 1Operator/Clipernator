@@ -4,6 +4,8 @@
 // Cheap glow substitute — just a soft circle drawn under the sprite
 const goldenCookieSpinImg = new Image();
 goldenCookieSpinImg.src = 'sprites/items/goldencookie/GoldenCookieSpin.png';
+const partyPopperImg = new Image();
+partyPopperImg.src = 'sprites/items/partypopper/PartyPopper.png';
 const cursedCandleUnlitSpinImg = new Image();
 cursedCandleUnlitSpinImg.src = 'sprites/items/cursedcandles/CursedCandleUnlitSpin.png';
 const cursedCandleLitSpinImg = new Image();

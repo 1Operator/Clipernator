@@ -314,10 +314,17 @@ function emailCreateRandomOffer() {
       { key: 'noMove', text: 'Goal: clear the next complete waves without changing position.' },
     ];
     const goal = goals[Math.floor(Math.random() * goals.length)];
+    const waveCount = `${duration} complete wave${duration === 1 ? '' : 's'}`;
+    const goalText = goal.text.replace('the next complete waves', waveCount);
+    const failureText = {
+      noReload: 'Reloading during an eligible wave fails this bounty.',
+      noDamage: 'Taking damage during an eligible wave fails this bounty.',
+      noMove: 'Changing position during an eligible wave fails this bounty.',
+    }[goal.key];
     emailDeliver({
       type: 'bounty',
-      subject: goal.text.replace('the next complete waves', `${duration} complete wave${duration === 1 ? '' : 's'}`),
-      body: `Hello, User! It seems like you want some chips... for a challenge?\n\n${goal.text.replace('the next complete waves', `${duration} complete wave${duration === 1 ? '' : 's'}`)}\n\nSay yes, and I'll watch your progress on next wave. Any reload, damage, or physical position change during an eligible wave immediately fails the bounty. \n\nIf you complete the bounty, you'll receive a reward of ${Math.ceil(2 + duration * 2 + Math.floor(gs.wave / 5))} chips. If you fail, the bounty is lost and you get no chips.\n\n You need to act fast User! This offer expires in ${Math.floor(duration * 60)} seconds.`,
+      subject: goalText,
+      body: `Hello, User! It seems like you want some chips... for a challenge?\n\n${goalText}\n\nAccept this offer and I'll track your progress starting next wave. ${failureText}\n\nIf you complete the bounty, you'll receive a reward of ${Math.ceil(2 + duration * 2 + Math.floor(gs.wave / 5))} chips. If you fail, the bounty is lost and you get no chips.\n\nThis offer expires in ${Math.floor(duration * 60)} seconds.`,
       payload: { goal: goal.key, duration },
     });
   } else if (roll < 0.75) {
