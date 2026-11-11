@@ -1939,15 +1939,20 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
 
   if (gs.antipieBossSequence) {
     const seq = gs.antipieBossSequence;
-    const elapsed = Math.min(4000, performance.now() - seq.startedAt);
-    const progress = elapsed / 4000;
-    const expandProgress = Math.max(0, Math.min(1, (elapsed - 1400) / 2600));
+    const elapsed = Math.min(
+      seq.shakeDuration + seq.expandDuration,
+      performance.now() - seq.startedAt
+    );
+    const shakeProgress = Math.min(1, elapsed / seq.shakeDuration);
+    const expandProgress = Math.max(0, Math.min(
+      1, (elapsed - seq.shakeDuration) / seq.expandDuration
+    ));
     const easedExpansion = expandProgress * expandProgress * (3 - 2 * expandProgress);
     const wrapper = document.getElementById('wrapper');
 
-    if (elapsed < 1400 && wrapper) {
-      wrapper.style.left = `${Math.round(seq.startLeft + (Math.random() * 2 - 1) * 9)}px`;
-      wrapper.style.top = `${Math.round(seq.startTop + (Math.random() * 2 - 1) * 7)}px`;
+    if (elapsed < seq.shakeDuration && wrapper) {
+      wrapper.style.left = `${Math.round(seq.startLeft + (Math.random() * 2 - 1) * 14)}px`;
+      wrapper.style.top = `${Math.round(seq.startTop + (Math.random() * 2 - 1) * 12)}px`;
     }
     if (expandProgress > 0 && wrapper) {
       const endWidth = Math.max(window.innerWidth * 1.4, seq.startWidth);
@@ -1958,16 +1963,13 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
       wrapper.style.height = `${height}px`;
       wrapper.style.left = `${(window.innerWidth - width) / 2}px`;
       wrapper.style.top = `${(window.innerHeight - height) / 2}px`;
-      if (canvas.clientWidth !== viewportSize.width || canvas.clientHeight !== viewportSize.height) {
-        resizeGameViewport();
-        renderScale = canvas.clientWidth / worldW;
-      }
+      resizeGameViewport();
     }
-    gs.antipieDarkness = progress;
+    gs.antipieDarkness = expandProgress;
 
-    const targetKills = elapsed >= 4000
+    const targetKills = elapsed >= seq.shakeDuration
       ? seq.enemyIds.length
-      : Math.floor(seq.enemyIds.length * progress * progress);
+      : Math.floor(seq.enemyIds.length * shakeProgress * shakeProgress);
     while (seq.killedCount < targetKills) {
       const enemyId = seq.enemyIds[seq.killedCount++];
       const pos = ECS.get(enemyId, 'pos');
@@ -1975,7 +1977,7 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
       ECS.destroyEntity(enemyId);
     }
 
-    if (elapsed >= 4000) {
+    if (elapsed >= seq.shakeDuration + seq.expandDuration) {
       gs.antipieDarkness = 1;
       gs.antipieBossSequence = null;
       if (wrapper) {
@@ -1985,10 +1987,7 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
         wrapper.style.height = `${height}px`;
         wrapper.style.left = `${(window.innerWidth - width) / 2}px`;
         wrapper.style.top = `${(window.innerHeight - height) / 2}px`;
-        if (canvas.clientWidth !== viewportSize.width || canvas.clientHeight !== viewportSize.height) {
-          resizeGameViewport();
-          renderScale = canvas.clientWidth / worldW;
-        }
+        resizeGameViewport();
       }
       startAntipieBoss(true);
     }

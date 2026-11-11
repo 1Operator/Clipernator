@@ -977,6 +977,8 @@ setTimeout(() => {
       startTop: rect.top,
       startWidth,
       startHeight,
+      shakeDuration: 5000,
+      expandDuration: 2600,
       enemyIds,
       killedCount: 0,
     };
