@@ -2,6 +2,28 @@
 // CLIPBLAST: PARTY HUNTER — Draw Functions 
 // ============================================================
 // Cheap glow substitute — just a soft circle drawn under the sprite
+const goldenCookieSpinImg = new Image();
+goldenCookieSpinImg.src = 'sprites/items/goldencookie/GoldenCookieSpin.png';
+const cursedCandleUnlitSpinImg = new Image();
+cursedCandleUnlitSpinImg.src = 'sprites/items/cursedcandles/CursedCandleUnlitSpin.png';
+const cursedCandleLitSpinImg = new Image();
+cursedCandleLitSpinImg.src = 'sprites/items/cursedcandles/CursedCandleLitSpin.png';
+
+function drawSpriteSheetFrame(image, columns, frameCount, frameDuration, x, y, width, height) {
+  if (!image.complete || image.naturalWidth === 0) return;
+  const frameWidth = image.naturalWidth / columns;
+  const rows = Math.ceil(frameCount / columns);
+  const frameHeight = image.naturalHeight / rows;
+  const frame = Math.floor(Date.now() / frameDuration) % frameCount;
+  const column = frame % columns;
+  const row = Math.floor(frame / columns);
+  ctx.drawImage(
+    image,
+    column * frameWidth, row * frameHeight, frameWidth, frameHeight,
+    x - width / 2, y - height / 2, width, height
+  );
+}
+
 function drawCheapGlow(x, y, radius, color, alpha = 0.3) {
   ctx.save();
   ctx.globalAlpha = alpha;
@@ -1128,26 +1150,19 @@ if (gs.hasClownish) {
     const t = Date.now() / 1200;
     const orbitR = 44;
     const headY = -22;
-    for (let i = 0; i < 5; i++) {
-      const a = t + (i / 5) * Math.PI * 2;
+    const candles = gs.cursedCandles || [];
+    for (let i = 0; i < candles.length; i++) {
+      const candle = candles[i];
+      const a = t + (i / candles.length) * Math.PI * 2;
       const cx = x + Math.cos(a) * orbitR;
       const cy = y + headY + Math.sin(a) * (orbitR * 0.35);
-      const isLit = i < gs.candlesLit;
       ctx.save();
-      ctx.translate(cx, cy);
-      ctx.fillStyle = isLit ? '#f5deb3' : '#aaaaaa';
-      ctx.shadowColor = isLit ? '#ff8800' : 'transparent';
-      ctx.shadowBlur = isLit ? 10 : 0;
-      ctx.fillRect(-2.5, -7, 5, 10);
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(0, -10); ctx.stroke();
-      if (isLit) {
-        const flicker = Math.sin(Date.now() / 60 + i * 1.3) * 1.5;
-        ctx.fillStyle = '#ffff88'; ctx.shadowColor = '#ff8800'; ctx.shadowBlur = 12 + flicker;
-        ctx.beginPath(); ctx.ellipse(0, -13 + flicker * 0.3, 2.5, 4 + flicker, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 0;
-        ctx.beginPath(); ctx.ellipse(0, -13 + flicker * 0.3, 1, 2, 0, 0, Math.PI * 2); ctx.fill();
-      }
+      ctx.shadowColor = candle.lit ? '#cc55ff' : '#551177';
+      ctx.shadowBlur = candle.lit ? 12 : 6;
+      drawSpriteSheetFrame(
+        candle.lit ? cursedCandleLitSpinImg : cursedCandleUnlitSpinImg,
+        4, 10, 100, cx, cy, 72, 72
+      );
       ctx.restore();
     }
   }

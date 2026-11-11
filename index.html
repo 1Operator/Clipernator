@@ -2115,21 +2115,6 @@ canvas {
     0%,100%{box-shadow:4px 4px 0 var(--green2);}
     50%{box-shadow:4px 4px 20px var(--green),4px 4px 0 var(--green2);}
   }
-  #msg {
-    position: absolute;
-    top: 70px; left: 50%;
-    transform: translateX(-50%);
-    font-size: 13px;
-    color: var(--pink);
-    text-shadow: 0 0 10px var(--pink);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-    max-width: calc(100% - 24px);
-    text-align: center;
-    z-index: 60;
-  }
-
   /* ── Win2k item choice dialog ── */
   #item-choice {
     position: absolute;
@@ -2890,8 +2875,6 @@ canvas {
     </div>
   </div>
 
-  <div id="msg"></div>
-
   <!-- ── Keybind Screen — Win2k dialog ── -->
   <div id="keybind-screen" class="independent-window" data-window-title="Keybinds">
     <div id="keybind-dialog">
@@ -3090,38 +3073,38 @@ canvas {
               <div class="clipshop-title">Computer Software Upgrades/Integrations</div>
               <div class="clipshop-tagline">Quality Software, Quality Prices</div>
             </div>
-            <button id="clipshop-ad-top" class="clipshop-ad" type="button" data-clipshop-ad="top" aria-label="ChipShop special offer" hidden></button>
+            <button id="chipshop-ad-top" class="clipshop-ad" type="button" data-chipshop-ad="top" aria-label="ChipShop special offer" hidden></button>
             <div class="clipshop-wallet" aria-label="Your balances">
-              <span>CHIPS: <b id="clipshop-chip-balance">0</b></span>
-              <span>GOLD: <b id="clipshop-golden-balance">0</b></span>
+              <span>CHIPS: <b id="chipshop-chip-balance">0</b></span>
+              <span>GOLD: <b id="chipshop-golden-balance">0</b></span>
             </div>
           </div>
           <nav class="clipshop-nav" aria-label="ChipShop navigation">
-            <button type="button" data-clipshop-view="profile">Customer Profile</button>
-            <button type="button" data-clipshop-view="help">Help</button>
-            <button type="button" data-clipshop-view="home">Shop Home</button>
+            <button type="button" data-chipshop-view="profile">Customer Profile</button>
+            <button type="button" data-chipshop-view="help">Help</button>
+            <button type="button" data-chipshop-view="home">Shop Home</button>
           </nav>
-          <div id="clipshop-home-view">
+          <div id="chipshop-home-view">
             <div class="clipshop-toolbar">
-              <span id="clipshop-floor" class="clipshop-floor">Floor 1</span>
-              <button id="clipshop-refresh" class="clipshop-button" type="button">Restock · 5 chips</button>
+              <span id="chipshop-floor" class="clipshop-floor">Floor 1</span>
+              <button id="chipshop-refresh" class="clipshop-button" type="button">Restock · 5 chips</button>
             </div>
-            <div id="clipshop-notice" class="clipshop-notice" role="status" aria-live="polite">Start a run to browse today's listings.</div>
+            <div id="chipshop-notice" class="clipshop-notice" role="status" aria-live="polite">Start a run to browse today's listings.</div>
             <div class="clipshop-columns">
               <div class="clipshop-catalog-column">
                 <div class="clipshop-store-title">COMPUTERS &amp; UPGRADES — CURRENT FLOOR STOCK</div>
-                <div id="clipshop-listings" class="clipshop-listings" aria-label="ChipShop listings"></div>
+                <div id="chipshop-listings" class="clipshop-listings" aria-label="ChipShop listings"></div>
               </div>
               <aside class="clipshop-cart" aria-label="Shopping cart">
                 <h3>Shopping Cart</h3>
-                <div id="clipshop-cart-list" class="clipshop-cart-list"></div>
-                <div id="clipshop-cart-total" class="clipshop-cart-total"></div>
-                <button id="clipshop-install-all" class="clipshop-button clipshop-cart-install" type="button">Install Everything</button>
+                <div id="chipshop-cart-list" class="clipshop-cart-list"></div>
+                <div id="chipshop-cart-total" class="clipshop-cart-total"></div>
+                <button id="chipshop-install-all" class="clipshop-button clipshop-cart-install" type="button">Install Everything</button>
               </aside>
             </div>
-            <button id="clipshop-ad-bottom" class="clipshop-ad clipshop-bottom-ad" type="button" data-clipshop-ad="bottom" aria-label="ChipShop special offer" hidden></button>
+            <button id="chipshop-ad-bottom" class="clipshop-ad clipshop-bottom-ad" type="button" data-chipshop-ad="bottom" aria-label="ChipShop special offer" hidden></button>
           </div>
-          <section id="clipshop-content-view" class="clipshop-content-view" aria-live="polite" hidden></section>
+          <section id="chipshop-content-view" class="clipshop-content-view" aria-live="polite" hidden></section>
         </section>
       </div>
     </div>

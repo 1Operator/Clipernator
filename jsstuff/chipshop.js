@@ -176,7 +176,7 @@ function chipShopMakeAd(stock, chance = 0.5) {
   return {
     listingId: listing.id,
     discount: 10 * (1 + Math.floor(Math.random() * 5)),
-    color: clipShopRandomFrom(['#aaff77', '#8ee7f2', '#fff18a', '#ffadd2', '#ffad6e']),
+    color: chipShopRandomFrom(['#aaff77', '#8ee7f2', '#fff18a', '#ffadd2', '#ffad6e']),
     effect: Math.random() < 0.2 ? 'virus' : 'discount',
   };
 }
@@ -261,8 +261,8 @@ function chipShopHandleItemAcquired(itemId) {
   }
 
   for (const [containerId, selector] of [
-    ['chipshop-listings', '.chipshop-card'],
-    ['chipshop-cart-list', '.chipshop-cart-item'],
+    ['chipshop-listings', '.clipshop-card'],
+    ['chipshop-cart-list', '.clipshop-cart-item'],
   ]) {
     const container = document.getElementById(containerId);
     if (!container) continue;
@@ -302,7 +302,7 @@ function chipShopUpdateBalances() {
 
 function chipShopAddItemPreview(container, itemIds) {
   const preview = document.createElement('div');
-  preview.className = `chipshop-item-preview${itemIds.length > 1 ? ' is-bundle' : ''}`;
+  preview.className = `clipshop-item-preview${itemIds.length > 1 ? ' is-bundle' : ''}`;
   for (const id of itemIds) {
     const definition = ITEM_DEFS[id];
     if (definition?.img) {
@@ -311,14 +311,14 @@ function chipShopAddItemPreview(container, itemIds) {
       image.alt = '';
       image.addEventListener('error', () => {
         const fallback = document.createElement('span');
-        fallback.className = 'chipshop-item-fallback';
+        fallback.className = 'clipshop-item-fallback';
         fallback.textContent = definition.icon || '?';
         image.replaceWith(fallback);
       }, { once: true });
       preview.appendChild(image);
     } else {
       const fallback = document.createElement('span');
-      fallback.className = 'chipshop-item-fallback';
+      fallback.className = 'clipshop-item-fallback';
       fallback.textContent = definition?.icon || '?';
       preview.appendChild(fallback);
     }
@@ -406,7 +406,7 @@ function chipShopRenderAd(element, ad) {
 
 function chipShopApplyAd(element) {
   if (!chipShopHasRun()) return;
-  const slot = element.dataset.clipshopAd;
+  const slot = element.dataset.chipshopAd;
   const ad = gs.chipShopAds?.[slot];
   const listing = ad && gs.chipShopStock?.find(candidate => candidate.id === ad.listingId);
   if (!ad || !listing) return;
@@ -421,12 +421,12 @@ function chipShopApplyAd(element) {
       listing.price = Math.max(1, Math.floor(
         listing.listPrice * (100 - ad.discount) / 100
       ));
-      clipShopRender();
-      document.getElementById('clipshop-notice').textContent =
+      chipShopRender();
+      document.getElementById('chipshop-notice').textContent =
         `All virus pop-up windows are already open; ${ad.discount}% off ${chipShopListingName(listing)} was applied instead.`;
       return;
     }
-    document.getElementById('clipshop-notice').textContent =
+    document.getElementById('chipshop-notice').textContent =
       `The ${chipShopListingName(listing)} ad opened some unexpected windows!`;
     return;
   }
@@ -438,7 +438,7 @@ function chipShopApplyAd(element) {
   ));
   gs.chipShopAds[slot] = null;
   chipShopRender();
-  document.getElementById('clipshop-notice').textContent =
+  document.getElementById('chipshop-notice').textContent =
     `${ad.discount}% ad discount applied to ${chipShopListingName(listing)}.`;
 }
 
@@ -466,11 +466,11 @@ function chipShopRenderContentView() {
   const heading = document.createElement('h2');
   const back = document.createElement('button');
   back.type = 'button';
-  back.className = 'chipshop-content-back';
+  back.className = 'clipshop-content-back';
   back.dataset.chipshopView = 'home';
   back.textContent = 'Back to Shop';
   const body = document.createElement('div');
-  body.className = 'chipshop-content-body';
+  body.className = 'clipshop-content-body';
   if (view === 'profile') {
     heading.textContent = 'Customer Profile — Installed Listings';
     const purchases = typeof gs !== 'undefined' && Array.isArray(gs.chipShopPurchases)
@@ -481,7 +481,7 @@ function chipShopRenderContentView() {
     } else {
       for (const purchase of purchases) {
         const row = document.createElement('div');
-        row.className = 'chipshop-history-item';
+        row.className = 'clipshop-history-item';
         row.textContent = `${purchase.name} — ${purchase.priceText}. ${purchase.description}`;
         body.appendChild(row);
       }
@@ -505,7 +505,7 @@ function chipShopRenderCart() {
   cart.replaceChildren();
   if (!entries.length) {
     cart.appendChild(Object.assign(document.createElement('div'), {
-      className: 'chipshop-cart-empty',
+      className: 'clipshop-cart-empty',
       textContent: 'Your cart is empty.',
     }));
   }
@@ -520,20 +520,20 @@ function chipShopRenderCart() {
     item.className = 'clipshop-cart-item';
     item.dataset.clipshopListingId = listing.id;
     const name = document.createElement('div');
-    name.className = 'chipshop-cart-item-title';
+    name.className = 'clipshop-cart-item-title';
     name.textContent = chipShopListingName(listing);
     const description = document.createElement('div');
-    description.className = 'chipshop-cart-description';
+    description.className = 'clipshop-cart-description';
     description.textContent = chipShopListingDescription(listing);
     const actions = document.createElement('div');
-    actions.className = 'chipshop-cart-actions';
+    actions.className = 'clipshop-cart-actions';
     const price = document.createElement('span');
     price.textContent = listing.kind === 'golden'
       ? `${listing.price} Golden Chip`
       : `${listing.price} chips`;
     const install = document.createElement('button');
     install.type = 'button';
-    install.className = 'chipshop-button';
+    install.className = 'clipshop-button';
     install.dataset.chipshopInstall = listing.id;
     install.textContent = 'Install';
     install.disabled = !chipShopHasRun() || !chipShopCanAfford(listing);
@@ -555,7 +555,7 @@ function chipShopRender() {
   if (!listings || !notice || !floor || !refresh) return;
 
   const hasRun = chipShopHasRun();
-  const page = document.getElementById('wonderweb-page-chipshop');
+  const page = document.getElementById('wonderweb-page-clipshop');
   if (page) {
     page.dataset.floor = String(hasRun ? gs.floor : 1);
     chipShopRenderAd(document.getElementById('chipshop-ad-top'),
@@ -571,7 +571,7 @@ function chipShopRender() {
   if (!hasRun || !Array.isArray(gs.chipShopStock)) {
     notice.textContent = 'Start a run to browse today’s listings.';
     listings.appendChild(Object.assign(document.createElement('div'), {
-      className: 'chipshop-empty',
+      className: 'clipshop-empty',
       textContent: 'No active stock. Start a game to open ChipShop.',
     }));
     chipShopUpdateBalances();
@@ -583,7 +583,7 @@ function chipShopRender() {
   notice.textContent = `${gs.chipShopStock.length} listings · Refreshing costs ${gs.chipShopRefreshCost} chips.`;
   for (const listing of gs.chipShopStock) {
     const card = document.createElement('article');
-    card.className = 'chipshop-card';
+    card.className = 'clipshop-card';
     card.dataset.chipshopListingId = listing.id;
     const productImage = document.createElement('div');
     productImage.className = 'clipshop-product-image';
@@ -591,13 +591,13 @@ function chipShopRender() {
       const sprite = CHIPSHOP_UPGRADE_SPRITES[listing.upgrade.stat];
       if (sprite) {
         const icon = document.createElement('img');
-        icon.className = 'chipshop-upgrade-icon';
+        icon.className = 'clipshop-upgrade-icon';
         icon.src = `sprites/ui/ChipShop/${sprite}`;
         icon.alt = '';
         productImage.appendChild(icon);
       } else {
         const placeholder = document.createElement('span');
-        placeholder.className = 'chipshop-upgrade-placeholder';
+        placeholder.className = 'clipshop-upgrade-placeholder';
         placeholder.textContent = '?';
         productImage.appendChild(placeholder);
       }
@@ -606,27 +606,27 @@ function chipShopRender() {
     }
 
     const name = document.createElement('div');
-    name.className = 'chipshop-item-name';
+    name.className = 'clipshop-item-name';
     name.textContent = chipShopListingName(listing);
 
     const detail = document.createElement('div');
-    detail.className = 'chipshop-item-detail';
+    detail.className = 'clipshop-item-detail';
     detail.textContent = listing.kind === 'golden'
       ? `Golden deal · ${chipShopListingDescription(listing)}`
       : chipShopListingDescription(listing);
     const productInfo = document.createElement('div');
-    productInfo.className = 'chipshop-product-info';
+    productInfo.className = 'clipshop-product-info';
     productInfo.append(name, detail);
 
     const price = document.createElement('div');
-    price.className = 'chipshop-price';
+    price.className = 'clipshop-price';
     if (listing.kind === 'golden') {
       price.textContent = `Price: ${listing.price} Golden Chip`;
     } else if (listing.discountPercent) {
       const oldPrice = document.createElement('s');
       oldPrice.textContent = `${listing.listPrice} chips`;
       const discountedPrice = document.createElement('span');
-      discountedPrice.className = 'chipshop-price-new';
+      discountedPrice.className = 'clipshop-price-new';
       discountedPrice.textContent =
         `${listing.discountPercent}% Discount: ${listing.price} chips`;
       price.append('List price: ', oldPrice, document.createElement('br'), discountedPrice);
@@ -636,13 +636,13 @@ function chipShopRender() {
     productInfo.appendChild(price);
 
     const action = document.createElement('div');
-    action.className = 'chipshop-product-action';
+    action.className = 'clipshop-product-action';
     const partNumber = document.createElement('div');
-    partNumber.className = 'chipshop-part-number';
+    partNumber.className = 'clipshop-part-number';
     partNumber.textContent = `P/N: ${listing.partNumber}`;
     const addToCart = document.createElement('button');
     addToCart.type = 'button';
-    addToCart.className = 'chipshop-button';
+    addToCart.className = 'clipshop-button';
     addToCart.dataset.chipshopAdd = listing.id;
     addToCart.textContent = 'Add to cart';
     action.append(partNumber, addToCart);
@@ -754,7 +754,7 @@ function chipShopInstallFromCart(listingId) {
   if (!chipShopHasRun()) return;
   const index = gs.chipShopCart.findIndex(listing => listing.id === listingId);
   if (index < 0) return;
-  const listing = gs.clipShopCart[index];
+  const listing = gs.chipShopCart[index];
   if (!chipShopCanAfford(listing)) {
     document.getElementById('chipshop-notice').textContent = listing.kind === 'golden'
       ? 'You need a Golden Chip to install this listing.'
@@ -828,7 +828,7 @@ document.getElementById('chipshop-install-all').addEventListener('click', chipSh
 document.querySelectorAll('[data-chipshop-ad]').forEach(ad => {
   ad.addEventListener('click', () => chipShopApplyAd(ad));
 });
-document.querySelector('.chipshop-nav').addEventListener('click', event => {
+document.querySelector('.clipshop-nav').addEventListener('click', event => {
   const button = event.target.closest('[data-chipshop-view]');
   if (button) chipShopSetView(button.dataset.chipshopView);
 });

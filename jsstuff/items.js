@@ -48,7 +48,7 @@ const ITEM_DEFS = {
 
   cookie: {
     id: 'cookie', label: 'GOLDEN\nCOOKIE', icon: '🍪',
-     img: 'sprites/items/goldencookie/GoldenCookie.png',
+    img: 'sprites/items/goldencookie/GoldenCookieSpin.png',
     desc: '7x SPEED\n+ 7x FASTER RELOAD\nFOR 7 SECONDS',
     color: '#ffdd00', shadowColor: '#ffaa00', spawnCooldown: 17000,
     effect(gs) {
@@ -60,16 +60,11 @@ const ITEM_DEFS = {
       showMsg('GOLDEN COOKIE!!! 7x SPEED + LIGHTNING RELOAD!');
     },
     draw(fi) {
-      const {x,y,phase}=fi, t=Date.now()/280, bob=Math.sin(t+phase)*6, pulse=1+Math.sin(t*3)*0.08;
-      ctx.save(); ctx.translate(x,y+bob); ctx.scale(pulse,pulse);
-      ctx.shadowColor='#ffdd00'; ctx.shadowBlur=28+Math.sin(t)*12;
-      ctx.fillStyle='#ffcc00'; ctx.beginPath(); ctx.arc(0,0,19,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#ffeeaa'; ctx.beginPath(); ctx.arc(-6,-6,6,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(7,-5,5,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#ff8800'; ctx.font='bold 14px "Fixedsys", monospace'; ctx.textAlign='center';
-      ctx.fillText('G', 0, 6);
-      ctx.shadowBlur=0; ctx.fillStyle='#ffffff'; ctx.font='8px "Fixedsys", monospace'; ctx.textAlign='center';
-      ctx.fillText('GOLDEN',0,29); ctx.fillText('COOKIE',0,38); ctx.restore();
+      const {x,y,phase}=fi, bob=Math.sin(Date.now()/300+phase)*5;
+      ctx.save();
+      ctx.shadowColor='#ffdd00'; ctx.shadowBlur=20;
+      drawSpriteSheetFrame(goldenCookieSpinImg, 4, 14, 90, x, y+bob, 58, 58);
+      ctx.restore();
     }
   },
 
@@ -271,6 +266,8 @@ const ITEM_DEFS = {
     color: '#ff8800', shadowColor: '#ffaa44', spawnCooldown: 999999999,
     effect(gs) {
       gs.hasCursedCandles = true;
+      gs.cursedCandles = [{ lit: false, lightTimer: 60 }];
+      gs.candleSpawnTimer = 0;
       gs.candlesLit = 0;
       gs.candleHpTimer = 0;
       showMsg('CURSED CANDLES! LIGHT THEM WITH YOUR SOUL!');

@@ -712,6 +712,7 @@ const topSpd = (slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult)
     gs.dashLaunchFrame = launchFrame;
     gs.dashActiveThisFrame = true;
     if (launchFrame === 1) {
+      SFX.play('PartyPopperDash', 0.65);
       const angle = Math.atan2(gs.dashVy, gs.dashVx);
       gs.dashBurst = { x: pos.x, y: pos.y, angle, life: 10, maxLife: 10 };
       spawnDashConfetti(pos.x, pos.y, angle);
@@ -871,6 +872,7 @@ function tickCorEnemy(id, type) {
         ai.corStateTimer = 29;
         ai.corDashFrame = 0;
         ai.corWhiteFlash = false;
+        SFX.playAt('RedCORDash', pos.x, pos.y, 0.65);
       }
     } else if (ai.corState === 'dash') {
       ai.corDashFrame++;
@@ -950,6 +952,7 @@ function tickCorEnemy(id, type) {
         color: '#22ddff',
         isCorClone: true,
       });
+      SFX.playAt('BlueCORShoot', pos.x, pos.y, 0.55);
       ai.corShotsFired++;
       ai.corStretchTimer = 10;
       ai.corShotTimer = 26;
@@ -1002,6 +1005,8 @@ function spawnCorSpriteFragments(pos, sprite, count) {
 
 function despawnCor(id, pos, color) {
   if (!ECS.has(id, 'enemy')) return;
+  const type = ECS.get(id, 'enemy').type;
+  SFX.playAt(type === 'corRed' ? 'RedCORVanish' : 'BlueCORVanish', pos.x, pos.y, 0.65);
   spawnParticles(pos.x, pos.y, color, 12);
   ECS.destroyEntity(id);
   gs.waveKills++;
@@ -1464,7 +1469,7 @@ function sysDashCollision() {
     if (!ai.dashHit&&Math.hypot(ppos.x-epos.x,ppos.y-epos.y)<32) {
       ehp.hp-=baseBulletDamage()*2*speedScale; ehp.hitFlash=14; ai.dashHit=true;
       spawnParticles(epos.x,epos.y,'#ffaa00',10);
-      if (ehp.hp<=0){spawnParticles(epos.x,epos.y,'#ff2222',16);ECS.destroyEntity(id);gs.score+=10*gs.wave;gs.waveKills++;tryDropTicket(epos.x,epos.y);gs.health=Math.min(gs.maxHealth,gs.health+CFG.HEALTH_REGEN);updateHUD();checkWave();}
+      if (ehp.hp<=0){SFX.playAt('PartyPopperKill',epos.x,epos.y,0.7);spawnParticles(epos.x,epos.y,'#ff2222',16);ECS.destroyEntity(id);gs.score+=10*gs.wave;gs.waveKills++;tryDropTicket(epos.x,epos.y);gs.health=Math.min(gs.maxHealth,gs.health+CFG.HEALTH_REGEN);updateHUD();checkWave();}
     }
   }
 }
@@ -1958,18 +1963,34 @@ if (gs.glowExplosionTimer > 0) gs.glowExplosionTimer--;
   if (gs.ammo===0&&!gs.reloading) startReload();
 
   if (gs.hasCursedCandles) {
-    if (gs.candleRelightDelay>0){gs.candleRelightDelay--;}
+    const candles = gs.cursedCandles || (gs.cursedCandles = []);
+    let candleLit = false;
+    for (const candle of candles) {
+      if (candle.lit) continue;
+      candle.lightTimer--;
+      if (candle.lightTimer <= 0) {
+        candle.lit = true;
+        gs.candlesLit++;
+        candleLit = true;
+        SFX.play('candleLight', 0.65);
+      }
+    }
+    if (candleLit) updateHUD();
+
+    gs.candleSpawnTimer = (gs.candleSpawnTimer || 0) + 1;
+    if (candles.length < 5 && gs.candleSpawnTimer >= 60) {
+      candles.push({ lit: false, lightTimer: 60 });
+      gs.candleSpawnTimer = 0;
+    }
+
+    if (gs.candleRelightDelay > 0) gs.candleRelightDelay--;
     else {
-      gs.candleHpTimer=(gs.candleHpTimer||0)+1;
-      if (gs.candleHpTimer>=60) {
-        gs.candleHpTimer=0; applyPlayerDamage(5); gs.flawlessThisWave=false;
-        if (gs.health<=0){gameOver();return;}
-        if (gs.candlesLit<5){
-          gs.candlesLit=Math.min(5,gs.candlesLit+1);
-          SFX.play('candleLight', 0.65);
-          showMsg(gs.candlesLit===5?"ALL CANDLES LIT! +10 BULLETS PER SHOT":`CANDLE LIT! +${gs.candlesLit*2} BULLETS PER SHOT`);
-        }
-        updateHUD();
+      gs.candleHpTimer = (gs.candleHpTimer || 0) + 1;
+      if (gs.candleHpTimer >= 60) {
+        gs.candleHpTimer = 0;
+        applyPlayerDamage(5);
+        gs.flawlessThisWave = false;
+        if (gs.health <= 0) { gameOver(); return; }
       }
     }
   }
@@ -1994,7 +2015,7 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
   if (gs.hasDash&&gs.dashCharges<gs.dashMaxCharges) {
     gs.dashCooldownTimer++;
     if (gs.dashCooldownTimer>=gs.dashCooldownMax) {
-      gs.dashCooldownTimer=0; gs.dashCharges++; updateHUD();
+      gs.dashCooldownTimer=0; gs.dashCharges++; SFX.play('PartyPopperRefill', 0.6); updateHUD();
       if (gs.dashCharges===gs.dashMaxCharges) showMsg('DASH FULLY CHARGED!');
     }
   }
@@ -2354,6 +2375,8 @@ const total = [...ECS.query('enemy')].length;
 if (type === 'utensil') SFX.playAt('utensilSpawn', x, y, 0.45);
 if (type === 'waterballoon') SFX.playAt('balloonSpawn', x, y, 0.5);
 if (type === 'partyHat') SFX.playAt('partyHatSpawn', x, y, 0.5);
+if (type === 'corRed') SFX.playAt('RedCORAppear', x, y, 0.65);
+if (type === 'corBlue') SFX.playAt('BlueCORAppear', x, y, 0.65);
 }
 
 function startAntipieBoss() {

@@ -195,6 +195,9 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
             ai.uPullTimer  = 35;
             ai.uState      = 'FORK_PULLING';
             SFX.playAt('forkHit', tpos.x, tpos.y, 0.45);
+            if (ECS.get(ai.uGrabbedId, 'enemy')?.type === 'giftBox') {
+              SFX.playAt('GiftBoxGrab', tpos.x, tpos.y, 0.65);
+            }
             // Freeze the grabbed entity's velocity
             const gvel = ECS.get(ai.uGrabbedId, 'vel');
             if (gvel) { gvel.vx = 0; gvel.vy = 0; }
@@ -401,6 +404,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
         ai.uHitTargets = new Set();
         ai.uState = 'LAUNCH';
         if (subtype === 'knife') SFX.playAt('knifeAttack', pos.x, pos.y, 0.65);
+        if (subtype === 'spoon') SFX.playAt('SpoonAttack', pos.x, pos.y, 0.65);
         spawnParticles(pos.x, pos.y, warnColor, 10);
       }
     }
@@ -426,6 +430,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       if (playerHit && gs.invincible <= 0) {
         ai.uHitTargets.add(gs.playerId);
         if (subtype === 'knife') {
+          SFX.playAt('KnifeHit', ai.uTipX, ai.uTipY, 0.65);
           gs.invincible = CFG.INVINCIBLE_FRAMES;
           SFX.playAt('clippyDamage', ppos2.x, ppos2.y, 0.55);
           gs.shakeX = 16; gs.shakeY = 16; gs.flawlessThisWave = false;
@@ -434,6 +439,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
           spawnParticles(ppos2.x, ppos2.y, '#ff2244', 16);
           if (gs.health <= 0) { gameOver(); return BT.FAILURE; }
         } else if (subtype === 'spoon') {
+          SFX.playAt('SpoonHit', ai.uTipX, ai.uTipY, 0.65);
           applyPlayerDamage(14, id); gs.invincible = CFG.INVINCIBLE_FRAMES;
           SFX.playAt('spoonDamage', ppos2.x, ppos2.y, 0.55);
           SFX.playAt('clippyDamage', ppos2.x, ppos2.y, 0.45);
@@ -469,10 +475,12 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
           if (Math.hypot(ai.uTipX - epos.x, ai.uTipY - epos.y) < 24) {
             ai.uHitTargets.add(eid);
             if (subtype === 'knife') {
+              SFX.playAt('KnifeHit', epos.x, epos.y, 0.65);
               ehp.hp -= 15; ehp.hitFlash = 12; spawnParticles(epos.x, epos.y, '#ff2244', 8);
               if (ehp.hp <= 0) killedEnemy = { eid, x: epos.x, y: epos.y };
               else applyLeakingStatus(eid, gs);
             } else if (subtype === 'spoon') {
+              SFX.playAt('SpoonHit', epos.x, epos.y, 0.65);
               ehp.hp -= 8; ehp.hitFlash = 10;
               const kd = Math.hypot(epos.x - ai.uTipX, epos.y - ai.uTipY) || 1;
               evel.vx += ((epos.x - ai.uTipX) / kd) * 14; evel.vy += ((epos.y - ai.uTipY) / kd) * 14;

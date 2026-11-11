@@ -5,7 +5,6 @@
  
 let gameRunning = false;
 let animId = null;
-let msgTimeout = null;
 let keys = {};
 let mouse = { x: CFG.W / 2, y: CFG.H / 2, screenX: CFG.W / 2, screenY: CFG.H / 2 };
 let muzzleFlash = 0;
@@ -66,6 +65,9 @@ const ECS = {
 destroyEntity(id) {
   const enemy = this.get(id, 'enemy');
   const pos = this.get(id, 'pos');
+  if (enemy?.type === 'giftBox' && pos) {
+    SFX.playAt('GiftBoxDeath', pos.x, pos.y, 0.7);
+  }
   if (enemy?.type === 'utensil' && pos) {
     SFX.playAt('utensilDeath', pos.x, pos.y, 0.65);
   }
@@ -297,12 +299,7 @@ function updateHUD() {
   if (typeof taskManagerRefresh === 'function') taskManagerRefresh();
 }
 
-function showMsg(txt) {
-  const el = document.getElementById('msg');
-  el.textContent = txt;
-  el.style.opacity = '1';
-  clearTimeout(msgTimeout);
-  msgTimeout = setTimeout(() => { el.style.opacity = '0'; }, 1800);
+function showMsg() {
 }
 
 // ================================================================
@@ -1390,6 +1387,7 @@ function tryPickUpGiftBox() {
       ECS.get(id, 'ai').heldByPlayer = true;
       ECS.get(id, 'vel').vx = 0;
       ECS.get(id, 'vel').vy = 0;
+      SFX.playAt('GiftBoxGrab', epos.x, epos.y, 0.65);
       showMsg('GIFT BOX GRABBED! RIGHT-CLICK TO THROW!');
       return;
     }
