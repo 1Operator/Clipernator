@@ -89,8 +89,8 @@ function baseBulletDamage() {
     : gs.hasTripleCake ? 3
       : gs.hasDoubleCake ? 2
         : 1;
-  return cakeDamage
-    * (1 + (gs.chipShopDamageBonus || 0))
+  return (1 + (gs.chipShopDamageBonus || 0))
+    * cakeDamage
     * (gs.chipShopDamageMultiplier || 1);
 }
 
@@ -685,9 +685,10 @@ function sysPlayerMovement() {
 if (gs.speedBoostTimer > 0) speedMult = gs.speedBoostMult || CFG.SPEED_BOOST_MULT;
 if (gs.sfpFull) speedMult = Math.max(speedMult, 1.3);
 if (gs.hasTightropeBoots) speedMult = Math.max(speedMult, 3.00);
-const clipShopSpeed = (1 + (gs.chipShopSpeedBonus || 0)) * (gs.chipShopSpeedMultiplier || 1);
-const topSpd = (slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult)
-  * emailMoveMultiplier() * clipShopSpeed;
+const clipShopSpeed = gs.chipShopSpeedMultiplier || 1;
+const baseSpeed = (CFG.PLAYER_SPEED + (gs.chipShopSpeedBonus || 0))
+  * (slowed ? 0.45 : 1);
+const topSpd = baseSpeed * speedMult * emailMoveMultiplier() * clipShopSpeed;
   if (dashing) {
   const easeInOut = progress => progress < 0.5
     ? 4 * progress * progress * progress

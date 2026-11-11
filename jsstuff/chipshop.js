@@ -140,7 +140,7 @@ function chipShopCreateUpgradeListing() {
   } else if (stat === 'health') {
     value = 3 + wave * 2;
   } else {
-    value = 0.01 + wave * 0.01;
+    value = stat === 'damage' ? 1 : 2;
   }
 
   const labels = {
@@ -152,7 +152,7 @@ function chipShopCreateUpgradeListing() {
     ? `+${Math.round(value * 100)}% ${labels[stat]}`
     : stat === 'health'
       ? `+${value} Max Health`
-      : `+${Math.round(value * 100)}% ${labels[stat]}`;
+      : `+${value} ${labels[stat]}`;
 
   return chipShopPriceListing({
     id: `chipshop-${gs.chipShopNextListingId++}`,
@@ -335,7 +335,7 @@ function chipShopUpgradeDetails(upgrade) {
     || 'Upgrade';
   if (upgrade.type === 'percent') return `Permanent +${Math.round(upgrade.value * 100)}% ${label}`;
   if (upgrade.stat === 'health') return `Permanent +${upgrade.value} max health`;
-  return `Permanent +${Math.round(upgrade.value * 100)}% ${label.toLowerCase()}`;
+  return `Permanent +${upgrade.value} ${label.toLowerCase()}`;
 }
 
 function chipShopListingDescription(listing) {
