@@ -90,8 +90,8 @@ function baseBulletDamage() {
       : gs.hasDoubleCake ? 2
         : 1;
   return cakeDamage
-    * (1 + (gs.clipShopDamageBonus || 0))
-    * (gs.clipShopDamageMultiplier || 1);
+    * (1 + (gs.chipShopDamageBonus || 0))
+    * (gs.chipShopDamageMultiplier || 1);
 }
 
 function gunMuzzlePos() {
@@ -686,7 +686,7 @@ function sysPlayerMovement() {
 if (gs.speedBoostTimer > 0) speedMult = gs.speedBoostMult || CFG.SPEED_BOOST_MULT;
 if (gs.sfpFull) speedMult = Math.max(speedMult, 1.3);
 if (gs.hasTightropeBoots) speedMult = Math.max(speedMult, 3.00);
-const clipShopSpeed = (1 + (gs.clipShopSpeedBonus || 0)) * (gs.clipShopSpeedMultiplier || 1);
+const clipShopSpeed = (1 + (gs.chipShopSpeedBonus || 0)) * (gs.chipShopSpeedMultiplier || 1);
 const topSpd = (slowed ? CFG.PLAYER_SPEED * 0.45 : CFG.PLAYER_SPEED * speedMult)
   * emailMoveMultiplier() * clipShopSpeed;
   if (dashing) {
@@ -1760,8 +1760,8 @@ function sysFieldItemPickup() {
       }
       const permanent=new Set(['bouncy','dash','doubledCake','tripleCake','quadCake','shakeFizzlePop','flawlessBaking','cursedCandles','glowsticks','paperCuts','extraClips','clownishUpgrade','popcornBowl']);
       if (permanent.has(fi.id) && !gs.unlockedItems.includes(fi.id)) gs.unlockedItems.push(fi.id);
-      if (typeof clipShopHandleItemAcquired === 'function') {
-        clipShopHandleItemAcquired(fi.id);
+      if (typeof chipShopHandleItemAcquired === 'function') {
+        chipShopHandleItemAcquired(fi.id);
       }
       if (!permanent.has(fi.id)) setTimeout(()=>{if(gameRunning)trySpawnFieldItems();},def.spawnCooldown);
     }

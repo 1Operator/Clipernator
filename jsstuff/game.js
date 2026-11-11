@@ -162,11 +162,11 @@ function initGameState(applyIntroChoices = true) {
     score: 0, wave: 1,
     chips: 0, goldenChips: 0, chipDrops: [], flawlessWaveStreak: 0,
     taskManagerNerfedTypes: {}, taskManagerDamageByType: {}, taskManagerNextNerfCost: 7,
-    clipShopStock: [], clipShopCart: [], clipShopPurchases: [], clipShopAds: {},
-    clipShopView: 'home', clipShopRefreshCost: 5, clipShopRefreshCount: 0,
-    clipShopRestockCount: 0, clipShopNextListingId: 1,
-    clipShopSpeedBonus: 0, clipShopSpeedMultiplier: 1,
-    clipShopDamageBonus: 0, clipShopDamageMultiplier: 1,
+    chipShopStock: [], chipShopCart: [], chipShopPurchases: [], chipShopAds: {},
+    chipShopView: 'home', chipShopRefreshCost: 5, chipShopRefreshCount: 0,
+    chipShopRestockCount: 0, chipShopNextListingId: 1,
+    chipShopSpeedBonus: 0, chipShopSpeedMultiplier: 1,
+    chipShopDamageBonus: 0, chipShopDamageMultiplier: 1,
     health: CFG.MAX_HEALTH, maxHealth: CFG.MAX_HEALTH,
     leakingTimer: 0, leakingTickTimer: 0,
     ammo: CFG.MAX_AMMO, maxAmmo: CFG.MAX_AMMO,
@@ -278,7 +278,7 @@ clippyPickupTimer: 0,
     INTRO.applyDraftItemsToGs(gs);
   }
   resetEmailRunState();
-  clipShopStartRun();
+  chipShopStartRun();
  
 }
 
@@ -295,7 +295,7 @@ function updateHUD() {
   document.getElementById('wave-val').textContent = gs.wave;
   document.getElementById('chips-val').textContent = gs.chips;
   document.getElementById('golden-chips-val').textContent = gs.goldenChips;
-  if (typeof clipShopUpdateBalances === 'function') clipShopUpdateBalances();
+  if (typeof chipShopUpdateBalances === 'function') chipShopUpdateBalances();
   if (typeof taskManagerRefresh === 'function') taskManagerRefresh();
 }
 
@@ -496,13 +496,13 @@ function renderPauseMenu() {
   }
   const cakeDamageLabel = gs.hasQuadCake ? '4x (50% dud)' : gs.hasTripleCake ? '3x (45% dud)' :
                           gs.hasDoubleCake ? '2x (40% dud)' : '1x';
-  const shopDamageMultiplier = (1 + (gs.clipShopDamageBonus || 0))
-    * (gs.clipShopDamageMultiplier || 1);
+  const shopDamageMultiplier = (1 + (gs.chipShopDamageBonus || 0))
+    * (gs.chipShopDamageMultiplier || 1);
   const baseSpeedMult = gs.speedBoostTimer > 0 ? (gs.speedBoostMult || CFG.SPEED_BOOST_MULT) :
                         gs.hasTightropeBoots ? 3.00 : 1;
   const speedMult = baseSpeedMult
-    * (1 + (gs.clipShopSpeedBonus || 0))
-    * (gs.clipShopSpeedMultiplier || 1);
+    * (1 + (gs.chipShopSpeedBonus || 0))
+    * (gs.chipShopSpeedMultiplier || 1);
   const speedVal  = speedMult.toFixed(2) + 'x';
   const bulletsPerShot = CFG.BULLET_COUNT + (gs.hasCursedCandles ? gs.candlesLit * 2 : 0);
 
@@ -1584,7 +1584,7 @@ setInterval(updateTaskbarClock, 1000);
 document.getElementById('floor-btn').addEventListener('click', () => {
   document.getElementById('floor-transition').style.display = 'none';
   gs.floor = 2;
-  clipShopStartFloor();
+  chipShopStartFloor();
   worldW *= 1.5;
   worldH *= 1.5;
   renderScale = canvas.clientWidth / worldW;
@@ -1661,8 +1661,8 @@ function offerItemChoice() {
     SFX.play('itemConfirm', 0.65);
     gs.unlockedItems.push(id);
     def.effect(gs);
-    if (typeof clipShopHandleItemAcquired === 'function') {
-      clipShopHandleItemAcquired(id);
+    if (typeof chipShopHandleItemAcquired === 'function') {
+      chipShopHandleItemAcquired(id);
     }
     choiceEl.style.display = 'none';
     gs.pendingChoice = false;
