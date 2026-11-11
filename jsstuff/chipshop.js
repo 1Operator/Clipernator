@@ -139,8 +139,11 @@ function chipShopCreateUpgradeListing() {
     value = chipShopRandomFrom(CHIPSHOP_PERCENTAGES) / 100;
   } else if (stat === 'health') {
     value = 3 + wave * 2;
+  } else if (stat === 'damage') {
+    const rangeIncrease = Math.floor((wave - 1) / 5) * 0.2;
+    value = Number((0.2 + rangeIncrease + Math.random() * 0.3).toFixed(2));
   } else {
-    value = stat === 'damage' ? 1 : 2;
+    value = 2;
   }
 
   const labels = {
@@ -152,7 +155,7 @@ function chipShopCreateUpgradeListing() {
     ? `+${Math.round(value * 100)}% ${labels[stat]}`
     : stat === 'health'
       ? `+${value} Max Health`
-      : `+${value} ${labels[stat]}`;
+      : `+${Number(value.toFixed(2))} ${labels[stat]}`;
 
   return chipShopPriceListing({
     id: `chipshop-${gs.chipShopNextListingId++}`,
@@ -335,7 +338,8 @@ function chipShopUpgradeDetails(upgrade) {
     || 'Upgrade';
   if (upgrade.type === 'percent') return `Permanent +${Math.round(upgrade.value * 100)}% ${label}`;
   if (upgrade.stat === 'health') return `Permanent +${upgrade.value} max health`;
-  return `Permanent +${upgrade.value} ${label.toLowerCase()}`;
+  const value = Number(upgrade.value.toFixed(2));
+  return `Permanent +${value} ${label.toLowerCase()}`;
 }
 
 function chipShopListingDescription(listing) {
