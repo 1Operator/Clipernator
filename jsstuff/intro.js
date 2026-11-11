@@ -1559,7 +1559,7 @@ function renderDesktopLoading() {
       gsRef._chipDropChanceMult = 1;
     }
     if (tippyMode) {
-      gsRef.wave = 9;
+      gsRef.wave = 10;
       gsRef.waveKills = 0;
       gsRef.waveEnemiesLeft = CFG.WAVE_ENEMIES_BASE + gsRef.wave * CFG.WAVE_ENEMIES_GROWTH;
       gsRef.spawnInterval = Math.max(55, CFG.SPAWN_INTERVAL_BASE - gsRef.wave * CFG.WAVE_SPAWN_SPEEDUP);
