@@ -487,7 +487,22 @@ function togglePause() {
 
 function renderPauseMenu() {
   const statsEl = document.getElementById('pause-stat-lines');
-  const shopDamageMultiplier = gs.chipShopDamageMultiplier || 1;
+  const statusEffectsEl = document.getElementById('pause-status-effects');
+  statusEffectsEl.replaceChildren();
+  if (gs.leakingTimer > 0) {
+    const leakingStatus = document.createElement('button');
+    leakingStatus.type = 'button';
+    leakingStatus.className = 'pause-status-icon';
+    leakingStatus.title = `Leaking: ${Math.ceil(gs.leakingTimer / 60)} seconds remaining. Click to ask Clippy.`;
+    leakingStatus.setAttribute('aria-label', leakingStatus.title);
+    leakingStatus.addEventListener('click', () => clippyExplainStatusEffect('leaking'));
+
+    const leakingIcon = document.createElement('img');
+    leakingIcon.src = 'sprites/ui/StatusEffects/Leaking.png';
+    leakingIcon.alt = '';
+    leakingStatus.appendChild(leakingIcon);
+    statusEffectsEl.appendChild(leakingStatus);
+  }
   let speedMult = gs.speedBoostTimer > 0 ? (gs.speedBoostMult || CFG.SPEED_BOOST_MULT) : 1;
   if (gs.sfpFull) speedMult = Math.max(speedMult, 1.3);
   if (gs.hasTightropeBoots) speedMult = Math.max(speedMult, 3.00);
@@ -502,13 +517,47 @@ function renderPauseMenu() {
     `Wave ............ ${gs.wave}`,
     `HP .............. ${Math.max(0, gs.health)} / ${gs.maxHealth}`,
     `Damage .......... ${damageVal}`,
-    `                 (Chip Shop: ${shopDamageMultiplier.toFixed(2)}x)`,
     `Speed ........... ${speedVal}`,
     `Clip Size ....... ${emailAmmoCapacity()}`,
     `Bullets/Shot .... ${bulletsPerShot}`,
   ];
 
   statsEl.textContent = lines.join('\n');
+
+  const container = document.getElementById('pause-items');
+  container.replaceChildren();
+
+  if (gs.unlockedItems.length === 0) {
+    const empty = document.createElement('span');
+    empty.style.cssText = 'font-size:10px; color:#666; font-family:"Microsoft Sans Serif","MS Sans Serif",Arial,sans-serif;';
+    empty.textContent = '(No items yet)';
+    container.appendChild(empty);
+  } else {
+    gs.unlockedItems.forEach(id => {
+      if (id === 'doubledCake' && (gs.hasTripleCake || gs.hasQuadCake)) return;
+      if (id === 'tripleCake' && gs.hasQuadCake) return;
+      const def = ITEM_DEFS[id];
+      if (!def) return;
+
+      const card = document.createElement('div');
+      card.className = 'pause-item-card';
+      if (def.img) {
+        const img = document.createElement('img');
+        img.src = def.img;
+        img.style.cssText = 'width:55px;height:55px;image-rendering:pixelated;';
+        card.appendChild(img);
+      } else {
+        card.textContent = def.icon;
+      }
+
+      const tip = document.createElement('div');
+      tip.className = 'tip';
+      tip.textContent = def.label.replace(/\n/g, ' ');
+      card.appendChild(tip);
+      card.addEventListener('click', () => clippyExplain(id));
+      container.appendChild(card);
+    });
+  }
 }
 
 const CLIPPY_ITEM_TIPS = {
@@ -538,7 +587,7 @@ const CLIPPY_STATUS_TIPS = {
   leaking: "Leaking makes you lose 5% of your health per second. Don't like it? Imagine how I feel!",
 };
 
-let _clippyBubbleText = "It looks like you discovered how to PAUSE! Your stats are right here.";
+let _clippyBubbleText = "It looks like you discovered how to PAUSE! Click an item to learn what it does.";
 
 // Legacy canvas kept for compatibility (hidden)
 function drawClippyBubble() {

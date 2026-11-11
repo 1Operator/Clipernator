@@ -2852,12 +2852,17 @@ canvas {
           <legend style="font-size:11px; color:#000; padding:0 4px; font-family:'MS Sans Serif',Arial,sans-serif;">Player Stats</legend>
 <div id="pause-stat-lines" style="font-family:'MS Sans Serif',Arial,sans-serif; font-size:11px; color:#000; line-height:1.6; white-space:pre;"></div>
         </fieldset>
+        <fieldset style="border:1px solid #808080; padding:4px 10px 8px 10px; margin:0;">
+          <legend style="font-size:11px; color:#000; padding:0 4px; font-family:'MS Sans Serif',Arial,sans-serif;">Unlocked Items</legend>
+          <div id="pause-items" style="display:flex; flex-wrap:wrap; gap:5px; min-height:32px; align-items:center; padding-top:2px;"></div>
+        </fieldset>
         <!-- Hidden legacy canvas (no-op, kept for compatibility) -->
         <canvas id="clippy-bubble-canvas" width="1" height="1" style="display:none;"></canvas>
         <!-- Separator -->
         <div style="height:1px; background:#808080; border-bottom:1px solid #fff;"></div>
         <!-- Buttons -->
-        <div style="display:flex; gap:6px; justify-content:flex-end; align-items:center;">
+        <div style="display:flex; gap:6px; justify-content:space-between; align-items:center;">
+          <div id="pause-status-effects" aria-live="polite" style="display:flex; align-items:center; gap:5px; min-height:28px;"></div>
           <div style="display:flex; gap:6px;">
             <button id="pause-keybind-btn" class="w2k-btn" onclick="openKeybindScreen()">Keybinds</button>
             <button class="w2k-btn" onclick="togglePause()">Resume</button>
