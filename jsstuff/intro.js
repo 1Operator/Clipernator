@@ -958,6 +958,11 @@ setTimeout(() => {
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
     wrapper.classList.add('antipie-takeover');
+    wrapper.style.position = 'fixed';
+    wrapper.style.bottom = '';
+    wrapper.style.transform = '';
+    wrapper.style.transformOrigin = '';
+    wrapper.style.margin = '0';
     wrapper.style.left = `${Math.round(rect.left)}px`;
     wrapper.style.top = `${Math.round(rect.top)}px`;
     wrapper.style.width = `${Math.round(rect.width)}px`;

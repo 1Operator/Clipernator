@@ -3178,6 +3178,7 @@ canvas {
   });
 
   window.addEventListener('resize', function() {
+    if (wrapper.classList.contains('antipie-takeover')) return;
     if (isMaximized) applyMaximize();
     else if (!minimized && wrapper.style.position === 'fixed') {
       const rect = wrapper.getBoundingClientRect();
@@ -3192,13 +3193,15 @@ canvas {
 
   let dragState = null;
   function clampWrapperToViewport(left, top) {
+    if (wrapper.classList.contains('antipie-takeover')) return { left, top };
     return {
       left: Math.max(0, Math.min(window.innerWidth - wrapper.offsetWidth, left)),
       top: Math.max(0, Math.min(window.innerHeight - wrapper.offsetHeight, top)),
     };
   }
   new ResizeObserver(() => {
-    if (isMaximized || minimized || wrapper.style.position !== 'fixed') return;
+    if (isMaximized || minimized || wrapper.classList.contains('antipie-takeover')
+      || wrapper.style.position !== 'fixed') return;
     const rect = wrapper.getBoundingClientRect();
     const position = clampWrapperToViewport(rect.left, rect.top);
     const deltaX = position.left - rect.left;
