@@ -137,6 +137,7 @@ function playerPos(gs) {
 let gs = {};
 
 function applyPlayerDamage(amount, sourceEntityId = null, sourceType = null) {
+  if (gs.antipieBossSequence) return;
   const source = sourceEntityId == null ? null : ECS.get(sourceEntityId, 'enemy');
   const sourceEnemyType = source?.type || sourceType;
   const adjustedAmount = sourceEnemyType

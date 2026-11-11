@@ -955,36 +955,33 @@ setTimeout(() => {
     if (gs.antipieBossSequence || gs.bossActive) return;
 
     const wrapper = document.getElementById('wrapper');
-    if (wrapper) {
-      wrapper.style.animation = 'antipie-window-shake 0.15s steps(2) infinite';
-      wrapper.style.transformOrigin = 'center center';
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    document.body.classList.add('antipie-takeover');
+    wrapper.classList.add('antipie-takeover');
+    wrapper.style.left = `${Math.round(rect.left)}px`;
+    wrapper.style.top = `${Math.round(rect.top)}px`;
+    wrapper.style.width = `${Math.round(rect.width)}px`;
+    wrapper.style.height = `${Math.round(rect.height)}px`;
+
+    const startWidth = rect.width;
+    const startHeight = rect.height;
+    const enemyIds = [...ECS.query('enemy')];
+    for (let i = enemyIds.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [enemyIds[i], enemyIds[j]] = [enemyIds[j], enemyIds[i]];
     }
-
-    const startW = worldW;
-    const startH = worldH;
     gs.antipieBossSequence = {
-      startW,
-      startH,
-      endW: Math.max(worldW * 1.9, 1500),
-      endH: Math.max(worldH * 1.9, 1200),
-      timer: 0,
-      shakeDuration: 95,
-      expandDuration: 45,
-      darkness: 0,
+      startedAt: performance.now(),
+      startLeft: rect.left,
+      startTop: rect.top,
+      startWidth,
+      startHeight,
+      enemyIds,
+      killedCount: 0,
     };
-
-    setTimeout(() => {
-      if (wrapper) wrapper.style.animation = 'antipie-window-expand 0.8s ease-in-out forwards';
-    }, 1500);
-
-    setTimeout(() => {
-      if (wrapper) {
-        wrapper.style.animation = '';
-        wrapper.style.transform = '';
-        wrapper.style.filter = '';
-      }
-      startAntipieBoss(true);
-    }, 2500);
+    gs.antipieDarkness = 0;
+    resizeGameViewport();
   }
 
   function handleDesktopAppClick(appId) {

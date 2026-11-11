@@ -1939,25 +1939,58 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
 
   if (gs.antipieBossSequence) {
     const seq = gs.antipieBossSequence;
-    seq.timer += 1;
-    const total = seq.shakeDuration + seq.expandDuration;
-    if (seq.timer <= seq.shakeDuration) {
-      gs.antipieDarkness = Math.min(0.9, seq.timer / seq.shakeDuration * 0.9);
-    } else {
-      const expandT = (seq.timer - seq.shakeDuration) / seq.expandDuration;
-      const ease = expandT < 0.5 ? 2 * expandT * expandT : 1 - Math.pow(-2 * expandT + 2, 2) / 2;
-      worldW = seq.startW + (seq.endW - seq.startW) * ease;
-      worldH = seq.startH + (seq.endH - seq.startH) * ease;
-      gs.antipieDarkness = Math.min(1, 0.9 + ease * 0.1);
-      renderScale = canvas.clientWidth / worldW;
+    const elapsed = Math.min(4000, performance.now() - seq.startedAt);
+    const progress = elapsed / 4000;
+    const expandProgress = Math.max(0, Math.min(1, (elapsed - 1400) / 2600));
+    const easedExpansion = expandProgress * expandProgress * (3 - 2 * expandProgress);
+    const wrapper = document.getElementById('wrapper');
+
+    if (elapsed < 1400 && wrapper) {
+      wrapper.style.left = `${Math.round(seq.startLeft + (Math.random() * 2 - 1) * 9)}px`;
+      wrapper.style.top = `${Math.round(seq.startTop + (Math.random() * 2 - 1) * 7)}px`;
+    }
+    if (expandProgress > 0 && wrapper) {
+      const endWidth = Math.max(window.innerWidth * 1.4, seq.startWidth);
+      const endHeight = Math.max(window.innerHeight * 1.4, seq.startHeight);
+      const width = seq.startWidth + (endWidth - seq.startWidth) * easedExpansion;
+      const height = seq.startHeight + (endHeight - seq.startHeight) * easedExpansion;
+      wrapper.style.width = `${width}px`;
+      wrapper.style.height = `${height}px`;
+      wrapper.style.left = `${(window.innerWidth - width) / 2}px`;
+      wrapper.style.top = `${(window.innerHeight - height) / 2}px`;
+      if (canvas.clientWidth !== viewportSize.width || canvas.clientHeight !== viewportSize.height) {
+        resizeGameViewport();
+        renderScale = canvas.clientWidth / worldW;
+      }
+    }
+    gs.antipieDarkness = progress;
+
+    const targetKills = elapsed >= 4000
+      ? seq.enemyIds.length
+      : Math.floor(seq.enemyIds.length * progress * progress);
+    while (seq.killedCount < targetKills) {
+      const enemyId = seq.enemyIds[seq.killedCount++];
+      const pos = ECS.get(enemyId, 'pos');
+      if (pos) spawnParticles(pos.x, pos.y, '#ff2222', 18);
+      ECS.destroyEntity(enemyId);
     }
 
-    if (seq.timer >= total) {
-      worldW = seq.endW;
-      worldH = seq.endH;
+    if (elapsed >= 4000) {
       gs.antipieDarkness = 1;
       gs.antipieBossSequence = null;
-      renderScale = canvas.clientWidth / worldW;
+      if (wrapper) {
+        const width = Math.max(window.innerWidth * 1.4, seq.startWidth);
+        const height = Math.max(window.innerHeight * 1.4, seq.startHeight);
+        wrapper.style.width = `${width}px`;
+        wrapper.style.height = `${height}px`;
+        wrapper.style.left = `${(window.innerWidth - width) / 2}px`;
+        wrapper.style.top = `${(window.innerHeight - height) / 2}px`;
+        if (canvas.clientWidth !== viewportSize.width || canvas.clientHeight !== viewportSize.height) {
+          resizeGameViewport();
+          renderScale = canvas.clientWidth / worldW;
+        }
+      }
+      startAntipieBoss(true);
     }
   }
 
@@ -2201,6 +2234,7 @@ function sysOobCleanup() {
 }
 
 function sysSpawner() {
+  if (gs.antipieBossSequence) return;
   gs.spawnTimer++;
   if (gs.spawnTimer>=gs.spawnInterval){gs.spawnTimer=0;spawnEnemy();}
 }
@@ -2291,6 +2325,7 @@ function update() {
 }
 
 function spawnEnemy(allowBeyondWaveLimit = false) {
+  if (gs.antipieBossSequence) return;
   if (gs.bossActive && !allowBeyondWaveLimit) return;
 const total = [...ECS.query('enemy')].length;
   if (!allowBeyondWaveLimit && gs.waveKills+total>=gs.waveEnemiesLeft) return;
@@ -2402,7 +2437,7 @@ function startAntipieBoss(centered = false) {
   const mainRect = canvas.getBoundingClientRect();
   const placeRight = window.innerWidth - mainRect.right >= mainRect.left;
   const x = centered ? worldW / 2 : (placeRight ? worldW + 220 : -220);
-  const y = centered ? worldH / 2 : worldH / 2;
+  const y = worldH / 2;
   const id = ECS.createEntity();
   const bossHp = CFG.BOSS_BASE_HP + gs.wave * 12;
   ECS.add(id, 'enemy', { type: 'cakeBoss' });

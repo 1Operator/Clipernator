@@ -73,23 +73,35 @@ body::before { display: none; }
   outline: none;
 }
 
-@keyframes antipie-window-shake {
-  0%   { transform: translate(0, 0); }
-  10%  { transform: translate(-8px, 2px); }
-  20%  { transform: translate(7px, -3px); }
-  30%  { transform: translate(-6px, 4px); }
-  40%  { transform: translate(5px, -5px); }
-  50%  { transform: translate(-4px, 2px); }
-  60%  { transform: translate(7px, -2px); }
-  70%  { transform: translate(-6px, 4px); }
-  80%  { transform: translate(5px, -3px); }
-  90%  { transform: translate(-2px, 1px); }
-  100% { transform: translate(0, 0); }
+body.antipie-takeover #persistent-desktop,
+body.antipie-takeover #desktop-taskbar,
+body.antipie-takeover #utensil-window-layer {
+  display: none !important;
 }
 
-@keyframes antipie-window-expand {
-  0%   { transform: scale(1); filter: brightness(1); }
-  100% { transform: scale(1.08); filter: brightness(0.35); }
+#wrapper.antipie-takeover {
+  position: fixed;
+  z-index: 20;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  resize: none;
+  border: 0;
+  box-shadow: none;
+  background: #000;
+}
+
+#wrapper.antipie-takeover #hud,
+#wrapper.antipie-takeover #menubar {
+  display: none !important;
+}
+
+#wrapper.antipie-takeover #c {
+  flex: 1 1 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0;
 }
 
 #hud { flex: 0 0 18px; }
