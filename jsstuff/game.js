@@ -17,6 +17,41 @@ let viewportSize = {
   height: canvas.clientHeight || CFG.H,
 };
 
+function scaleWorldCoordinates(value, scaleX, scaleY, visited = new WeakSet()) {
+  if (!value || typeof value !== 'object' || visited.has(value)) return;
+  visited.add(value);
+
+  if (value instanceof Map || value instanceof Set) {
+    for (const entry of value.values()) {
+      scaleWorldCoordinates(entry, scaleX, scaleY, visited);
+    }
+    return;
+  }
+
+  if (Number.isFinite(value.x) && Number.isFinite(value.y)) {
+    value.x *= scaleX;
+    value.y *= scaleY;
+  }
+
+  for (const [xKey, yKey] of [
+    ['targetX', 'targetY'],
+    ['startX', 'startY'],
+    ['shadowX', 'shadowY'],
+    ['bossHomeX', 'bossHomeY'],
+    ['corOriginX', 'corOriginY'],
+    ['uTipX', 'uTipY'],
+  ]) {
+    if (Number.isFinite(value[xKey]) && Number.isFinite(value[yKey])) {
+      value[xKey] *= scaleX;
+      value[yKey] *= scaleY;
+    }
+  }
+
+  for (const child of Object.values(value)) {
+    scaleWorldCoordinates(child, scaleX, scaleY, visited);
+  }
+}
+
 function resizeGameViewport() {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -28,6 +63,9 @@ function resizeGameViewport() {
     if (gameRunning) {
       worldW *= scaleX;
       worldH *= scaleY;
+      scaleWorldCoordinates(ECS._comps, scaleX, scaleY);
+      scaleWorldCoordinates(gs, scaleX, scaleY);
+      scaleWorldCoordinates(mouse, scaleX, scaleY);
       if (gs.transitioning) {
         gs.transitionStartW *= scaleX;
         gs.transitionEndW *= scaleX;
