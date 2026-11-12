@@ -1248,9 +1248,9 @@ function drawCurrentView(targetCanvas, camera, advanceVisualState) {
   ctx.translate(shake.x, shake.y);
 
   if (gs.floor === 2) {
-    ctx.strokeStyle = 'rgba(255,80,0,0.18)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,80,0,0.14)'; ctx.lineWidth = 1;
   } else {
-    ctx.strokeStyle = 'rgba(0,255,100,0.18)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(0,255,100,0.14)'; ctx.lineWidth = 1;
   }
   for(let x=0; x<worldW; x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,worldH); ctx.stroke(); }
   for(let y=0; y<worldH; y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(worldW,y); ctx.stroke(); }
