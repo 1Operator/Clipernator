@@ -143,7 +143,7 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 - **Water Balloon** — wanders but steers back toward Clippy when beyond its leash distance; periodically fires tears at Clippy. In Hard mode, a balloon ridden by a Party Hat occasionally circles quickly toward Clippy while firing a red homing volley.
 - **Gift Box** — slow wind-up explosion on proximity; player can grab and throw it
 - **Party Hat** — fast, periodically speed-dives at player
-- **AntiPie** (wave 11) — the desktop program expands the MGW arena slightly before two side-by-side visual prototypes appear. The left uses each layer's own Spin sheet; the right reuses scaled `Layer2Spin` frames for all tiers. Clippy and both AntiPies stay inside the visible arena and orbit without attacking. SpinStart animations are not used yet; combat phases are temporarily disabled while the appearance is refined.
+- **AntiPie** (wave 11) — the desktop program expands the MGW arena slightly before the boss appears. During the visual prototype, Clippy and AntiPie stay inside the visible arena, AntiPie orbits without attacking, and each cake layer loops its own Spin sprite-sheet animation. SpinStart animations are not used yet; combat phases are temporarily disabled while the appearance is refined.
 
 ### Floor 2
 

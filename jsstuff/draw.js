@@ -533,7 +533,6 @@ function drawCakeBoss(epos, ehp, ai, frozen) {
   const { x, y } = epos;
   const layerOffsets = ai.layerDashOffsets || [0, 0, 0];
   const layerSpinFrames = ai.layerSpinFrames || [0, 0, 0];
-  const layerSpinFrameCounts = ai.layerSpinFrameCounts || [36, 24, 44];
 
   ctx.save();
   ctx.translate(x, y);
@@ -548,40 +547,26 @@ function drawCakeBoss(epos, ehp, ai, frozen) {
   layers.forEach((layer, index) => {
     ctx.save();
     ctx.translate(layerOffsets[index] || 0, layer.y);
-    const useLayer2ForAll = ai.antipieUseLayer2ForAll;
-    const spinImage = useLayer2ForAll ? antipieLayer2SpinImg : layer.spinImage;
-    const staticImage = useLayer2ForAll ? antipieLayer2Img : layer.image;
-    const frameCount = useLayer2ForAll ? 24 : (layerSpinFrameCounts[index] || layer.frames);
-    const width = useLayer2ForAll ? [210, 164, 132][index] : layer.width;
-    const height = useLayer2ForAll ? [140, 164, 132][index] : layer.height;
-    if (spinImage.complete && spinImage.naturalWidth > 0) {
+    if (layer.spinImage.complete && layer.spinImage.naturalWidth > 0) {
       const columns = 4;
-      const rows = frameCount / columns;
-      const frameWidth = spinImage.naturalWidth / columns;
-      const frameHeight = spinImage.naturalHeight / rows;
-      const frame = layerSpinFrames[index] % frameCount;
+      const rows = layer.frames / columns;
+      const frameWidth = layer.spinImage.naturalWidth / columns;
+      const frameHeight = layer.spinImage.naturalHeight / rows;
+      const frame = layerSpinFrames[index] % layer.frames;
       const sourceX = (frame % 4) * frameWidth;
       const sourceY = Math.floor(frame / 4) * frameHeight;
       ctx.drawImage(
-        spinImage,
+        layer.spinImage,
         sourceX, sourceY, frameWidth, frameHeight,
-        -width / 2, -height / 2, width, height
+        -layer.width / 2, -layer.height / 2, layer.width, layer.height
       );
-    } else if (staticImage.complete && staticImage.naturalWidth > 0) {
-      ctx.drawImage(staticImage, -width / 2, -height / 2, width, height);
+    } else if (layer.image.complete && layer.image.naturalWidth > 0) {
+      ctx.drawImage(layer.image, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
     }
     ctx.restore();
   });
 
   ctx.restore();
-  if (ai.antipieLabel) {
-    ctx.save();
-    ctx.font = '14px "Fixedsys", "Courier New", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(ai.antipieLabel, x, y - 190);
-    ctx.restore();
-  }
 }
 
 function drawCannonball(epos, ehp, ai, frozen) {
