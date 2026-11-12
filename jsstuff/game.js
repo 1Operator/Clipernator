@@ -11,7 +11,6 @@ let muzzleFlash = 0;
 let meleeSwingTimer = 0;
 let isPaused = false;
 let lastTime = 0;
-let resizeCanvasTimer = null;
 let viewportSize = {
   width: canvas.clientWidth || CFG.W,
   height: canvas.clientHeight || CFG.H,
@@ -80,23 +79,13 @@ function resizeGameViewport() {
     viewportSize = { width, height };
   }
 
-  renderScale = canvas.width / (dpr * worldW);
-  if (resizeCanvasTimer !== null) clearTimeout(resizeCanvasTimer);
+  const bitmapWidth = Math.round(width * dpr);
+  const bitmapHeight = Math.round(height * dpr);
+  if (canvas.width !== bitmapWidth) canvas.width = bitmapWidth;
+  if (canvas.height !== bitmapHeight) canvas.height = bitmapHeight;
+  renderScale = width / worldW;
   if (gs?.antipieBossSequence) return;
-
-  resizeCanvasTimer = setTimeout(() => {
-    resizeCanvasTimer = null;
-    const settledWidth = canvas.clientWidth;
-    const settledHeight = canvas.clientHeight;
-    if (!settledWidth || !settledHeight) return;
-
-    const bitmapWidth = Math.round(settledWidth * dpr);
-    const bitmapHeight = Math.round(settledHeight * dpr);
-    if (canvas.width !== bitmapWidth) canvas.width = bitmapWidth;
-    if (canvas.height !== bitmapHeight) canvas.height = bitmapHeight;
-    renderScale = settledWidth / worldW;
-    if (gameRunning) draw();
-  }, 120);
+  if (gameRunning) draw();
 }
 
 new ResizeObserver(resizeGameViewport).observe(document.getElementById('wrapper'));
