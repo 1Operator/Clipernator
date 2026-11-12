@@ -279,6 +279,15 @@ antipieLayer2Img.src = '/Clipernator/sprites/enemies/ANTIPIE/Layer2.png';
 const antipieLayer3Img = new Image();
 antipieLayer3Img.src = '/Clipernator/sprites/enemies/ANTIPIE/Layer3.png';
 
+const antipieLayer1SpinImg = new Image();
+antipieLayer1SpinImg.src = '/Clipernator/sprites/enemies/ANTIPIE/Layer1Spin.png';
+
+const antipieLayer2SpinImg = new Image();
+antipieLayer2SpinImg.src = '/Clipernator/sprites/enemies/ANTIPIE/Layer2Spin.png';
+
+const antipieLayer3SpinImg = new Image();
+antipieLayer3SpinImg.src = '/Clipernator/sprites/enemies/ANTIPIE/Layer3Spin.png';
+
 // Water balloon sprite sheets (mask enemy)
 // All sheets: 1024×1024 per frame
 const WB_IDLE_COLS   = 3;  WB_IDLE_FW   = 1024; // 3072-wide sheet

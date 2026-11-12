@@ -2454,8 +2454,8 @@ function startAntipieBoss(centered = false) {
     orbitRadiusX: 0,
     orbitRadiusY: 0,
     orbitRetargetTimer: 0,
-    layerSpinAngles: [0, 0, 0],
-    layerSpinSpeeds: [0.004, -0.003, 0.0055],
+    layerSpinFrames: [0, 0, 0],
+    layerSpinFrameTicks: [0, 0, 0],
     windowActive: false,
   });
   spawnParticles(x, y, '#ff69b4', 20);

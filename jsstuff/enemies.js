@@ -1351,10 +1351,15 @@ const BT_CAKEBOSS = new BTSelector(
       constrainAntipiePosition(pos, vel, 170, true);
       vel.vx = 0;
       vel.vy = 0;
-      ai.layerSpinAngles = ai.layerSpinAngles || [0, 0, 0];
-      ai.layerSpinSpeeds = ai.layerSpinSpeeds || [0.004, -0.003, 0.0055];
-      for (let i = 0; i < ai.layerSpinAngles.length; i++) {
-        ai.layerSpinAngles[i] = (ai.layerSpinAngles[i] + ai.layerSpinSpeeds[i]) % (Math.PI * 2);
+      ai.layerSpinFrames = ai.layerSpinFrames || [0, 0, 0];
+      ai.layerSpinFrameTicks = ai.layerSpinFrameTicks || [0, 0, 0];
+      const layerSpinFrameCounts = [36, 24, 44];
+      for (let i = 0; i < ai.layerSpinFrames.length; i++) {
+        ai.layerSpinFrameTicks[i]++;
+        if (ai.layerSpinFrameTicks[i] >= 7) {
+          ai.layerSpinFrameTicks[i] = 0;
+          ai.layerSpinFrames[i] = (ai.layerSpinFrames[i] + 1) % layerSpinFrameCounts[i];
+        }
       }
       return BT.RUNNING;
     }

@@ -532,35 +532,37 @@ function drawGiftBox(epos, ehp, ai, frozen, advanceVisualState = true) {
 function drawCakeBoss(epos, ehp, ai, frozen) {
   const { x, y } = epos;
   const layerOffsets = ai.layerDashOffsets || [0, 0, 0];
-  const layerSpinAngles = ai.layerSpinAngles || [0, 0, 0];
+  const layerSpinFrames = ai.layerSpinFrames || [0, 0, 0];
 
   ctx.save();
   ctx.translate(x, y);
   if (frozen) ctx.globalAlpha = 0.7;
 
   const layers = [
-    { image: antipieLayer1Img, width: 210, height: 140, y: 30 },
-    { image: antipieLayer2Img, width: 164, height: 164, y: -33 },
-    { image: antipieLayer3Img, width: 132, height: 132, y: -90 },
+    { image: antipieLayer1Img, spinImage: antipieLayer1SpinImg, frames: 36, width: 210, height: 140, y: 30 },
+    { image: antipieLayer2Img, spinImage: antipieLayer2SpinImg, frames: 24, width: 164, height: 164, y: -33 },
+    { image: antipieLayer3Img, spinImage: antipieLayer3SpinImg, frames: 44, width: 132, height: 132, y: -90 },
   ];
-  const spritesReady = layers.every(layer => layer.image.complete && layer.image.naturalWidth > 0);
 
-  if (spritesReady) {
-    layers.forEach((layer, index) => {
-      ctx.save();
-      ctx.translate(layerOffsets[index] || 0, layer.y);
-      ctx.rotate(layerSpinAngles[index] || 0);
+  layers.forEach((layer, index) => {
+    ctx.save();
+    ctx.translate(layerOffsets[index] || 0, layer.y);
+    if (layer.spinImage.complete && layer.spinImage.naturalWidth > 0) {
+      const frameWidth = layer.spinImage.naturalWidth / 4;
+      const frameHeight = layer.spinImage.naturalHeight / (layer.frames / 4);
+      const frame = layerSpinFrames[index] % layer.frames;
+      const sourceX = (frame % 4) * frameWidth;
+      const sourceY = Math.floor(frame / 4) * frameHeight;
+      ctx.drawImage(
+        layer.spinImage,
+        sourceX, sourceY, frameWidth, frameHeight,
+        -layer.width / 2, -layer.height / 2, layer.width, layer.height
+      );
+    } else if (layer.image.complete && layer.image.naturalWidth > 0) {
       ctx.drawImage(layer.image, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
-      ctx.restore();
-    });
-  } else {
-    ctx.fillStyle = frozen ? '#4488cc' : '#ff69b4';
-    ctx.fillRect(-62, 18, 124, 38);
-    ctx.fillStyle = frozen ? '#5599dd' : '#ff4499';
-    ctx.fillRect(-47, -38, 94, 30);
-    ctx.fillStyle = frozen ? '#6699cc' : '#cc2277';
-    ctx.fillRect(-34, -88, 68, 28);
-  }
+    }
+    ctx.restore();
+  });
 
   ctx.restore();
 }
