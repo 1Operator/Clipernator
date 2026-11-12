@@ -1333,10 +1333,17 @@ const BT_CAKEBOSS = new BTSelector(
       if (ai.orbitRetargetTimer <= 0) {
         ai.orbitRetargetTimer = 150 + Math.floor(Math.random() * 150);
         ai.targetOrbitSpeed = 0.005 + Math.random() * 0.007;
-        ai.targetOrbitRadiusX = (bounds.right - bounds.left) * (0.18 + Math.random() * 0.08);
-        ai.targetOrbitRadiusY = (bounds.bottom - bounds.top) * (0.18 + Math.random() * 0.08);
-        ai.targetOrbitOffsetX = (Math.random() - 0.5) * (bounds.right - bounds.left) * 0.12;
-        ai.targetOrbitOffsetY = (Math.random() - 0.5) * (bounds.bottom - bounds.top) * 0.12;
+        if (ai.antipieComparison) {
+          ai.targetOrbitRadiusX = 35 + Math.random() * 30;
+          ai.targetOrbitRadiusY = 20 + Math.random() * 24;
+          ai.targetOrbitOffsetX = (Math.random() - 0.5) * 24;
+          ai.targetOrbitOffsetY = (Math.random() - 0.5) * 18;
+        } else {
+          ai.targetOrbitRadiusX = (bounds.right - bounds.left) * (0.18 + Math.random() * 0.08);
+          ai.targetOrbitRadiusY = (bounds.bottom - bounds.top) * (0.18 + Math.random() * 0.08);
+          ai.targetOrbitOffsetX = (Math.random() - 0.5) * (bounds.right - bounds.left) * 0.12;
+          ai.targetOrbitOffsetY = (Math.random() - 0.5) * (bounds.bottom - bounds.top) * 0.12;
+        }
       }
       ai.orbitSpeed += ((ai.targetOrbitSpeed ?? ai.orbitSpeed) - ai.orbitSpeed) * 0.008;
       ai.orbitRadiusX += ((ai.targetOrbitRadiusX ?? ai.orbitRadiusX) - ai.orbitRadiusX) * 0.008;
@@ -1344,8 +1351,8 @@ const BT_CAKEBOSS = new BTSelector(
       ai.orbitOffsetX = (ai.orbitOffsetX || 0) + ((ai.targetOrbitOffsetX || 0) - (ai.orbitOffsetX || 0)) * 0.008;
       ai.orbitOffsetY = (ai.orbitOffsetY || 0) + ((ai.targetOrbitOffsetY || 0) - (ai.orbitOffsetY || 0)) * 0.008;
 
-      const centerX = (bounds.left + bounds.right) / 2 + ai.orbitOffsetX;
-      const centerY = (bounds.top + bounds.bottom) / 2 + ai.orbitOffsetY;
+      const centerX = (ai.comparisonAnchorX ?? (bounds.left + bounds.right) / 2) + ai.orbitOffsetX;
+      const centerY = (ai.comparisonAnchorY ?? (bounds.top + bounds.bottom) / 2) + ai.orbitOffsetY;
       pos.x = centerX + Math.cos(ai.orbitAngle) * ai.orbitRadiusX;
       pos.y = centerY + Math.sin(ai.orbitAngle) * ai.orbitRadiusY;
       constrainAntipiePosition(pos, vel, 170, true);
@@ -1353,7 +1360,7 @@ const BT_CAKEBOSS = new BTSelector(
       vel.vy = 0;
       ai.layerSpinFrames = ai.layerSpinFrames || [0, 0, 0];
       ai.layerSpinFrameTicks = ai.layerSpinFrameTicks || [0, 0, 0];
-      const layerSpinFrameCounts = [36, 24, 44];
+      const layerSpinFrameCounts = ai.layerSpinFrameCounts || [36, 24, 44];
       for (let i = 0; i < ai.layerSpinFrames.length; i++) {
         ai.layerSpinFrameTicks[i]++;
         if (ai.layerSpinFrameTicks[i] >= 7) {

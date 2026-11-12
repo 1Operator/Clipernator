@@ -2437,29 +2437,45 @@ function startAntipieBoss(centered = false) {
   const mainRect = canvas.getBoundingClientRect();
   const placeRight = window.innerWidth - mainRect.right >= mainRect.left;
   const bounds = antipieVisibleWorldBounds();
-  const x = centered ? (bounds.left + bounds.right) / 2 : (placeRight ? worldW + 220 : -220);
-  const y = centered ? (bounds.top + bounds.bottom) / 2 : worldH / 2;
-  const id = ECS.createEntity();
-  const bossHp = CFG.BOSS_BASE_HP + gs.wave * 12;
-  ECS.add(id, 'enemy', { type: 'cakeBoss' });
-  ECS.add(id, 'pos', { x, y, angle: 0 });
-  ECS.add(id, 'vel', { vx: 0, vy: 0 });
-  ECS.add(id, 'hp', { hp: bossHp, maxHp: bossHp, hitFlash: 0 });
-  ECS.add(id, 'physics', { speed: CFG.BOSS_SPEED });
-  taskManagerApplySpawnNerf(id, 'cakeBoss');
-  ECS.add(id, 'ai', {
-    antipieBoss: true,
-    orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: 0.006 + Math.random() * 0.005,
-    orbitRadiusX: 0,
-    orbitRadiusY: 0,
-    orbitRetargetTimer: 0,
-    layerSpinFrames: [0, 0, 0],
-    layerSpinFrameTicks: [0, 0, 0],
-    windowActive: false,
-  });
-  spawnParticles(x, y, '#ff69b4', 20);
-  gs.bossId = id;
+  const centerX = (bounds.left + bounds.right) / 2;
+  const centerY = (bounds.top + bounds.bottom) / 2;
+  const bosses = centered
+    ? [
+      { x: centerX - (bounds.right - bounds.left) * 0.22, y: centerY, useLayer2ForAll: false, label: 'CURRENT SHEETS' },
+      { x: centerX + (bounds.right - bounds.left) * 0.22, y: centerY, useLayer2ForAll: true, label: 'LAYER 2 SCALED' },
+    ]
+    : [{ x: placeRight ? worldW + 220 : -220, y: worldH / 2, useLayer2ForAll: false, label: '' }];
+  let firstBossId = null;
+  for (const boss of bosses) {
+    const id = ECS.createEntity();
+    const bossHp = centered ? 1_000_000_000 : CFG.BOSS_BASE_HP + gs.wave * 12;
+    ECS.add(id, 'enemy', { type: 'cakeBoss' });
+    ECS.add(id, 'pos', { x: boss.x, y: boss.y, angle: 0 });
+    ECS.add(id, 'vel', { vx: 0, vy: 0 });
+    ECS.add(id, 'hp', { hp: bossHp, maxHp: bossHp, hitFlash: 0 });
+    ECS.add(id, 'physics', { speed: CFG.BOSS_SPEED });
+    taskManagerApplySpawnNerf(id, 'cakeBoss');
+    ECS.add(id, 'ai', {
+      antipieBoss: true,
+      antipieComparison: centered,
+      antipieUseLayer2ForAll: boss.useLayer2ForAll,
+      antipieLabel: boss.label,
+      comparisonAnchorX: boss.x,
+      comparisonAnchorY: boss.y,
+      orbitAngle: Math.random() * Math.PI * 2,
+      orbitSpeed: 0.006 + Math.random() * 0.005,
+      orbitRadiusX: 0,
+      orbitRadiusY: 0,
+      orbitRetargetTimer: 0,
+      layerSpinFrames: [0, 0, 0],
+      layerSpinFrameTicks: [0, 0, 0],
+      layerSpinFrameCounts: boss.useLayer2ForAll ? [24, 24, 24] : [36, 24, 44],
+      windowActive: false,
+    });
+    spawnParticles(boss.x, boss.y, '#ff69b4', 20);
+    if (firstBossId === null) firstBossId = id;
+  }
+  gs.bossId = firstBossId;
   gs.bossActive = true;
   gs.spawnTimer = 0;
   gs.antipieDarkness = 1;
