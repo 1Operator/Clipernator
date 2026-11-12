@@ -532,6 +532,7 @@ function drawGiftBox(epos, ehp, ai, frozen, advanceVisualState = true) {
 function drawCakeBoss(epos, ehp, ai, frozen) {
   const { x, y } = epos;
   const layerOffsets = ai.layerDashOffsets || [0, 0, 0];
+  const layerSpinAngles = ai.layerSpinAngles || [0, 0, 0];
 
   ctx.save();
   ctx.translate(x, y);
@@ -545,15 +546,13 @@ function drawCakeBoss(epos, ehp, ai, frozen) {
   const spritesReady = layers.every(layer => layer.image.complete && layer.image.naturalWidth > 0);
 
   if (spritesReady) {
-    ctx.shadowColor = frozen ? '#aaccff' : '#ff69b4';
-    ctx.shadowBlur = 18;
     layers.forEach((layer, index) => {
       ctx.save();
       ctx.translate(layerOffsets[index] || 0, layer.y);
+      ctx.rotate(layerSpinAngles[index] || 0);
       ctx.drawImage(layer.image, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
       ctx.restore();
     });
-    ctx.shadowBlur = 0;
   } else {
     ctx.fillStyle = frozen ? '#4488cc' : '#ff69b4';
     ctx.fillRect(-62, 18, 124, 38);
@@ -564,42 +563,6 @@ function drawCakeBoss(epos, ehp, ai, frozen) {
   }
 
   ctx.restore();
-
-  // Spin bounce glow
-  if (ai.bossPhase === 'SPIN_BOUNCE') {
-    ctx.save();
-    ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 40) * 0.3;
-    ctx.strokeStyle = '#ff2200';
-    ctx.lineWidth = 4;
-    ctx.shadowColor = '#ff4400';
-    ctx.shadowBlur = 20;
-    ctx.beginPath();
-    ctx.arc(x, y, 118, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // Telegraph glow for frosting
-  if (ai.bossPhase === 'FROSTING_CHARGE') {
-    const progress = 1 - (ai.phaseTimer / 60);
-    ctx.save();
-    ctx.globalAlpha = progress * 0.7;
-    ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 30;
-    ctx.beginPath();
-    ctx.arc(x, y, 20 + progress * 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // HP bar
-  const bw = 80;
-  ctx.fillStyle = '#330000';
-  ctx.fillRect(x - bw / 2, y - 175, bw, 8);
-  ctx.fillStyle = ehp.hp < ehp.maxHp * 0.3 ? '#ff2200' : '#ff69b4';
-  ctx.fillRect(x - bw / 2, y - 175, bw * (ehp.hp / ehp.maxHp), 8);
-
 }
 
 function drawCannonball(epos, ehp, ai, frozen) {

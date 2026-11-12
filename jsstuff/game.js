@@ -147,6 +147,50 @@ function playerPos(gs) {
   return ECS.get(ids.values().next().value, 'pos');
 }
 
+function antipieVisibleWorldBounds(margin = 0) {
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return { left: margin, right: worldW - margin, top: margin, bottom: worldH - margin };
+  }
+
+  const toWorldX = screenX => (screenX - rect.left) * worldW / rect.width;
+  const toWorldY = screenY => (screenY - rect.top) * worldH / rect.height;
+  const clampX = x => Math.max(0, Math.min(worldW, x));
+  const clampY = y => Math.max(0, Math.min(worldH, y));
+  const left = clampX(toWorldX(0));
+  const right = clampX(toWorldX(window.innerWidth));
+  const top = clampY(toWorldY(0));
+  const bottom = clampY(toWorldY(window.innerHeight));
+  const safeMarginX = Math.min(margin, (right - left) / 2);
+  const safeMarginY = Math.min(margin, (bottom - top) / 2);
+
+  return {
+    left: left + safeMarginX,
+    right: right - safeMarginX,
+    top: top + safeMarginY,
+    bottom: bottom - safeMarginY,
+  };
+}
+
+function constrainAntipiePosition(pos, vel, margin = 0, bounce = false) {
+  if (!gs.antipieArenaBounds) return;
+  const bounds = antipieVisibleWorldBounds(margin);
+  if (pos.x < bounds.left) {
+    pos.x = bounds.left;
+    if (vel) vel.vx = bounce ? Math.abs(vel.vx) : Math.max(0, vel.vx);
+  } else if (pos.x > bounds.right) {
+    pos.x = bounds.right;
+    if (vel) vel.vx = bounce ? -Math.abs(vel.vx) : Math.min(0, vel.vx);
+  }
+  if (pos.y < bounds.top) {
+    pos.y = bounds.top;
+    if (vel) vel.vy = bounce ? Math.abs(vel.vy) : Math.max(0, vel.vy);
+  } else if (pos.y > bounds.bottom) {
+    pos.y = bounds.bottom;
+    if (vel) vel.vy = bounce ? -Math.abs(vel.vy) : Math.min(0, vel.vy);
+  }
+}
+
 // ================================================================
 // GAME STATE
 // ================================================================

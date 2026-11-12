@@ -1326,6 +1326,39 @@ const BT_CAKEBOSS = new BTSelector(
     const pp  = playerPos(gs);
     if (!pp || !pos || !vel) return BT.FAILURE;
 
+    if (ai.antipieBoss) {
+      const bounds = antipieVisibleWorldBounds(170);
+      ai.orbitAngle = (ai.orbitAngle || 0) + (ai.orbitSpeed || 0.008);
+      ai.orbitRetargetTimer = (ai.orbitRetargetTimer || 0) - 1;
+      if (ai.orbitRetargetTimer <= 0) {
+        ai.orbitRetargetTimer = 150 + Math.floor(Math.random() * 150);
+        ai.targetOrbitSpeed = 0.005 + Math.random() * 0.007;
+        ai.targetOrbitRadiusX = (bounds.right - bounds.left) * (0.18 + Math.random() * 0.08);
+        ai.targetOrbitRadiusY = (bounds.bottom - bounds.top) * (0.18 + Math.random() * 0.08);
+        ai.targetOrbitOffsetX = (Math.random() - 0.5) * (bounds.right - bounds.left) * 0.12;
+        ai.targetOrbitOffsetY = (Math.random() - 0.5) * (bounds.bottom - bounds.top) * 0.12;
+      }
+      ai.orbitSpeed += ((ai.targetOrbitSpeed ?? ai.orbitSpeed) - ai.orbitSpeed) * 0.008;
+      ai.orbitRadiusX += ((ai.targetOrbitRadiusX ?? ai.orbitRadiusX) - ai.orbitRadiusX) * 0.008;
+      ai.orbitRadiusY += ((ai.targetOrbitRadiusY ?? ai.orbitRadiusY) - ai.orbitRadiusY) * 0.008;
+      ai.orbitOffsetX = (ai.orbitOffsetX || 0) + ((ai.targetOrbitOffsetX || 0) - (ai.orbitOffsetX || 0)) * 0.008;
+      ai.orbitOffsetY = (ai.orbitOffsetY || 0) + ((ai.targetOrbitOffsetY || 0) - (ai.orbitOffsetY || 0)) * 0.008;
+
+      const centerX = (bounds.left + bounds.right) / 2 + ai.orbitOffsetX;
+      const centerY = (bounds.top + bounds.bottom) / 2 + ai.orbitOffsetY;
+      pos.x = centerX + Math.cos(ai.orbitAngle) * ai.orbitRadiusX;
+      pos.y = centerY + Math.sin(ai.orbitAngle) * ai.orbitRadiusY;
+      constrainAntipiePosition(pos, vel, 170, true);
+      vel.vx = 0;
+      vel.vy = 0;
+      ai.layerSpinAngles = ai.layerSpinAngles || [0, 0, 0];
+      ai.layerSpinSpeeds = ai.layerSpinSpeeds || [0.004, -0.003, 0.0055];
+      for (let i = 0; i < ai.layerSpinAngles.length; i++) {
+        ai.layerSpinAngles[i] = (ai.layerSpinAngles[i] + ai.layerSpinSpeeds[i]) % (Math.PI * 2);
+      }
+      return BT.RUNNING;
+    }
+
     // ── Candle count from HP thresholds ──
     const hpRatio = hp.hp / hp.maxHp;
     const newCandles = hpRatio > 0.8 ? 5 : hpRatio > 0.6 ? 4 : hpRatio > 0.4 ? 3 : hpRatio > 0.2 ? 2 : 1;

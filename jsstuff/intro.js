@@ -968,8 +968,8 @@ setTimeout(() => {
     wrapper.style.width = `${Math.round(rect.width)}px`;
     wrapper.style.height = `${Math.round(rect.height)}px`;
 
-    const targetWidth = Math.max(window.innerWidth * 1.4, 1500);
-    const targetHeight = Math.max(window.innerHeight * 1.4, 1200);
+    const targetWidth = Math.max(window.innerWidth * 1.55, 1500);
+    const targetHeight = Math.max(window.innerHeight * 1.55, 1200);
     const startWidth = rect.width;
     const startHeight = rect.height;
     const enemyIds = [...ECS.query('enemy')];
@@ -992,6 +992,7 @@ setTimeout(() => {
       enemyIds,
       killedCount: 0,
     };
+    gs.antipieArenaBounds = true;
     gs.antipieDarkness = 0;
     resizeGameViewport();
   }

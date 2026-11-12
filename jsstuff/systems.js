@@ -749,6 +749,7 @@ const topSpd = baseSpeed * speedMult * emailMoveMultiplier() * clipShopSpeed;
 if (gs.knockingPinsActive) {
   // Skip all friction/cap logic — velocity is set directly by sysTimers each frame
   pos.x += vel.vx; pos.y += vel.vy;
+  constrainAntipiePosition(pos, vel, 28);
   notifyEmailPlayerMoved(pos);
   if (gs.bouncyHouse) {
     if (pos.x < CFG.WALL_PAD) vel.vx = Math.abs(vel.vx);
@@ -762,6 +763,7 @@ if (gs.knockingPinsActive) {
   return;
 }
   pos.x+=vel.vx; pos.y+=vel.vy;
+  constrainAntipiePosition(pos, vel, 28);
   notifyEmailPlayerMoved(pos);
   if (gs.bouncyHouse) {
     if (pos.x < CFG.WALL_PAD) vel.vx = Math.abs(vel.vx);
@@ -1172,6 +1174,7 @@ if (ai2&&ai2.reflectedByGlowstick&&ECS.has(id,'enemy')&&ECS.get(id,'enemy').type
     const movementScale = taskManagerMovementMultiplier(type);
     pos.x += vel.vx * movementScale;
     pos.y += vel.vy * movementScale;
+    if (ai2?.antipieBoss) constrainAntipiePosition(pos, vel, 170, true);
     if (gs.bouncyHouse) {
       if (pos.x<18){pos.x=18;vel.vx=Math.abs(vel.vx);spawnParticles(pos.x,pos.y,'#88ffdd',4);}
       if (pos.x>worldW-18){pos.x=worldW-18;vel.vx=-Math.abs(vel.vx);spawnParticles(pos.x,pos.y,'#88ffdd',4);}
@@ -1492,6 +1495,7 @@ function sysEnemyPlayerCollision() {
   for (const id of ECS.query('enemy','pos')) {
     const epos=ECS.get(id,'pos');
     const type = ECS.get(id, 'enemy').type;
+    if (type === 'cakeBoss' && ECS.get(id, 'ai')?.antipieBoss) continue;
     const contactRadius = type === 'cakeBoss' ? 82 : 28;
     if (Math.hypot(ppos.x-epos.x,ppos.y-epos.y)<contactRadius) {
 
@@ -2432,8 +2436,9 @@ function startAntipieBoss(centered = false) {
 
   const mainRect = canvas.getBoundingClientRect();
   const placeRight = window.innerWidth - mainRect.right >= mainRect.left;
-  const x = centered ? worldW / 2 : (placeRight ? worldW + 220 : -220);
-  const y = worldH / 2;
+  const bounds = antipieVisibleWorldBounds();
+  const x = centered ? (bounds.left + bounds.right) / 2 : (placeRight ? worldW + 220 : -220);
+  const y = centered ? (bounds.top + bounds.bottom) / 2 : worldH / 2;
   const id = ECS.createEntity();
   const bossHp = CFG.BOSS_BASE_HP + gs.wave * 12;
   ECS.add(id, 'enemy', { type: 'cakeBoss' });
@@ -2443,26 +2448,22 @@ function startAntipieBoss(centered = false) {
   ECS.add(id, 'physics', { speed: CFG.BOSS_SPEED });
   taskManagerApplySpawnNerf(id, 'cakeBoss');
   ECS.add(id, 'ai', {
-    bossPhase: 'IDLE', phaseTimer: 140,
-    candlesLit: 5, candleTimer: 80,
-    idleSpin: 0, spiralAngle: 0,
-    bounceCount: 0, permanentSpiral: false,
-    shootCooldown: 0, ambushTimer: 0,
-    diveTimer: 0, dashHit: false,
     antipieBoss: true,
-    bossHomeX: x, bossHomeY: y,
-    bossWindowDirection: centered ? 1 : (placeRight ? 1 : -1),
-    windowActive: true,
-    windowGroup: ++utensilWindowGroupSequence,
-    windowOrbitTimer: 0,
-    layerDashTimer: -1,
-    layerDashOffsets: [0, 0, 0],
+    orbitAngle: Math.random() * Math.PI * 2,
+    orbitSpeed: 0.006 + Math.random() * 0.005,
+    orbitRadiusX: 0,
+    orbitRadiusY: 0,
+    orbitRetargetTimer: 0,
+    layerSpinAngles: [0, 0, 0],
+    layerSpinSpeeds: [0.004, -0.003, 0.0055],
+    windowActive: false,
   });
   spawnParticles(x, y, '#ff69b4', 20);
   gs.bossId = id;
   gs.bossActive = true;
   gs.spawnTimer = 0;
   gs.antipieDarkness = 1;
+  gs.antipieArenaBounds = true;
   showMsg('ANTIPIE HAS ENTERED THE DESKTOP!');
 }
 
