@@ -25,6 +25,7 @@
 - When suggesting changes, tell me what part of the code to add or change, do not remake entire files unless necessary
 - This document should be updated after any signifcant changes
 - Sometimes game states are modified for play testing. I'm not playing 30 minutes until wave 19 to see if mirror maze is reflectable with bowling balls.
+- Healing is currently the most basic and untouched mechanic. Any enemy you kill heals 8 HP.
 
 ### Difficulty
 
