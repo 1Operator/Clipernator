@@ -37,7 +37,7 @@ Candle Isolation: This is more of a state than attack. When AntiPie reaches 30% 
 
 Cakequake: AntiPie telegraphs a heavy landing, then jumps into the air and falls onto Clippy's last positin. This spawns frosting all around AntiPie on landing.
 
-Death: AntiPie stops current attack and begins shaking. The health bar shakes then dissapears. AntiPie begins randomly bouncing around the area, slowly at first but the speed increases by 33% each bounce. While this happens the MGW begins to shrink until the UI comes back into view again, and everything shakes progressively more. Eventually, A window with an error message will appear, and the arena will "crash". 
+Death: AntiPie stops current attack and begins shaking. The health bar shakes then dissapears. AntiPie begins randomly bouncing around the area, slowly at first but the speed increases by 33% each bounce. While this happens the MGW begins to shrink until the UI comes back into view again, and everything shakes progressively more. Eventually, A window with an error message will appear, and the arena will "crash". AntiPie's icon on the desktop will now appear grey (ANTIPIEDefeated.png).
 
 
 
