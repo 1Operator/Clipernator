@@ -26,7 +26,7 @@
 - This document should be updated after any signifcant changes
 - Sometimes game states are modified for play testing. I'm not playing 30 minutes until wave 19 to see if mirror maze is reflectable with bowling balls.
 - Healing is currently the most basic and untouched mechanic. Any enemy you kill heals 8 HP.
-
+- I think a good sound design philosphy is that you should be able to generally know what is happening with your eyes closed. Implimenting idle sound for enemies hopefully does this, and makes them feel more alive.
 ### Difficulty
 
 - **Easy:** 150 starting health, 12 ammo, enemies move at 0.85x speed and deal 0.7x damage; no opening item picks, then an in-game item choice every 3 completed waves.
@@ -140,7 +140,7 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 ## Enemy Behaviors
 
 ### Floor 1
-- **Utensil** (fork/knife/spoon) — body drifts toward player; orbiting utensil launches at player on a timer; knife bleeds, spoon knocks back, fork grabs and slows
+- **Utensil** (fork/knife/spoon) — body drifts toward player; orbiting utensil launches at player on a timer; knife bleeds, spoon knocks back, fork grabs and slows. The ForkGrab2 sound effct should play when the fork grabs Clippy; when it grabs anything else, ForkGrab should play.
 - **Water Balloon** — wanders but steers back toward Clippy when beyond its leash distance; periodically fires tears at Clippy. In Hard mode, a balloon ridden by a Party Hat occasionally circles quickly toward Clippy while firing a red homing volley.
 - **Gift Box** — slow wind-up explosion on proximity; player can grab and throw it
 - **Party Hat** — fast, periodically speed-dives at player

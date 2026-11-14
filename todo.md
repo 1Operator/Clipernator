@@ -105,6 +105,13 @@ The IPartyHat should give any WaterBalloon combinaton higher accuracy (less curv
 
 - Enemies killed from items, like paper cuts, should heal you
 
+-The glowstick reflect should sound like a quick, bright snap: a short swish as it swings, then a crisp glassy-metallic ting exactly when it catches a projectile. Add a brief rising shimmer as the shot shoots back toward the cursor, so the player hears both the successful parry and its direction.
+
+Keep the swing itself subtle; make the catch the satisfying part. For several projectiles reflected at once, use one strong catch with lighter, slightly varied pings layered behind it—not a burst of identical loud sounds. Arc shots and bowling balls could get a lower, heavier clang to distinguish them from ordinary bullets.
+
+A “rising shimmer” is a very brief, bright, high-pitched tail after the ting—its pitch glides upward slightly, then fades. Think ting-wiuu, like a tiny magical sparkle. It would make a successful reflect feel energized; it’s optional, and should stay subtle so it doesn’t compete with the impact sound.
+
+
 
 - Clownish is still a bit iffy. wave radius should be expanded slightly. confused enemies should do 3x damage to other enemies (both from contact damage and bullets). confused enemies currently still dont do contact damage. cannonballs that are confused dont charge at enemies and explode. all enemeies when confused should attack other enenmies
 
