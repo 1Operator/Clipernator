@@ -26,7 +26,8 @@
 - This document should be updated after any signifcant changes
 - Sometimes game states are modified for play testing. I'm not playing 30 minutes until wave 19 to see if mirror maze is reflectable with bowling balls.
 - Healing is currently the most basic and untouched mechanic. Any enemy you kill heals 8 HP.
-- I think a good sound design philosphy is that you should be able to generally know what is happening with your eyes closed. Implimenting idle sound for enemies hopefully does this, and makes them feel more alive.
+- I think a good sound design philosphy is that you should be able to generally know what is happening with your eyes closed. Implimenting idle sound for enemies hopefully does this, and makes them feel more alive. Idle sounds choose randomly between all existing idle sounds for an enemy, and plays that sound when the enemy is only moving or doing nothing (eg, not attacking). Under those conditions, they will play under a random timer of 2-6 seconds. These sounds should only be heard from enemies that are near CLippy; the farther away the enemy the quieter the idle sounds, until they cannot be heard.
+
 ### Difficulty
 
 - **Easy:** 150 starting health, 12 ammo, enemies move at 0.85x speed and deal 0.7x damage; no opening item picks, then an in-game item choice every 3 completed waves.
