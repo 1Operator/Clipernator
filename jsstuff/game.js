@@ -549,6 +549,7 @@ function _startPauseClippyLoop() {
 // ================================================================
 function gameOver() {
   endEmailRun();
+  SFX.setLoop('ShakeFizzlePopBuildUp', false);
   SFX.play('clippyDeath', 0.7);
   gameRunning = false;
   cancelAnimationFrame(animId);

@@ -205,7 +205,7 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | `BowlingBallBounce.mp3` | Wired: bowling ball bounces. |
 | `BowlingBallHit.mp3` | Wired: bowling ball hits an enemy. |
 | `DudHit.mp3` | Wired: dud player bullets hit an enemy. |
-| `TearHit.mp3` | Wired: an enemy tear projectile hits the player. |
+| `WaterTearHit.mp3`, `BloodTearHit.mp3` | Wired: water or red tear bullets hit Clippy, respectively. |
 | `BouncyBullet.mp3` | Wired: a bullet ricochets from a wall while Bouncy House is active. |
 | `bullets/Shoot1.mp3` | Unused: player firing already uses the four files under `player/`; this duplicate is not layered over them. |
 
@@ -214,18 +214,24 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | File | Intended event / status |
 |---|---|
 | `Utensil/UtensilSpawn.mp3` | Wired: a Utensil spawns. |
+| `Utensil/UtensilIdle1.mp3` | Wired: plays while a Utensil is idle or recovering; randomized 2–6 second interval, volume falls with distance, and pitch shifts slightly. `UtensilIdle2.mp3` is not present in the repository yet. |
 | `Utensil/Fork/ForkHit.mp3` | Wired: a fork makes contact with its target. |
 | `Utensil/Fork/ForkAttack.mp3` | Wired: a fork launches toward its target, separate from the hit and grab sounds. |
+| `Utensil/Fork/ForkThrow.mp3` | Wired: a fork throws a grabbed enemy. |
 | `Utensil/Fork/ForkGrab.mp3`, `ForkGrab2.mp3` | Wired: randomized cue when the fork grabs the player. |
 | `Utensil/Spoon/SpoonDamage.mp3` | Wired: a spoon damages the player. |
 | `PartyHat/PartyHatSpawn.mp3` | Wired: a Party Hat spawns. |
+| `PartyHat/PartyHatIdle1.mp3`, `PartyHatIdle2.mp3` | Wired: randomly selected while a Party Hat is idle, recovering, or riding; randomized 2–6 second interval, distance falloff, and pitch shift. |
 | `PartyHat/PartyHatAttack.mp3` | Wired: a Party Hat begins its dive attack. |
 | `PartyHat/PartyHatRecover.mp3` | Wired: plays as the Party Hat starts its recovery bounce after a dive. |
 | `PartyHat/PartyHatRide.mp3`, `PartyHatRide2.mp3` | Wired: randomized cue when a Party Hat rides an enemy. |
 | `PartyHat/PartyHatDrop.mp3` | Wired: a Party Hat loses its ride target. |
 | `PartyHat/PartyHatDie.mp3` | Wired: a Party Hat entity is destroyed. |
 | `GiftBox/GiftBoxWindUp.mp3` | Wired: winds forward while the player is in range and reverses as its fuse winds down out of range; silence when fully unwound. |
+| `GiftBox/GiftBoxSpawn.mp3` | Wired: a Gift Box spawns. |
 | `WaterBalloon/BalloonSpawn.mp3` | Wired: a Water Balloon enemy spawns. |
+| `WaterBalloon/WaterBalloonIdle1.mp3`, `WaterBalloonIdle2.mp3` | Wired: randomly selected while roaming or turning back to roam; randomized 2–6 second interval, distance falloff, and pitch shift. |
+| `WaterBalloon/WaterBalloonWindUp.mp3`, `WaterBalloonDeath.mp3` | Wired: shooting animation begins / Water Balloon is destroyed. |
 | `CakeBoss/FrostingLaunch.mp3` | Wired: the Cake Boss launches frosting projectiles. |
 | `CakeBoss/FrostingHit.mp3` | Wired: a frosting projectile lands. |
 
@@ -240,6 +246,9 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | `Chips/GoldenChipTarget.mp3` | Wired as a loop: plays while at least one golden chip is magnetized and homing toward the player. |
 | `Chips/GoldenChipPickup.mp3` | Wired: a golden chip is collected, including from Chippy. |
 | `items/ItemConfirm.mp3` | Wired: confirms an in-game item choice, plays when an item is picked up, and plays when Glowsticks are unlocked. Opening-sequence item drafts use `opening/confirm.mp3`. |
+| `items/ShakeFizzlePop/ShakeFizzlePopBuildUp.wav` | Wired as a loop while Shake Fizzle Pop charges; stops and resets when interrupted, and stops when the charge completes. |
+| `items/ShakeFizzlePop/ShakeFizzlePopExplosion.mp3` | Wired: plays when an incomplete Shake Fizzle Pop charge is lost; volume scales with charge progress. |
+| `items/ShakeFizzlePop/ShakeFizzlePopSeal.mp3` | Wired: plays when Shake Fizzle Pop reaches full charge. |
 | `items/BirthdayParty/BirthdayParty.mp3` | Wired: intended to play when the Birthday Party item effect activates and freezes enemy movement. The current file is 1 byte and needs valid audio data to be audible. |
 | `items/ItemReveal.mp3` | Wired: plays at normal speed when in-game item choices appear; cards reveal immediately, at about +0.67 seconds, and at about +1.33 seconds, each with a 1.5-second impact-scale animation. The fourth Floor 2 card reveals with the third. |
 | `misc/CandleLight.mp3` | Wired: plays whenever one of the player's Cursed Candles relights. Reuse this cue for future boss-candle lighting events. |
@@ -251,6 +260,7 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | File | Intended event / status |
 |---|---|
 | `UI/PauseSound.mp3` | Wired: entering the pause menu. Starts directly from the pause key event; pausing the game loop does not prevent audio playback. |
+| `UI/Transition/MGWShake.mp3`, `MGWExpand.mp3` | Wired: play as the MGW shake and expansion phases begin during the ANTIPIE transition. |
 | `UI/Email/EmailNotification.mp3` | Wired: a new message arrives. |
 | `UI/Email/EmailOpen.mp3` | Wired: opening the inbox or selecting an unread message. |
 | `UI/Email/EmailAccept.mp3`, `EmailReject.mp3` | Wired: accepting/rejecting an offer. |

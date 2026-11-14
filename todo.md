@@ -1,6 +1,16 @@
 ## Problems, somewhat ordered by importance 
 
 
+
+
+
+Sounds missing:
+- Utensil Spoon Throw
+- Utensil utensil pickup sound
+- Utensil wind up attack 
+- GiftBox idle sounds
+
+
 * replace the cake boss (antipie) etc with cartoon style and make fight better
 
 

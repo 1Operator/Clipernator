@@ -142,6 +142,7 @@ function detonateExplosiveBullet(b, hitX, hitY, playerCredited = true) {
 function triggerSFPHit() {
   if (!gs.hasShakeFizzlePop) return;
 
+  SFX.setLoop('ShakeFizzlePopBuildUp', false);
   if (!gs.sfpFull && gs.sfpMeter > 0) {
     const chargeRatio = Math.min(1, gs.sfpMeter / gs.sfpMax);
     SFX.play('ShakeFizzlePopExplosion', 0.25 + chargeRatio * 0.75);
@@ -172,7 +173,7 @@ function triggerSFPHit() {
     showMsg('SHOCKWAVE RELEASE!!!');
     setTimeout(() => checkWave(), 0);
   }
-  gs.sfpMeter = 0; gs.sfpFull = false; gs.sfpBuildPulse = 0; gs.sfpSealPlayed = false;
+  gs.sfpMeter = 0; gs.sfpFull = false; gs.sfpSealPlayed = false;
 }
 
 function unlockGlowsticks() {
@@ -1034,11 +1035,6 @@ function playEnemyIdleSounds() {
     const dist = Math.hypot(pos.x - ppos.x, pos.y - ppos.y);
     if (dist > 540) continue;
 
-    const volume = 0.16 + (1 - Math.min(dist, 540) / 540) * 0.32;
-    const pitch = 0.88 + Math.random() * 0.2;
-    ai.idleSoundCooldown = ai.idleSoundCooldown ?? (30 + Math.random() * 120);
-    ai.idleSoundCooldown--;
-
     let shouldPlay = false;
     let keys = [];
     if (enemy.type === 'utensil') {
@@ -1054,10 +1050,18 @@ function playEnemyIdleSounds() {
       keys = ['PartyHatIdle1', 'PartyHatIdle2'];
     }
 
-    if (!shouldPlay || ai.idleSoundCooldown > 0) continue;
+    if (!shouldPlay) continue;
+    ai.idleSoundCooldown ??= 120 + Math.floor(Math.random() * 241);
+    if (ai.idleSoundCooldown > 0) {
+      ai.idleSoundCooldown--;
+      if (ai.idleSoundCooldown > 0) continue;
+    }
+
     const key = keys[Math.floor(Math.random() * keys.length)];
+    const volume = 0.7 * (1 - dist / 540);
+    const pitch = 0.9 + Math.random() * 0.2;
     SFX.playAtWithRate(key, pos.x, pos.y, volume, pitch);
-    ai.idleSoundCooldown = 120 + Math.random() * 180;
+    ai.idleSoundCooldown = 120 + Math.floor(Math.random() * 241);
   }
 }
 
@@ -2117,23 +2121,17 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
 }
 
   if (gs.hasShakeFizzlePop&&!gs.sfpFull) {
-    const priorMeter = gs.sfpMeter;
     gs.sfpMeter=Math.min(gs.sfpMax,gs.sfpMeter+1);
-    const buildPulse = gs.sfpBuildPulse ?? 0;
-    gs.sfpBuildPulse = buildPulse + (gs.sfpMeter - priorMeter);
-    if (gs.sfpMeter > priorMeter && gs.sfpMeter < gs.sfpMax && gs.sfpBuildPulse >= 45) {
-      const volume = 0.18 + (gs.sfpMeter / gs.sfpMax) * 0.35;
-      SFX.play('ShakeFizzlePopBuildUp', volume);
-      gs.sfpBuildPulse = 0;
-    }
     if (gs.sfpMeter>=gs.sfpMax){
       gs.sfpFull=true;
+      SFX.setLoop('ShakeFizzlePopBuildUp', false);
       if (!gs.sfpSealPlayed) {
         SFX.play('ShakeFizzlePopSeal', 0.8);
         gs.sfpSealPlayed = true;
       }
       showMsg('SHAKE FIZZLE POP — FULLY CHARGED!!!');
     } else {
+      SFX.setLoop('ShakeFizzlePopBuildUp', true, 0.25 + (gs.sfpMeter / gs.sfpMax) * 0.4);
       gs.sfpSealPlayed = false;
     }
   }

@@ -125,6 +125,7 @@
         gs.dashBurst = null;
         break;
       case 'shakeFizzlePop':
+        SFX.setLoop('ShakeFizzlePopBuildUp', false);
         gs.hasShakeFizzlePop = false;
         gs.sfpMeter = 0;
         gs.sfpFull = false;
