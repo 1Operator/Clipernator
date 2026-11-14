@@ -141,7 +141,12 @@ function detonateExplosiveBullet(b, hitX, hitY, playerCredited = true) {
 
 function triggerSFPHit() {
   if (!gs.hasShakeFizzlePop) return;
-  
+
+  if (!gs.sfpFull && gs.sfpMeter > 0) {
+    const chargeRatio = Math.min(1, gs.sfpMeter / gs.sfpMax);
+    SFX.play('ShakeFizzlePopExplosion', 0.25 + chargeRatio * 0.75);
+  }
+
   if (gs.sfpFull) {
     const ppos = ECS.get(gs.playerId,'pos');
     SFX.playAt('partyExplosion', ppos.x, ppos.y, 0.75);
@@ -167,7 +172,7 @@ function triggerSFPHit() {
     showMsg('SHOCKWAVE RELEASE!!!');
     setTimeout(() => checkWave(), 0);
   }
-  gs.sfpMeter = 0; gs.sfpFull = false;
+  gs.sfpMeter = 0; gs.sfpFull = false; gs.sfpBuildPulse = 0; gs.sfpSealPlayed = false;
 }
 
 function unlockGlowsticks() {
@@ -1015,8 +1020,50 @@ function despawnCor(id, pos, color) {
   setTimeout(() => checkWave(), 0);
 }
 
+function playEnemyIdleSounds() {
+  if (!gs?.playerId) return;
+  const ppos = ECS.get(gs.playerId, 'pos');
+  if (!ppos) return;
+
+  for (const id of ECS.query('enemy', 'pos', 'ai')) {
+    if (!ECS.has(id, 'enemy')) continue;
+    const enemy = ECS.get(id, 'enemy');
+    const pos = ECS.get(id, 'pos');
+    const ai = ECS.get(id, 'ai');
+    if (!pos || !ai) continue;
+    const dist = Math.hypot(pos.x - ppos.x, pos.y - ppos.y);
+    if (dist > 540) continue;
+
+    const volume = 0.16 + (1 - Math.min(dist, 540) / 540) * 0.32;
+    const pitch = 0.88 + Math.random() * 0.2;
+    ai.idleSoundCooldown = ai.idleSoundCooldown ?? (30 + Math.random() * 120);
+    ai.idleSoundCooldown--;
+
+    let shouldPlay = false;
+    let keys = [];
+    if (enemy.type === 'utensil') {
+      const state = ai.uState || 'IDLE';
+      shouldPlay = state === 'IDLE' || state === 'RETURN';
+      keys = ['UtensilIdle1'];
+    } else if (enemy.type === 'waterballoon') {
+      shouldPlay = ai.wbState === 'ROAM' || ai.wbState === 'UNTURN';
+      keys = ['WaterBalloonIdle1', 'WaterBalloonIdle2'];
+    } else if (enemy.type === 'partyHat') {
+      const hatState = ai.hatState || 'IDLE';
+      shouldPlay = hatState === 'IDLE' || hatState === 'RECOVER' || hatState === 'RIDING';
+      keys = ['PartyHatIdle1', 'PartyHatIdle2'];
+    }
+
+    if (!shouldPlay || ai.idleSoundCooldown > 0) continue;
+    const key = keys[Math.floor(Math.random() * keys.length)];
+    SFX.playAtWithRate(key, pos.x, pos.y, volume, pitch);
+    ai.idleSoundCooldown = 120 + Math.random() * 180;
+  }
+}
+
 function sysAI() {
   gs.frozen=gs.partyFreezeTimer>0;
+  playEnemyIdleSounds();
 
   // ── Clean up juggled flags for any enemy whose juggler has died ──
   for (const id of ECS.query('enemy','ai')) {
@@ -1648,6 +1695,7 @@ if (eb.isFrosting && eb.spawnGiftBox) {
   ECS.add(gid, 'physics', { speed: 0.8 });
   taskManagerApplySpawnNerf(gid, 'giftBox');
   ECS.add(gid, 'ai', { windupTimer: 0, exploded: false, heldByPlayer: false, thrown: false, dashHit: false });
+SFX.playAt('GiftBoxSpawn', eb.x, eb.y, 0.6);
   spawnParticles(eb.x, eb.y, '#ffaa00', 14);
   showMsg('A GIFT BOX FELL FROM THE FROSTING!');
 }
@@ -1728,7 +1776,10 @@ applyPlayerDamage(Math.round(18 * (eb.rmDmgMult || 1) * scale), eb.sourceId, eb.
     if (!eb.friendlyFire&&gs.invincible<=0&&Math.hypot(eb.x-ppos.x,eb.y-ppos.y)<20) {
       const bulletDmg = Math.round(15 * (eb.rmDmgMult || 1));
 applyPlayerDamage(bulletDmg, eb.sourceId, eb.sourceType, true);
-if (eb.isTear) SFX.playAt('tearHit', eb.x, eb.y, 0.5);
+if (eb.isTear) {
+  if (eb.isRedTear) SFX.playAt('BloodTearHit', eb.x, eb.y, 0.5);
+  else SFX.playAt('WaterTearHit', eb.x, eb.y, 0.5);
+}
       gs.shakeX=10;gs.shakeY=10;
       gs.flawlessThisWave=false; triggerSFPHit();
       spawnParticles(ppos.x,ppos.y,'#ff69b4',10); updateHUD();
@@ -1949,6 +2000,14 @@ if (Math.abs(gs.shakeY) < 0.1) gs.shakeY = 0;
     const easedExpansion = expandProgress * expandProgress * (3 - 2 * expandProgress);
     const wrapper = document.getElementById('wrapper');
 
+    if (!seq.shakeSoundPlayed) {
+      SFX.play('MGWShake', 0.8);
+      seq.shakeSoundPlayed = true;
+    }
+    if (elapsed >= seq.shakeDuration && !seq.expandSoundPlayed) {
+      SFX.play('MGWExpand', 0.8);
+      seq.expandSoundPlayed = true;
+    }
     if (elapsed < seq.shakeDuration && wrapper) {
       wrapper.style.left = `${Math.round(seq.startLeft + (Math.random() * 2 - 1) * 6)}px`;
       wrapper.style.top = `${Math.round(seq.startTop + (Math.random() * 2 - 1) * 5)}px`;
@@ -2058,8 +2117,25 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
 }
 
   if (gs.hasShakeFizzlePop&&!gs.sfpFull) {
+    const priorMeter = gs.sfpMeter;
     gs.sfpMeter=Math.min(gs.sfpMax,gs.sfpMeter+1);
-    if (gs.sfpMeter>=gs.sfpMax){gs.sfpFull=true;showMsg('SHAKE FIZZLE POP — FULLY CHARGED!!!');}
+    const buildPulse = gs.sfpBuildPulse ?? 0;
+    gs.sfpBuildPulse = buildPulse + (gs.sfpMeter - priorMeter);
+    if (gs.sfpMeter > priorMeter && gs.sfpMeter < gs.sfpMax && gs.sfpBuildPulse >= 45) {
+      const volume = 0.18 + (gs.sfpMeter / gs.sfpMax) * 0.35;
+      SFX.play('ShakeFizzlePopBuildUp', volume);
+      gs.sfpBuildPulse = 0;
+    }
+    if (gs.sfpMeter>=gs.sfpMax){
+      gs.sfpFull=true;
+      if (!gs.sfpSealPlayed) {
+        SFX.play('ShakeFizzlePopSeal', 0.8);
+        gs.sfpSealPlayed = true;
+      }
+      showMsg('SHAKE FIZZLE POP — FULLY CHARGED!!!');
+    } else {
+      gs.sfpSealPlayed = false;
+    }
   }
 
   if (gs.hasDash&&gs.dashCharges<gs.dashMaxCharges) {
@@ -2426,6 +2502,7 @@ const total = [...ECS.query('enemy')].length;
   spawnParticles(x, y, isCor ? def.color : '#ff4400', isCor ? 14 : 10);
 if (type === 'utensil') SFX.playAt('utensilSpawn', x, y, 0.45);
 if (type === 'waterballoon') SFX.playAt('balloonSpawn', x, y, 0.5);
+if (type === 'giftBox') SFX.playAt('GiftBoxSpawn', x, y, 0.6);
 if (type === 'partyHat') SFX.playAt('partyHatSpawn', x, y, 0.5);
 if (type === 'corRed') SFX.playAt('RedCORAppear', x, y, 0.65);
 if (type === 'corBlue') SFX.playAt('BlueCORAppear', x, y, 0.65);

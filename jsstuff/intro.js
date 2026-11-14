@@ -991,6 +991,8 @@ setTimeout(() => {
       expandDuration: 2600,
       enemyIds,
       killedCount: 0,
+      shakeSoundPlayed: false,
+      expandSoundPlayed: false,
     };
     gs.antipieArenaBounds = true;
     gs.antipieDarkness = 0;

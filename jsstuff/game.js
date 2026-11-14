@@ -114,6 +114,9 @@ destroyEntity(id) {
   if (enemy?.type === 'utensil' && pos) {
     SFX.playAt('utensilDeath', pos.x, pos.y, 0.65);
   }
+  if (enemy?.type === 'waterballoon' && pos) {
+    SFX.playAt('WaterBalloonDeath', pos.x, pos.y, 0.55);
+  }
   SFX.stopEntitySound('giftBoxWindUp', id);
   if (enemy?.type === 'partyHat' && pos) {
     SFX.playAt('partyHatDie', pos.x, pos.y, 0.5);

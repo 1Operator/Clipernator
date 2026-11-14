@@ -88,6 +88,29 @@ const SFX = {
     }
   },
 
+  playWithRate(key, volumeOverride, onStarted, playbackRate) {
+    if (this._muted) return;
+    const src = this._cache[key];
+    if (!src) return;
+    try {
+      const clone = src.cloneNode();
+      clone.volume = volumeOverride !== undefined ? volumeOverride : 0.6;
+      if (playbackRate !== undefined) clone.playbackRate = playbackRate;
+      if (key === 'partyExplosion') clone.playbackRate = (clone.playbackRate ?? 1) * (0.96 + Math.random() * 0.08);
+      this._activeAudio.add(clone);
+      clone.addEventListener('ended', () => this._activeAudio.delete(clone), { once: true });
+      const playback = clone.play();
+      const reportPauseFailure = error => {
+        this._activeAudio.delete(clone);
+        if (key === 'pause') console.warn('Unable to play pause sound.', error);
+      };
+      if (onStarted) playback.then(onStarted).catch(reportPauseFailure);
+      else playback.catch(reportPauseFailure);
+    } catch (error) {
+      if (key === 'pause') console.warn('Unable to play pause sound.', error);
+    }
+  },
+
   syncEntitySound(key, entityId, active, volumeOverride) {
     const soundId = `${key}:${entityId}`;
     let entry = this._entityAudio.get(soundId);
@@ -267,6 +290,12 @@ const SFX = {
     this.play(key, volumeOverride);
   },
 
+  playRandomPitch(keys, volumeOverride, minPitch = 0.9, maxPitch = 1.1) {
+    const key = keys[Math.floor(Math.random() * keys.length)];
+    const playbackRate = minPitch + Math.random() * (maxPitch - minPitch);
+    this.playWithRate(key, volumeOverride, undefined, playbackRate);
+  },
+
   setLoop(key, enabled, volumeOverride) {
     const audio = this._cache[key];
     if (!audio) return;
@@ -338,6 +367,31 @@ const SFX = {
       clone.play().catch(() => this._activeAudio.delete(clone));
     } catch(e) {}
   },
+
+  playAtWithRate(key, sourceX, sourceY, volumeOverride, playbackRate) {
+    if (this._muted) return;
+    const src = this._cache[key];
+    if (!src) return;
+    if (typeof gs === 'undefined' || !gs.playerId) { this.playWithRate(key, volumeOverride, undefined, playbackRate); return; }
+    const ppos = ECS.get(gs.playerId, 'pos');
+    if (!ppos) { this.playWithRate(key, volumeOverride, undefined, playbackRate); return; }
+    const FALLOFF_START = 180;
+    const FALLOFF_END   = 520;
+    const dist = Math.hypot(sourceX - ppos.x, sourceY - ppos.y);
+    if (dist > FALLOFF_END) return;
+    const spatial = dist <= FALLOFF_START ? 1.0
+      : 1.0 - ((dist - FALLOFF_START) / (FALLOFF_END - FALLOFF_START));
+    const base = volumeOverride !== undefined ? volumeOverride : 0.6;
+    try {
+      const clone = src.cloneNode();
+      clone.volume = Math.max(0, Math.min(1, base * spatial));
+      if (playbackRate !== undefined) clone.playbackRate = playbackRate;
+      if (key === 'partyExplosion') clone.playbackRate = (clone.playbackRate ?? 1) * (0.96 + Math.random() * 0.08);
+      this._activeAudio.add(clone);
+      clone.addEventListener('ended', () => this._activeAudio.delete(clone), { once: true });
+      clone.play().catch(() => this._activeAudio.delete(clone));
+    } catch(e) {}
+  },
 };
 
 SFX.load('normalHit1',       'sounds/soundeffects/bullets/NormalBulletHit.mp3');
@@ -347,6 +401,8 @@ SFX.load('hit3x',            'sounds/soundeffects/bullets/3xHit.mp3');
 SFX.load('hit4x',            'sounds/soundeffects/bullets/4xHit.mp3');
 SFX.load('dudHit',           'sounds/soundeffects/bullets/DudHit.mp3');
 SFX.load('tearHit',          'sounds/soundeffects/bullets/TearHit.mp3');
+SFX.load('WaterTearHit',     'sounds/soundeffects/bullets/WaterTearHit.mp3');
+SFX.load('BloodTearHit',     'sounds/soundeffects/bullets/BloodTearHit.mp3');
 SFX.load('bouncyHit',        'sounds/soundeffects/bullets/BouncyBullet.mp3');
 SFX.load('bowlingBallBounce','sounds/soundeffects/bullets/BowlingBallBounce.mp3');
 SFX.load('bowlingBallHit',   'sounds/soundeffects/bullets/BowlingBallHit.mp3');
@@ -366,19 +422,22 @@ SFX.load('clippyDeath',      'sounds/soundeffects/player/ClippyDeath.mp3');
 SFX.load('notAllowed',       'sounds/soundeffects/player/NotAllowed.mp3');
 
 SFX.load('utensilSpawn',     'sounds/soundeffects/enemies/Utensil/UtensilSpawn.mp3');
+SFX.load('UtensilIdle1',     'sounds/soundeffects/enemies/Utensil/UtensilIdle1.mp3');
 SFX.load('forkGrab',         'sounds/soundeffects/enemies/Utensil/Fork/ForkGrab.mp3');
 SFX.load('forkGrab2',        'sounds/soundeffects/enemies/Utensil/Fork/ForkGrab2.mp3');
 SFX.load('forkHit',          'sounds/soundeffects/enemies/Utensil/Fork/ForkHit.mp3');
 SFX.load('forkAttack',       'sounds/soundeffects/enemies/Utensil/Fork/ForkAttack.mp3');
+SFX.load('ForkThrow',        'sounds/soundeffects/enemies/Utensil/Fork/ForkThrow.mp3');
 SFX.load('knifeAttack',      'sounds/soundeffects/enemies/Utensil/Knife/KnifeAttack.mp3');
-SFX.load('KnifeHit',          'sounds/soundeffects/enemies/Utensil/Knife/KnifeHit.mp3');
+SFX.load('KnifeHit',         'sounds/soundeffects/enemies/Utensil/Knife/KnifeHit.mp3');
 SFX.load('utensilDeath',     'sounds/soundeffects/enemies/Utensil/UtensilDeath.mp3');
 SFX.load('spoonDamage',      'sounds/soundeffects/enemies/Utensil/Spoon/SpoonDamage.mp3');
-SFX.load('SpoonAttack',       'sounds/soundeffects/enemies/Utensil/Spoon/SpoonAttack.mp3');
-SFX.load('SpoonHit',          'sounds/soundeffects/enemies/Utensil/Spoon/SpoonHit.mp3');
+SFX.load('SpoonAttack',      'sounds/soundeffects/enemies/Utensil/Spoon/SpoonAttack.mp3');
+SFX.load('SpoonHit',         'sounds/soundeffects/enemies/Utensil/Spoon/SpoonHit.mp3');
 SFX.load('giftBoxWindUp',    'sounds/soundeffects/enemies/GiftBox/GiftBoxWindUp.mp3');
-SFX.load('GiftBoxGrab',       'sounds/soundeffects/enemies/GiftBox/GiftBoxGrab.mp3');
-SFX.load('GiftBoxDeath',      'sounds/soundeffects/enemies/GiftBox/GiftBoxDeath.mp3');
+SFX.load('GiftBoxGrab',      'sounds/soundeffects/enemies/GiftBox/GiftBoxGrab.mp3');
+SFX.load('GiftBoxSpawn',     'sounds/soundeffects/enemies/GiftBox/GiftBoxSpawn.mp3');
+SFX.load('GiftBoxDeath',     'sounds/soundeffects/enemies/GiftBox/GiftBoxDeath.mp3');
 SFX.load('RedCORDash',        'sounds/soundeffects/enemies/COR/RedCORDash.mp3');
 SFX.load('RedCORAppear',      'sounds/soundeffects/enemies/COR/RedCORAppear.mp3');
 SFX.load('RedCORVanish',      'sounds/soundeffects/enemies/COR/RedCORVanish.mp3');
@@ -388,9 +447,12 @@ SFX.load('BlueCORShoot',      'sounds/soundeffects/enemies/COR/BlueCORShoot.mp3'
 SFX.load('balloonSpawn',     'sounds/soundeffects/enemies/WaterBalloon/BalloonSpawn.mp3');
 SFX.load('balloonShoot',     'sounds/soundeffects/enemies/WaterBalloon/BalloonShoot.mp3');
 SFX.load('redBalloonShoot',  'sounds/soundeffects/enemies/WaterBalloon/RedBalloonShoot.mp3');
+SFX.load('WaterBalloonIdle1','sounds/soundeffects/enemies/WaterBalloon/WaterBalloonIdle1.mp3');
+SFX.load('WaterBalloonIdle2','sounds/soundeffects/enemies/WaterBalloon/WaterBalloonIdle2.mp3');
+SFX.load('WaterBalloonWindUp','sounds/soundeffects/enemies/WaterBalloon/WaterBalloonWindUp.mp3');
+SFX.load('WaterBalloonDeath','sounds/soundeffects/enemies/WaterBalloon/WaterBalloonDeath.mp3');
 
 SFX.load('frostingLaunch',   'sounds/soundeffects/enemies/CakeBoss/FrostingLaunch.mp3');
-SFX.load('frostingHit',      'sounds/soundeffects/enemies/CakeBoss/FrostingHit.mp3');
 SFX.load('partyHatAttack',   'sounds/soundeffects/enemies/PartyHat/PartyHatAttack.mp3');
 SFX.load('partyHatRecover',  'sounds/soundeffects/enemies/PartyHat/PartyHatRecover.mp3');
 SFX.load('partyHatDie',      'sounds/soundeffects/enemies/PartyHat/PartyHatDie.mp3');
@@ -398,8 +460,12 @@ SFX.load('partyHatDrop',     'sounds/soundeffects/enemies/PartyHat/PartyHatDrop.
 SFX.load('partyHatRide',     'sounds/soundeffects/enemies/PartyHat/PartyHatRide.mp3');
 SFX.load('partyHatRide2',    'sounds/soundeffects/enemies/PartyHat/PartyHatRide2.mp3');
 SFX.load('partyHatSpawn',    'sounds/soundeffects/enemies/PartyHat/PartyHatSpawn.mp3');
+SFX.load('PartyHatIdle1',    'sounds/soundeffects/enemies/PartyHat/PartyHatIdle1.mp3');
+SFX.load('PartyHatIdle2',    'sounds/soundeffects/enemies/PartyHat/PartyHatIdle2.mp3');
 
 SFX.load('pause',            'sounds/soundeffects/UI/PauseSound.mp3');
+SFX.load('MGWShake',         'sounds/soundeffects/UI/Transition/MGWShake.mp3');
+SFX.load('MGWExpand',        'sounds/soundeffects/UI/Transition/MGWExpand.mp3');
 SFX.load('EmailNotification','sounds/soundeffects/UI/Email/EmailNotification.mp3');
 SFX.load('EmailAccept',      'sounds/soundeffects/UI/Email/EmailAccept.mp3');
 SFX.load('EmailReject',      'sounds/soundeffects/UI/Email/EmailReject.mp3');
@@ -416,6 +482,9 @@ SFX.load('birthdayParty',    'sounds/soundeffects/items/BirthdayParty/BirthdayPa
 SFX.load('PartyPopperDash',   'sounds/soundeffects/items/PartyPopper/PartyPopperDash.mp3');
 SFX.load('PartyPopperKill',   'sounds/soundeffects/items/PartyPopper/PartyPopperKill.mp3');
 SFX.load('PartyPopperRefill', 'sounds/soundeffects/items/PartyPopper/PartyPopperRefill.mp3');
+SFX.load('ShakeFizzlePopBuildUp','sounds/soundeffects/items/ShakeFizzlePop/ShakeFizzlePopBuildUp.wav');
+SFX.load('ShakeFizzlePopExplosion','sounds/soundeffects/items/ShakeFizzlePop/ShakeFizzlePopExplosion.mp3');
+SFX.load('ShakeFizzlePopSeal','sounds/soundeffects/items/ShakeFizzlePop/ShakeFizzlePopSeal.mp3');
 SFX.load('itemConfirm',      'sounds/soundeffects/items/ItemConfirm.mp3');
 SFX.load('itemReveal',       'sounds/soundeffects/items/ItemReveal.mp3');
 

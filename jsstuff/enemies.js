@@ -296,6 +296,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
           const dx2 = targetX - gpos.x, dy2 = targetY - gpos.y;
           const d2 = Math.hypot(dx2, dy2) || 1;
           const throwSpd = 11 + Math.min(dist / 40, 5);
+          SFX.playAt('ForkThrow', gpos.x, gpos.y, 0.5);
           if (gvel) {
             gvel.vx = (dx2 / d2) * throwSpd;
             gvel.vy = (dy2 / d2) * throwSpd;
@@ -541,6 +542,7 @@ if (!hatrider && ai.hatrider) ai.hatrider = null; // rider died, clear flag
     if (ai.wbShootFrame   === undefined) ai.wbShootFrame   = 0;
     if (ai.wbShootTick    === undefined) ai.wbShootTick    = 0;
     if (ai.wbFiredShots   === undefined) ai.wbFiredShots   = 0;
+    if (ai.wbWindupPlayed === undefined) ai.wbWindupPlayed = false;
     if (ai.orientAngle    === undefined) ai.orientAngle    = 0;
     if (ai.wbOrbitTimer   === undefined) ai.wbOrbitTimer   = 180 + Math.random() * 180;
     if (ai.wbOrbitDuration === undefined) ai.wbOrbitDuration = 0;
@@ -584,6 +586,7 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
       if (ai.wbShootTimer <= 0) {
         // Stop and begin turn
         vel.vx *= 0.1; vel.vy *= 0.1;
+        ai.wbWindupPlayed = false;
         ai.wbState = 'TURNING';
         ai.wbTurnFrame = 0;
         ai.wbTurnTick = 0;
@@ -613,6 +616,10 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
     } else if (ai.wbState === 'SHOOTING') {
       if (!hatrider || ai.wbOrbitDuration <= 0) {
         vel.vx *= 0.88; vel.vy *= 0.88;
+      }
+      if (!ai.wbWindupPlayed) {
+        SFX.playAtWithRate('WaterBalloonWindUp', pos.x, pos.y, 0.55, 0.9 + Math.random() * 0.2);
+        ai.wbWindupPlayed = true;
       }
 
       ai.wbShootTick++;
@@ -681,6 +688,7 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
         // After 3 shots, reverse turn back to roam
         if (ai.wbFiredShots >= 3 && ai.wbShootFrame >= 7) {
           ai.wbState = 'UNTURN';
+          ai.wbWindupPlayed = false;
           ai.wbTurnFrame = 3;
           ai.wbTurnTick = 0;
         }
@@ -688,6 +696,7 @@ ai.wbShootTimer -= hatMult / (ai.clownCooldownMult || 1);
 
     } else if (ai.wbState === 'UNTURN') {
       vel.vx *= 0.88; vel.vy *= 0.88;
+      ai.wbWindupPlayed = false;
       ai.wbTurnTick++;
       if (ai.wbTurnTick >= 6) {
         ai.wbTurnTick = 0;
