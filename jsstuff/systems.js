@@ -173,7 +173,7 @@ function triggerSFPHit() {
     showMsg('SHOCKWAVE RELEASE!!!');
     setTimeout(() => checkWave(), 0);
   }
-  gs.sfpMeter = 0; gs.sfpFull = false; gs.sfpSealPlayed = false;
+  gs.sfpMeter = 0; gs.sfpFull = false; gs.sfpSealPlayed = false; gs.sfpStretchStartedAt = null;
 }
 
 function unlockGlowsticks() {
@@ -2124,6 +2124,7 @@ if (gs.clippyIntroLines && !gs.clippyIntroDone) {
     gs.sfpMeter=Math.min(gs.sfpMax,gs.sfpMeter+1);
     if (gs.sfpMeter>=gs.sfpMax){
       gs.sfpFull=true;
+      gs.sfpStretchStartedAt = performance.now();
       SFX.setLoop('ShakeFizzlePopBuildUp', false);
       if (!gs.sfpSealPlayed) {
         SFX.play('ShakeFizzlePopSeal', 0.8);

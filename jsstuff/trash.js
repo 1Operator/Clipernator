@@ -129,6 +129,7 @@
         gs.hasShakeFizzlePop = false;
         gs.sfpMeter = 0;
         gs.sfpFull = false;
+        gs.sfpStretchStartedAt = null;
         break;
       case 'flawlessBaking':
         gs.hasFlawlessBaking = false;

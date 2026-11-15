@@ -98,7 +98,7 @@ Selecting an enemy process enables **Damage Process** when enough chips are avai
 - **Quadruple Layered Cake** 🍰🍰🍰🍰 — every bullet: 50% dud, 50% 4x damage. Replaces Triple. Permanent
 - **Bouncy House** 🏠 — bullets, enemies, and player all bounce off walls. Permanent
 - **Party Popper** 🎉 (Dash) — SHIFT to dash, damages enemies on contact, 3 charges. Permanent
-- **Shake Fizzle Pop** 🥤 — meter fills over time; while full: +speed +damage; on hit: shockwave burst and meter resets. Permanent
+- **Shake Fizzle Pop** 🥤 — meter fills over time; when full, Clippy stretches for 1 second; while full: +speed +damage; on hit: shockwave burst and meter resets. Permanent
 - **Flawless Baking** 🧁 — complete a wave without taking damage: +2 max ammo. Permanent
 - **Cursed Candles** 🕯️ — 5 candles orbit player, drain 5 HP/sec, each lit candle adds +2 bullets/shot. Candles relight over time. Permanent
 

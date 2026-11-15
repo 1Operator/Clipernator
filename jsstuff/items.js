@@ -204,6 +204,7 @@ const ITEM_DEFS = {
       gs.hasShakeFizzlePop = true;
       gs.sfpMeter = 0;
       gs.sfpFull = false;
+      gs.sfpStretchStartedAt = null;
       showMsg('SHAKE FIZZLE POP! DON\'T GET HIT!');
     },
     draw(fi) {
