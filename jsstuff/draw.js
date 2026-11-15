@@ -1042,13 +1042,18 @@ const sfpStretchElapsed = gs.sfpStretchStartedAt === null
   : performance.now() - gs.sfpStretchStartedAt;
 let sfpStretchGrowth = 0;
 if (sfpStretchElapsed >= 0 && sfpStretchElapsed < 1000) {
-  const progress = sfpStretchElapsed / 1000;
-  sfpStretchGrowth = progress < 0.2
-    ? (1 - Math.cos(Math.PI * progress / 0.2)) / 2
-    : (1 + Math.cos(Math.PI * (progress - 0.2) / 0.8)) / 2;
+  const riseDuration = 100;
+  const fallDuration = 250;
+  if (sfpStretchElapsed < riseDuration) {
+    const progress = sfpStretchElapsed / riseDuration;
+    sfpStretchGrowth = 1 - Math.pow(1 - progress, 3);
+  } else if (sfpStretchElapsed < riseDuration + fallDuration) {
+    const progress = (sfpStretchElapsed - riseDuration) / fallDuration;
+    sfpStretchGrowth = 1 - Math.pow(progress, 3);
+  }
 }
-const sfpScaleX = 1 + sfpStretchGrowth * 0.3;
-const sfpScaleY = 1 + sfpStretchGrowth * 0.45;
+const sfpScaleX = 1 + sfpStretchGrowth * 0.8;
+const sfpScaleY = 1 + sfpStretchGrowth * 1.1;
 const scaleX = (windingUp ? 1 - windupProgress * 0.16 : 1 + stretch) * sfpScaleX;
 const scaleY = (windingUp ? 1 + windupProgress * 0.2 : 1 - stretch * 0.52) * sfpScaleY;
 const dashFlash = gs.dashActiveThisFrame
