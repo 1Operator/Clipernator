@@ -10,6 +10,13 @@
   let animationFrame = null;
   let lastFrameTime = 0;
 
+  function getReplicationInterval() {
+    const difficulty = String(gs?._difficultyLabel || '').toLowerCase();
+    if (difficulty === 'easy') return 3000;
+    if (difficulty === 'hard') return 1000;
+    return 2000;
+  }
+
   function makePopup(id) {
     if (typeof isPaused !== 'undefined' && isPaused && typeof togglePause === 'function') {
       togglePause();
@@ -85,7 +92,7 @@
         if (typeof window.taskManagerRefresh === 'function') window.taskManagerRefresh();
       }
       scheduleReplication(popup);
-    }, 2000);
+    }, getReplicationInterval());
   }
 
   function closePopup(id) {
