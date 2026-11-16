@@ -64,7 +64,7 @@ I will likely impliment a 'Enemy Sink' change in the wave system, so that when a
 At a certain point the wave scaling system (in its current state) will become stale, so these varients may add more variety. The waves do get harder, but mainly because of the sheer amount of enemies around you. Dying to dozens of enemies will not feel very satisfying, because at certain point you cannot do anything to live, regardless of skill. Like I said, a point like this should be reached eventually, so the player can not become endlessly strong on floor 1, but skill should play more of a part.
 
 To determine how to fix this, we should consider what 'skill' in this specific game is actually comprised of (in rough order of complexity):
-1) Ability to dodge (reaction time)
+1) Ability to dodge (reaction time, and also with the addition of enemies predicting your movement, it feels nice to juke them)
 2) Aim
 3) Timing (using a utility (like glowstick), item, or attack at the right moment)
 4) Positioning (choosing routes, avoiding getting cornered, and keeping escape paths open)
