@@ -11,6 +11,45 @@ const BOSS_PHASE = {
   VOLLEY:         'VOLLEY',
 };
 
+const ENEMY_TRACKING_ACCURACY = {
+  EASY: 0.1,
+  NORMAL: 0.65,
+  HARD: 0.95,
+};
+
+function enemyAttackSpeedMultiplier(gs) {
+  return String(gs?._difficultyLabel || '').toUpperCase() === 'EASY' ? 1 : 1.3;
+}
+
+function enemyTrackingAccuracy(gs) {
+  return ENEMY_TRACKING_ACCURACY[String(gs?._difficultyLabel || 'NORMAL').toUpperCase()]
+    ?? ENEMY_TRACKING_ACCURACY.NORMAL;
+}
+
+function predictPlayerPosition(gs, origin, projectileSpeed) {
+  const target = playerPos(gs);
+  if (!target) return null;
+  const velocity = ECS.get(gs.playerId, 'vel');
+  if (!velocity) return { x: target.x, y: target.y };
+
+  const distance = Math.hypot(target.x - origin.x, target.y - origin.y);
+  const leadFrames = Math.min(45, distance / Math.max(projectileSpeed, 0.1));
+  const accuracy = enemyTrackingAccuracy(gs);
+  let leadX = (velocity.vx || 0) * leadFrames * accuracy;
+  let leadY = (velocity.vy || 0) * leadFrames * accuracy;
+  const leadDistance = Math.hypot(leadX, leadY);
+  const maxLeadDistance = 180;
+  if (leadDistance > maxLeadDistance) {
+    leadX *= maxLeadDistance / leadDistance;
+    leadY *= maxLeadDistance / leadDistance;
+  }
+  return { x: target.x + leadX, y: target.y + leadY };
+}
+
+function giftBoxWindupFrames(gs) {
+  return String(gs?._difficultyLabel || '').toUpperCase() === 'EASY' ? 180 : 120;
+}
+
 // ================================================================
 // BEHAVIOR TREES
 // ================================================================
@@ -24,6 +63,7 @@ const BT_UTENSIL = new BTSelector(
     const ai  = ECS.get(id, 'ai');
     const pp  = playerPos(gs);
     if (!pp || !pos || !vel) return BT.FAILURE;
+    const attackSpeed = enemyAttackSpeedMultiplier(gs);
 
     const subtype = ECS.get(id, 'enemy').subtype || 'fork';
 
@@ -71,7 +111,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       // ── IDLE: orbit, then decide target ──
       if (ai.uState === 'IDLE') {
         ai.uOrbitAngle += 0.045;
-        ai.uLaunchTimer--;
+        ai.uLaunchTimer -= attackSpeed;
 
         if (ai.uLaunchTimer <= 0 && dist < 400) {
           // Decide target: nearest giftbox within 220px, else player
@@ -140,7 +180,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
 
       // ── FORK_GRAB_TELEGRAPH: wobble tines toward target ──
       else if (ai.uState === 'FORK_GRAB_TELEGRAPH') {
-        ai.uTelegraphTimer--;
+        ai.uTelegraphTimer -= attackSpeed;
         if (ai.uTelegraphTimer % 5 === 0) spawnParticles(ai.uTipX, ai.uTipY, '#ffcc88', 4);
         const orbitA = ai.uOrbitAngle;
         ai.uTipX = pos.x + Math.cos(orbitA) * 20 + Math.sin(Date.now() / 60) * 4;
@@ -151,8 +191,8 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
             const tpos = ECS.get(ai.uForkTargetId, 'pos');
             const fdx = tpos.x - pos.x, fdy = tpos.y - pos.y, fd = Math.hypot(fdx, fdy) || 1;
             ai.uLaunchDir = { x: fdx / fd, y: fdy / fd };
-            ai.uTipVx = ai.uLaunchDir.x * 10;
-            ai.uTipVy = ai.uLaunchDir.y * 10;
+            ai.uTipVx = ai.uLaunchDir.x * 10 * attackSpeed;
+            ai.uTipVy = ai.uLaunchDir.y * 10 * attackSpeed;
           } else {
             // Target gone — abort
             ai.uState = 'IDLE'; ai.uForkTargetId = null; return BT.RUNNING;
@@ -168,7 +208,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       else if (ai.uState === 'FORK_REACHING') {
         ai.uTipX += ai.uTipVx;
         ai.uTipY += ai.uTipVy;
-        ai.uTravelTimer++;
+        ai.uTravelTimer += attackSpeed;
 
         const maxTravel = ai.uTravelTimer > 60;
 
@@ -213,7 +253,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
 
       // ── FORK_PULLING: drag grabbed entity back toward body ──
       else if (ai.uState === 'FORK_PULLING') {
-        ai.uPullTimer--;
+        ai.uPullTimer -= attackSpeed;
 
         if (!ai.uGrabbedId || !ECS.has(ai.uGrabbedId, 'pos')) {
           // Entity died while being pulled
@@ -226,7 +266,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
         // Pull toward body
         const pdx = pos.x - gpos.x, pdy = pos.y - gpos.y;
         const pd  = Math.hypot(pdx, pdy) || 1;
-        if (gvel) { gvel.vx = (pdx / pd) * 9; gvel.vy = (pdy / pd) * 9; }
+        if (gvel) { gvel.vx = (pdx / pd) * 9 * attackSpeed; gvel.vy = (pdy / pd) * 9 * attackSpeed; }
 
         // Keep tip at grabbed entity
         ai.uTipX = gpos.x; ai.uTipY = gpos.y;
@@ -242,7 +282,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       // ── FORK_HOLDING: windup, then arc-throw toward player ──
      // ── FORK_HOLDING: windup, then arc-throw toward player ──
       else if (ai.uState === 'FORK_HOLDING') {
-        ai.uHoldTimer--;
+        ai.uHoldTimer -= attackSpeed;
 
         if (!ai.uGrabbedId || !ECS.has(ai.uGrabbedId, 'pos')) {
           ai.uGrabbedId = null; ai.uState = 'IDLE'; return BT.RUNNING;
@@ -253,7 +293,8 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
 
         // Windup: pull grabbed entity back behind the fork body, then sweep forward
         const windupRatio = 1 - (ai.uHoldTimer / 40); // 0→1 as timer counts down
-        const aimAngle = Math.atan2(pp.y - pos.y, pp.x - pos.x);
+        const predictedPlayer = predictPlayerPosition(gs, pos, 9 * attackSpeed) || pp;
+        const aimAngle = Math.atan2(predictedPlayer.y - pos.y, predictedPlayer.x - pos.x);
 
         if (ai.uHoldTimer > 10) {
           // Pull back phase: orbit behind the body opposite to player direction
@@ -292,14 +333,14 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
           gpos.y = ai.uTipY;
 
           // Launch toward player
-          const targetX = pp.x, targetY = pp.y;
-          const dx2 = targetX - gpos.x, dy2 = targetY - gpos.y;
-          const d2 = Math.hypot(dx2, dy2) || 1;
           const throwSpd = 11 + Math.min(dist / 40, 5);
+          const throwTarget = predictPlayerPosition(gs, gpos, throwSpd * attackSpeed) || pp;
+          const dx2 = throwTarget.x - gpos.x, dy2 = throwTarget.y - gpos.y;
+          const d2 = Math.hypot(dx2, dy2) || 1;
           SFX.playAt('ForkThrow', gpos.x, gpos.y, 0.5);
           if (gvel) {
-            gvel.vx = (dx2 / d2) * throwSpd;
-            gvel.vy = (dy2 / d2) * throwSpd;
+            gvel.vx = (dx2 / d2) * throwSpd * attackSpeed;
+            gvel.vy = (dy2 / d2) * throwSpd * attackSpeed;
           }
 
           // Tag it so sysEnemyPlayerCollision deals bonus damage on impact
@@ -325,23 +366,24 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       else if (ai.uState === 'RETURN') {
         const rdx = pos.x - ai.uTipX, rdy = pos.y - ai.uTipY;
         const rd  = Math.hypot(rdx, rdy) || 1;
-        ai.uTipX += (rdx / rd) * 10;
-        ai.uTipY += (rdy / rd) * 10;
+        ai.uTipX += (rdx / rd) * 10 * attackSpeed;
+        ai.uTipY += (rdy / rd) * 10 * attackSpeed;
         if (rd < 22) { ai.uState = 'IDLE'; ai.uActiveIdx = -1; ai.uForkTargetId = null; spawnParticles(pos.x, pos.y, '#cccccc', 4); }
       }
 
       // ── Legacy TELEGRAPH/LAUNCH for player-stab fallback ──
       else if (ai.uState === 'TELEGRAPH') {
-        ai.uTelegraphTimer--;
+        ai.uTelegraphTimer -= attackSpeed;
         if (ai.uTelegraphTimer % 5 === 0) spawnParticles(ai.uTipX, ai.uTipY, '#ffcc88', 4);
         const orbitA = ai.uOrbitAngle;
         ai.uTipX = pos.x + Math.cos(orbitA) * 20 + Math.sin(Date.now() / 60) * 5;
         ai.uTipY = pos.y + Math.sin(orbitA) * 20 + Math.sin(Date.now() / 80) * 5;
         if (ai.uTelegraphTimer <= 0) {
-          const ldx = pp.x - pos.x, ldy = pp.y - pos.y, ldist = Math.hypot(ldx, ldy) || 1;
+          const target = predictPlayerPosition(gs, pos, 9 * attackSpeed) || pp;
+          const ldx = target.x - pos.x, ldy = target.y - pos.y, ldist = Math.hypot(ldx, ldy) || 1;
           ai.uLaunchDir = { x: ldx / ldist, y: ldy / ldist };
-          ai.uTipVx = ai.uLaunchDir.x * 9;
-          ai.uTipVy = ai.uLaunchDir.y * 9;
+          ai.uTipVx = ai.uLaunchDir.x * 9 * attackSpeed;
+          ai.uTipVy = ai.uLaunchDir.y * 9 * attackSpeed;
           ai.uTravelTimer = 0;
           ai.uState = 'LAUNCH';
           SFX.playAt('forkAttack', pos.x, pos.y, 0.5);
@@ -352,7 +394,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       else if (ai.uState === 'LAUNCH') {
         ai.uTipX += ai.uTipVx;
         ai.uTipY += ai.uTipVy;
-        ai.uTravelTimer++;
+        ai.uTravelTimer += attackSpeed;
         const maxTravel = ai.uTravelTimer > 65;
         const ppos2 = ECS.get(gs.playerId, 'pos');
         if (ppos2 && Math.hypot(ai.uTipX - ppos2.x, ai.uTipY - ppos2.y) < 22 && gs.invincible <= 0) {
@@ -377,7 +419,7 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
 
     if (ai.uState === 'IDLE') {
       ai.uOrbitAngle += 0.045;
-      ai.uLaunchTimer--;
+      ai.uLaunchTimer -= attackSpeed;
       if (ai.uLaunchTimer <= 0 && dist < 360) {
         // knife/spoon always target player
         ai.uActiveIdx = subtype === 'knife' ? 1 : 2;
@@ -391,17 +433,18 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       }
     }
     else if (ai.uState === 'TELEGRAPH') {
-      ai.uTelegraphTimer--;
+      ai.uTelegraphTimer -= attackSpeed;
       const warnColor = subtype === 'knife' ? '#ff4444' : '#aaddff';
       if (ai.uTelegraphTimer % 5 === 0) spawnParticles(ai.uTipX, ai.uTipY, warnColor, 4);
       const orbitA = ai.uOrbitAngle + (ai.uActiveIdx / 3) * Math.PI * 2;
       ai.uTipX = pos.x + Math.cos(orbitA) * 20 + Math.sin(Date.now() / 60) * 5;
       ai.uTipY = pos.y + Math.sin(orbitA) * 20 + Math.sin(Date.now() / 80) * 5;
       if (ai.uTelegraphTimer <= 0) {
-        const ldx = pp.x - pos.x, ldy = pp.y - pos.y, ldist = Math.hypot(ldx, ldy) || 1;
+        const target = predictPlayerPosition(gs, pos, 9 * attackSpeed) || pp;
+        const ldx = target.x - pos.x, ldy = target.y - pos.y, ldist = Math.hypot(ldx, ldy) || 1;
         ai.uLaunchDir = { x: ldx / ldist, y: ldy / ldist };
-        ai.uTipVx = ai.uLaunchDir.x * 9;
-        ai.uTipVy = ai.uLaunchDir.y * 9;
+        ai.uTipVx = ai.uLaunchDir.x * 9 * attackSpeed;
+        ai.uTipVy = ai.uLaunchDir.y * 9 * attackSpeed;
         ai.uTravelTimer = 0;
         ai.uHitTargets = new Set();
         ai.uState = 'LAUNCH';
@@ -415,12 +458,12 @@ vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
       if (returning) {
         const rdx = pos.x - ai.uTipX, rdy = pos.y - ai.uTipY;
         const rd = Math.hypot(rdx, rdy) || 1;
-        ai.uTipX += (rdx / rd) * 10;
-        ai.uTipY += (rdy / rd) * 10;
+        ai.uTipX += (rdx / rd) * 10 * attackSpeed;
+        ai.uTipY += (rdy / rd) * 10 * attackSpeed;
       } else {
         ai.uTipX += ai.uTipVx;
         ai.uTipY += ai.uTipVy;
-        ai.uTravelTimer++;
+        ai.uTravelTimer += attackSpeed;
       }
       const maxTravel = !returning && ai.uTravelTimer > 65;
       if (!ai.uHitTargets) ai.uHitTargets = new Set();
@@ -1009,8 +1052,9 @@ const BT_JUGGLER = new BTSelector(
 // ── GiftBox: slow wind-up explosion ──
 const BT_GIFTBOX = new BTSelector(
   new BTAction((id, gs) => {
+    const soundRate = 180 / giftBoxWindupFrames(gs);
     if (gs.frozen) {
-      SFX.syncGiftBoxWindUp(id, false);
+      SFX.syncGiftBoxWindUp(id, false, soundRate);
       return BT.RUNNING;
     }
     const pos = ECS.get(id, 'pos');
@@ -1021,7 +1065,7 @@ const BT_GIFTBOX = new BTSelector(
     if (!pp || !pos || !vel) return BT.FAILURE;
 
     if (ai.heldByPlayer) {
-      SFX.syncGiftBoxWindUp(id, false);
+      SFX.syncGiftBoxWindUp(id, false, soundRate);
       return BT.RUNNING;
     }
 
@@ -1051,17 +1095,18 @@ const BT_GIFTBOX = new BTSelector(
     if (spd > phy.speed) { vel.vx = vel.vx/spd*phy.speed; vel.vy = vel.vy/spd*phy.speed; }
 
     if (dist < 140) {
-      SFX.syncGiftBoxWindUp(id, true);
+      const windupFrames = giftBoxWindupFrames(gs);
+      SFX.syncGiftBoxWindUp(id, true, soundRate);
       ai.windupTimer++;
       if (ai.windupTimer % 12 === 0) spawnParticles(pos.x, pos.y, '#ffaa00', 4);
       if (ai.windupTimer === 30) showMsg('⚠️ GIFT BOX WINDING UP!');
 
-      if (ai.windupTimer >= 180) {
+      if (ai.windupTimer >= windupFrames) {
         ai.exploded = true;
         _giftBoxExplode(id, pos, gs);
       }
     } else {
-      SFX.syncGiftBoxWindUp(id, false);
+      SFX.syncGiftBoxWindUp(id, false, soundRate);
       ai.windupTimer = Math.max(0, ai.windupTimer - 1);
       if (ai.windupTimer === 0) SFX.stopEntitySound('giftBoxWindUp', id);
     }
@@ -1176,6 +1221,7 @@ if (ai.ridingId      === undefined) ai.ridingId      = null;
 const dx = pp.x - pos.x, dy = pp.y - pos.y;
 const dist = Math.hypot(dx, dy) || 1;
 const baseSpeed = (1.2 + gs.wave * 0.12) * ENEMY_DEFS.partyHat.speedMult;
+const attackSpeed = enemyAttackSpeedMultiplier(gs);
 
 ai.hatAnimTimer++;
 
@@ -1275,7 +1321,8 @@ if (ai.hatState === 'IDLE') {
   if (ai.hatTimer % 6 === 0) spawnParticles(pos.x, pos.y, '#ff4400', 4);
   ai.hatTimer--;
   if (ai.hatTimer <= 0) {
-    ai.hatDiveTarget = { x: pp.x, y: pp.y };
+    ai.hatDiveTarget = predictPlayerPosition(gs, pos, baseSpeed * 4.5 * attackSpeed)
+      || { x: pp.x, y: pp.y };
     ai.hatState = 'DIVE';
     SFX.playAt('partyHatAttack', pos.x, pos.y, 0.45);
     ai.hatTimer = 42; ai.hatAnimFrame = 0; ai.hatAnimTimer = 0;

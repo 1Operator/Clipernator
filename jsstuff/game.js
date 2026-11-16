@@ -569,6 +569,7 @@ function togglePause() {
   if (!isPaused && window.virusAdPopupCount?.() > 0) return;
   if (!isPaused) SFX.play('pause', 0.75);
   isPaused = !isPaused;
+  SFX.pauseLoop('ShakeFizzlePopBuildUp', isPaused);
   pauseEmailTimers();
   if (isPaused) {
     gameRunning = false;
@@ -1615,6 +1616,7 @@ document.addEventListener('keydown', e => {
       document.getElementById('pause-menu').style.display = 'none';
       updateTaskbarActiveWindow();
       isPaused = false;
+      SFX.setLoop('ShakeFizzlePopBuildUp', false);
       pauseEmailTimers();
       gameRunning = false;
       document.getElementById('overlay').style.display = 'flex';

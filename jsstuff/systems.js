@@ -851,6 +851,7 @@ function tickCorEnemy(id, type) {
   const ai = ECS.get(id, 'ai');
   const target = ECS.get(gs.playerId, 'pos');
   if (!pos || !vel || !ai || !target) return;
+  const attackSpeed = enemyAttackSpeedMultiplier(gs);
   if (gs.frozen) {
     vel.vx = 0;
     vel.vy = 0;
@@ -867,7 +868,7 @@ function tickCorEnemy(id, type) {
   });
 
   if (type === 'corRed') {
-    ai.corStateTimer--;
+    ai.corStateTimer -= ai.corState === 'warning' || ai.corState === 'dash' ? attackSpeed : 1;
     if (ai.corState === 'warning') {
       ai.corWhiteFlash = ai.corStateTimer <= 18 && Math.floor(ai.corStateTimer / 3) % 2 === 0;
       if (ai.corStateTimer <= 0) {
@@ -883,14 +884,15 @@ function tickCorEnemy(id, type) {
         SFX.playAt('RedCORDash', pos.x, pos.y, 0.65);
       }
     } else if (ai.corState === 'dash') {
-      ai.corDashFrame++;
-      const speed = ai.corDashFrame <= 18 ? 13 : 13 * Math.max(0, (29 - ai.corDashFrame) / 11);
+      ai.corDashFrame += attackSpeed;
+      const speed = (ai.corDashFrame <= 18 ? 13 : 13 * Math.max(0, (29 - ai.corDashFrame) / 11))
+        * attackSpeed;
       vel.vx = ai.corDirX * speed;
       vel.vy = ai.corDirY * speed;
       const movementScale = taskManagerMovementMultiplier(type);
       pos.x += vel.vx * movementScale;
       pos.y += vel.vy * movementScale;
-      if (ai.corDashFrame % 2 === 0) {
+      if (Math.floor(ai.corDashFrame) % 2 === 0) {
         ai.corTrail.push({
           x: pos.x,
           y: pos.y,
@@ -901,7 +903,7 @@ function tickCorEnemy(id, type) {
           scaleY: 0.8,
         });
       }
-      if (ai.corDashFrame % 3 === 0) {
+      if (Math.floor(ai.corDashFrame) % 3 === 0) {
         spawnParticles(pos.x, pos.y, Math.random() < 0.5 ? '#ff3355' : '#22ddff', 2);
       }
       if (ai.corStateTimer <= 0) {
@@ -934,7 +936,7 @@ function tickCorEnemy(id, type) {
   }
 
   if (ai.corState === 'hover') {
-    ai.corStateTimer--;
+    ai.corStateTimer -= attackSpeed;
     ai.corHoverTime++;
     const movementScale = taskManagerMovementMultiplier(type);
     pos.x = ai.corOriginX + Math.sin(ai.corHoverTime * 0.07) * 12 * movementScale;
@@ -946,7 +948,7 @@ function tickCorEnemy(id, type) {
   }
 
   if (ai.corState === 'shoot') {
-    ai.corShotTimer--;
+    ai.corShotTimer -= attackSpeed;
     if (ai.corShotTimer <= 0 && ai.corShotsFired < 5) {
       const dx = target.x - pos.x, dy = target.y - pos.y;
       const angle = Math.atan2(dy, dx);

@@ -5,6 +5,7 @@
 const SFX = {
   _cache: {},
   _loops: {},
+  _pausedLoops: new Set(),
   _instanceLoops: new Set(),
   _activeAudio: new Set(),
   _entityAudio: new Map(),
@@ -48,6 +49,7 @@ const SFX = {
       }
       delete this._loops[key];
     }
+    this._pausedLoops.clear();
 
     for (const entry of this._entityAudio.values()) {
       entry.audio.pause();
@@ -180,7 +182,7 @@ const SFX = {
     return decoded;
   },
 
-  _startGiftBoxAudio(entry, buffer, direction, position) {
+  _startGiftBoxAudio(entry, buffer, direction, position, playbackRate) {
     if (entry.source) {
       const previousSource = entry.source;
       entry.source = null;
@@ -198,12 +200,14 @@ const SFX = {
       return;
     }
     source.buffer = playbackBuffer;
+    source.playbackRate.value = playbackRate;
     gain.gain.value = 0.7;
     source.connect(gain);
     gain.connect(context.destination);
     entry.source = source;
     entry.gain = gain;
     entry.direction = direction;
+    entry.playbackRate = playbackRate;
     entry.sourcePosition = position;
     entry.sourceStartedAt = context.currentTime;
     if (direction === 'forward') entry.hasPlayed = true;
@@ -213,7 +217,7 @@ const SFX = {
       entry.gain?.disconnect();
       entry.gain = null;
       if (entry.active && direction === 'forward') {
-        this._startGiftBoxAudio(entry, buffer, 'forward', buffer.duration / 2);
+        this._startGiftBoxAudio(entry, buffer, 'forward', buffer.duration / 2, entry.playbackRate);
       } else if (direction === 'reverse') {
         entry.direction = 'stopped';
         entry.sourcePosition = 0;
@@ -226,11 +230,11 @@ const SFX = {
     if (!entry.source) return entry.direction === 'reverse' ? 0 : entry.sourcePosition;
     const elapsed = context.currentTime - entry.sourceStartedAt;
     return entry.direction === 'reverse'
-      ? Math.max(0, entry.sourcePosition - elapsed)
-      : Math.min(entry.buffer.duration, entry.sourcePosition + elapsed);
+      ? Math.max(0, entry.sourcePosition - elapsed * entry.playbackRate)
+      : Math.min(entry.buffer.duration, entry.sourcePosition + elapsed * entry.playbackRate);
   },
 
-  syncGiftBoxWindUp(entityId, active) {
+  syncGiftBoxWindUp(entityId, active, playbackRate = 1) {
     let entry = this._giftBoxAudio.get(entityId);
     if (!entry) {
       if (!active) return;
@@ -257,11 +261,11 @@ const SFX = {
     });
     if (entry.buffer) {
       const direction = active ? 'forward' : 'reverse';
-      if (direction !== entry.direction) {
+      if (direction !== entry.direction || playbackRate !== entry.playbackRate) {
         const position = direction === 'forward'
           ? entry.buffer.duration / 2
           : this._giftBoxAudioPosition(entry, context);
-        this._startGiftBoxAudio(entry, entry.buffer, direction, position);
+        this._startGiftBoxAudio(entry, entry.buffer, direction, position, playbackRate);
       }
       return;
     }
@@ -281,7 +285,7 @@ const SFX = {
       const direction = entry.active ? 'forward' : 'reverse';
       if (direction === 'reverse' && !entry.hasPlayed) return;
       const position = direction === 'forward' ? buffer.duration / 2 : buffer.duration / 2;
-      this._startGiftBoxAudio(entry, buffer, direction, position);
+      this._startGiftBoxAudio(entry, buffer, direction, position, playbackRate);
     });
   },
 
@@ -300,6 +304,7 @@ const SFX = {
     const audio = this._cache[key];
     if (!audio) return;
     if (!enabled) {
+      this._pausedLoops.delete(key);
       if (this._loops[key]) {
         audio.pause();
         audio.currentTime = 0;
@@ -310,7 +315,12 @@ const SFX = {
     }
     if (this._muted) return;
     audio.volume = volumeOverride !== undefined ? volumeOverride : 0.6;
-    if (this._loops[key]) return;
+    if (this._loops[key]) {
+      if (!this._pausedLoops.has(key) && audio.paused) {
+        audio.play().catch(error => console.warn(`Unable to resume looping ${key} sound.`, error));
+      }
+      return;
+    }
     audio.loop = true;
     audio.currentTime = 0;
     this._loops[key] = true;
@@ -318,6 +328,20 @@ const SFX = {
       audio.loop = false;
       delete this._loops[key];
     });
+  },
+
+  pauseLoop(key, paused) {
+    const audio = this._cache[key];
+    if (!audio || !this._loops[key]) return;
+    if (paused) {
+      this._pausedLoops.add(key);
+      audio.pause();
+    } else {
+      this._pausedLoops.delete(key);
+      if (!this._muted && audio.paused) {
+        audio.play().catch(error => console.warn(`Unable to resume looping ${key} sound.`, error));
+      }
+    }
   },
 
   playLoopInstance(key, volumeOverride) {

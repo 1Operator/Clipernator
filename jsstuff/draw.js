@@ -460,7 +460,10 @@ function drawGiftBox(epos, ehp, ai, frozen, advanceVisualState = true) {
   const { x, y } = epos;
   const DRAW_SIZE = 64;
 
-  const windupRatio = Math.min(1, (ai.windupTimer || 0) / (ai.thrown ? 120 : 180));
+  const windupRatio = Math.min(
+    1,
+    (ai.windupTimer || 0) / (ai.thrown ? 120 : giftBoxWindupFrames(gs))
+  );
   const usingWindup = windupRatio > 0 || ai.thrown;
 
   // Shaking increases with windup progress

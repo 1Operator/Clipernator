@@ -36,6 +36,8 @@
 - Difficulty does not alter enemy HP. Wave progression still increases enemy HP and speed independently. Email chip rewards retain their separate difficulty modifiers (0.75x / 1x / 1.5x). Boss-transition waves retain their special flow instead of opening a normal wave item choice.
 - **Damage invincibility:** After a direct hit, invincibility duration is based on actual health lost relative to maximum health. On Easy, losing less than 50% grants 0.66 seconds; losing 50% or more grants 1 second. On Normal and Hard, those durations are 0.33 and 0.5 seconds, respectively. Damage-over-time ticks do not grant invincibility. The Utensil knife's bleed application uses its 5%-of-max-health tick amount to choose the lower duration.
 
+- **Enemy attack tuning:** Easy retains the existing pace. On Normal and Hard, Utensil attacks and COR attacks are 1.3x faster; Water Balloon and Party Hat attack cadence is unchanged. Gift Boxes wind up for 2 seconds before proximity detonation on Normal and Hard (3 seconds on Easy); their separate thrown fuse is unchanged. Utensil and Party Hat predict player movement with low accuracy on Easy, medium accuracy on Normal, and high accuracy on Hard. These difficulty adjustments do not scale with wave level.
+
 ### Desktop
 
 - Use MS Sans Serif for most UI, and Fixedsys sparingly for code-like or legacy text areas. 
@@ -246,7 +248,7 @@ Sound effects are registered in `jsstuff/sounds.js`. “Wired” means the sound
 | `Chips/GoldenChipTarget.mp3` | Wired as a loop: plays while at least one golden chip is magnetized and homing toward the player. |
 | `Chips/GoldenChipPickup.mp3` | Wired: a golden chip is collected, including from Chippy. |
 | `items/ItemConfirm.mp3` | Wired: confirms an in-game item choice, plays when an item is picked up, and plays when Glowsticks are unlocked. Opening-sequence item drafts use `opening/confirm.mp3`. |
-| `items/ShakeFizzlePop/ShakeFizzlePopBuildUp.wav` | Wired as a loop while Shake Fizzle Pop charges; stops and resets when interrupted, and stops when the charge completes. |
+| `items/ShakeFizzlePop/ShakeFizzlePopBuildUp.wav` | Wired as a loop while Shake Fizzle Pop charges; pauses and resumes with the game, and stops/resets when interrupted or when the charge completes. |
 | `items/ShakeFizzlePop/ShakeFizzlePopExplosion.mp3` | Wired: plays when an incomplete Shake Fizzle Pop charge is lost; volume scales with charge progress. |
 | `items/ShakeFizzlePop/ShakeFizzlePopSeal.mp3` | Wired: plays when Shake Fizzle Pop reaches full charge. |
 | `items/BirthdayParty/BirthdayParty.mp3` | Wired: intended to play when the Birthday Party item effect activates and freezes enemy movement. The current file is 1 byte and needs valid audio data to be audible. |
