@@ -2448,12 +2448,6 @@ const total = [...ECS.query('enemy')].length;
     const distance = 205 + Math.random() * 65;
     x = Math.max(CFG.WALL_PAD + 55, Math.min(worldW - CFG.WALL_PAD - 55, ppos.x + Math.cos(angle) * distance));
     y = Math.max(CFG.WALL_PAD + 55, Math.min(worldH - CFG.WALL_PAD - 55, ppos.y + Math.sin(angle) * distance));
-  } else if (type === 'utensil') {
-    const rect = canvas.getBoundingClientRect();
-    const screenX = Math.random() * window.innerWidth;
-    const screenY = Math.random() * window.innerHeight;
-    x = ((screenX - rect.left) / rect.width) * worldW;
-    y = ((screenY - rect.top) / rect.height) * worldH;
   } else {
     let attempts = 0;
     do {
