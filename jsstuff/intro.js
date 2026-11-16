@@ -1589,7 +1589,6 @@ function renderDesktopLoading() {
       if (!gsRef.unlockedItems.includes(id)) gsRef.unlockedItems.push(id);
       item.effect(gsRef);
     }
-    draftChosenItems = [];
   }
 
   function installPersistentDesktop() {

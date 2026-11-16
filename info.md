@@ -31,8 +31,8 @@
 ### Difficulty
 
 - **Easy:** 150 starting health, 12 ammo, enemies move at 0.85x speed and deal 0.7x damage; no opening item picks, then an in-game item choice every 3 completed waves.
-- **Normal:** 100 starting health, 8 ammo, enemies move at 1.1x speed and deal normal damage; 1 opening item pick, then an in-game item choice every 4 completed waves.
-- **Hard:** 70 starting health, 6 ammo, enemies move at 1.4x speed and deal 1.5x damage; 2 opening item picks, then an in-game item choice every 5 completed waves. Ordinary enemy chip-drop chance is doubled (20%, up from 10%).
+- **Normal:** 100 starting health, 8 ammo, enemies move at 1.1x speed and deal normal damage; 1 opening item pick, then an in-game item choice every 4 completed waves. Opening item picks are retained when retrying after death.
+- **Hard:** 70 starting health, 6 ammo, enemies move at 1.4x speed and deal 1.5x damage; 2 opening item picks, then an in-game item choice every 5 completed waves. Ordinary enemy chip-drop chance is doubled (20%, up from 10%). Opening item picks are retained when retrying after death.
 - Difficulty does not alter enemy HP. Wave progression still increases enemy HP and speed independently. Email chip rewards retain their separate difficulty modifiers (0.75x / 1x / 1.5x). Boss-transition waves retain their special flow instead of opening a normal wave item choice.
 - **Damage invincibility:** After a direct hit, invincibility duration is based on actual health lost relative to maximum health. On Easy, losing less than 50% grants 0.66 seconds; losing 50% or more grants 1 second. On Normal and Hard, those durations are 0.33 and 0.5 seconds, respectively. Damage-over-time ticks do not grant invincibility. The Utensil knife's bleed application uses its 5%-of-max-health tick amount to choose the lower duration.
 
