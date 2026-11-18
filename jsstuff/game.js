@@ -1488,7 +1488,7 @@ function tryPickUpGiftBox() {
     if (type !== 'giftBox') continue;
     const epos = ECS.get(id, 'pos');
     const ppos = ECS.get(gs.playerId, 'pos');
-    if (Math.hypot(epos.x - ppos.x, epos.y - ppos.y) < 48) {
+    if (Math.hypot(epos.x - ppos.x, epos.y - ppos.y) < 64) {
       gs.heldGiftBox = id;
       ECS.get(id, 'ai').heldByPlayer = true;
       ECS.get(id, 'vel').vx = 0;
