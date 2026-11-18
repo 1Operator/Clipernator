@@ -447,6 +447,7 @@ SFX.load('notAllowed',       'sounds/soundeffects/player/NotAllowed.mp3');
 
 SFX.load('utensilSpawn',     'sounds/soundeffects/enemies/Utensil/UtensilSpawn.mp3');
 SFX.load('UtensilIdle1',     'sounds/soundeffects/enemies/Utensil/UtensilIdle1.mp3');
+SFX.load('UtensilIdle2',     'sounds/soundeffects/enemies/Utensil/UtensilIdle2.mp3');
 SFX.load('forkGrab',         'sounds/soundeffects/enemies/Utensil/Fork/ForkGrab.mp3');
 SFX.load('forkGrab2',        'sounds/soundeffects/enemies/Utensil/Fork/ForkGrab2.mp3');
 SFX.load('forkHit',          'sounds/soundeffects/enemies/Utensil/Fork/ForkHit.mp3');

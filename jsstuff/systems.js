@@ -1035,14 +1035,14 @@ function playEnemyIdleSounds() {
     const ai = ECS.get(id, 'ai');
     if (!pos || !ai) continue;
     const dist = Math.hypot(pos.x - ppos.x, pos.y - ppos.y);
-    if (dist > 540) continue;
+    if (dist > 520) continue;
 
     let shouldPlay = false;
     let keys = [];
     if (enemy.type === 'utensil') {
       const state = ai.uState || 'IDLE';
       shouldPlay = state === 'IDLE' || state === 'RETURN';
-      keys = ['UtensilIdle1'];
+      keys = ['UtensilIdle1', 'UtensilIdle2'];
     } else if (enemy.type === 'waterballoon') {
       shouldPlay = ai.wbState === 'ROAM' || ai.wbState === 'UNTURN';
       keys = ['WaterBalloonIdle1', 'WaterBalloonIdle2'];
@@ -1060,9 +1060,8 @@ function playEnemyIdleSounds() {
     }
 
     const key = keys[Math.floor(Math.random() * keys.length)];
-    const volume = 0.7 * (1 - dist / 540);
     const pitch = 0.9 + Math.random() * 0.2;
-    SFX.playAtWithRate(key, pos.x, pos.y, volume, pitch);
+    SFX.playAtWithRate(key, pos.x, pos.y, 0.7, pitch);
     ai.idleSoundCooldown = 120 + Math.floor(Math.random() * 241);
   }
 }
