@@ -1407,7 +1407,7 @@ function renderDesktopLoading() {
     const wrapperRect = gameWrapper.getBoundingClientRect();
     const gameCanvasRect = canvas.getBoundingClientRect();
     const side = window.innerWidth - wrapperRect.right >= wrapperRect.left ? 'right' : 'left';
-    const outsideX = side === 'right' ? wrapperRect.right + 90 : wrapperRect.left - 90;
+    const outsideX = side === 'right' ? wrapperRect.right + 110 : wrapperRect.left - 110;
     const outsideY = Math.max(90, Math.min(window.innerHeight - 90, wrapperRect.bottom - 110));
     const toScreen = (x, y) => ({
       x: gameCanvasRect.left + x * gameCanvasRect.width / worldW,
@@ -1419,11 +1419,8 @@ function renderDesktopLoading() {
       const target = toScreen(introEnemyX, introEnemyY);
       const x = outsideX + (target.x - outsideX) * t;
       const y = outsideY + (target.y - outsideY) * t - Math.sin(t * Math.PI) * 180;
-      drawClippyAt(c, x, y, 'jump', clippyAnimFrame);
-    } else if (gameWindowPhase === 'done') {
-      const target = toScreen(introEnemyX, introEnemyY);
-      drawClippyAt(c, target.x, target.y, clippyAnim, clippyAnimFrame);
-    } else {
+      drawClippyAt(c, x, y, 'jump', clippyAnimFrame, 1 - t * 0.85);
+    } else if (gameWindowPhase !== 'done') {
       drawClippyAt(c, outsideX, outsideY, clippyAnim, clippyAnimFrame);
     }
 
@@ -1442,7 +1439,7 @@ function renderDesktopLoading() {
   // ================================================================
   // CLIPPY HELPERS
   // ================================================================
-  function drawClippyAt(c, x, y, anim, frame) {
+  function drawClippyAt(c, x, y, anim, frame, scale = 1) {
     const W = 180, H = 180;
     let img = null;
     let flipX = false;
@@ -1469,10 +1466,11 @@ function renderDesktopLoading() {
       c.save();
       c.translate(x, y);
       if (flipX) c.scale(-1, 1);
+      c.scale(scale, scale);
       c.drawImage(img, -W/2, -H/2, W, H);
       c.restore();
     } else {
-      c.save(); c.translate(x, y);
+      c.save(); c.translate(x, y); c.scale(scale, scale);
       c.fillStyle = '#ffcc88'; c.beginPath(); c.arc(0, -10, 18, 0, Math.PI*2); c.fill();
       c.fillStyle = '#4488ff'; c.fillRect(-14, 6, 28, 20);
       c.restore();
