@@ -1315,18 +1315,10 @@ function renderDesktopLoading() {
     ECS.add(introEnemyId, 'ai', {});
     clippyJumpProgress = -1;
 
-    if (overlayEl) {
-      overlayEl.style.display = 'block';
-      overlayEl.style.background = 'transparent';
-      overlayEl.style.pointerEvents = 'none';
-      container.style.display = 'none';
-      const crtEffects = overlayEl.querySelector('.intro-crt-effects');
-      if (crtEffects) crtEffects.style.display = 'none';
-      gameWindowClippyCanvas = document.createElement('canvas');
-      gameWindowClippyCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
-      overlayEl.appendChild(gameWindowClippyCanvas);
-      gameWindowClippyCtx = gameWindowClippyCanvas.getContext('2d');
-    }
+    gameWindowClippyCanvas = document.createElement('canvas');
+    gameWindowClippyCanvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;';
+    document.body.appendChild(gameWindowClippyCanvas);
+    gameWindowClippyCtx = gameWindowClippyCanvas.getContext('2d');
 
     attachKeys((e) => {
       if (stage !== 'GAME_WINDOW') return;
@@ -1669,6 +1661,9 @@ function renderDesktopLoading() {
     detachDesktopClicks();
     stopAllMusic();
     installPersistentDesktop();
+    if (gameWindowClippyCanvas) gameWindowClippyCanvas.remove();
+    gameWindowClippyCanvas = null;
+    gameWindowClippyCtx = null;
     if (gameWrapper) {
       gameWrapper.style.visibility = '';
       gameWrapper.style.opacity = '';
