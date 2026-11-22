@@ -1316,7 +1316,7 @@ function renderDesktopLoading() {
     clippyJumpProgress = -1;
 
     gameWindowClippyCanvas = document.createElement('canvas');
-    gameWindowClippyCanvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;';
+    gameWindowClippyCanvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;margin:0;background:transparent;z-index:9999;pointer-events:none;';
     document.body.appendChild(gameWindowClippyCanvas);
     gameWindowClippyCtx = gameWindowClippyCanvas.getContext('2d');
 
