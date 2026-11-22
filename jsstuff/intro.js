@@ -1302,6 +1302,7 @@ function renderDesktopLoading() {
       gameWrapper.style.opacity = '0';
     }
     initGameState(false);
+    gs.playerHidden = true;
     introPlayerPos = ECS.get(gs.playerId, 'pos');
     if (introPlayerPos) { gunX = introPlayerPos.x; gunY = introPlayerPos.y; }
     introEnemyX = worldW * 0.68; introEnemyY = worldH * 0.55;
@@ -1356,6 +1357,7 @@ function renderDesktopLoading() {
       clippyAnimFrame = clippyJumpProgress > 0.8 ? 1 : 0; 
       if (clippyJumpProgress > 1) {
         gameWindowPhase = 'done';
+        gs.playerHidden = false;
         // Use a guard so finishIntro can only fire once
         setTimeout(() => finishIntro(), 800);
       }
@@ -1655,6 +1657,7 @@ function renderDesktopLoading() {
     _introDone = true;
 
     stage = 'DONE';
+    if (gs) gs.playerHidden = false;
     detachKeys();
     detachDesktopClicks();
     stopAllMusic();

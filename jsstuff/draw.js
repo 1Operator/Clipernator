@@ -904,6 +904,7 @@ function drawCor(pos, ai, type) {
 // PLAYER DRAW
 // ============================================================
 function drawPlayer(advanceVisualState = true) {
+  if (gs.playerHidden) return;
   const ppos = ECS.get(gs.playerId, 'pos');
   let {x, y} = ppos;
 
