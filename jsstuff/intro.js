@@ -336,6 +336,8 @@ function stopSound(key) {
   let gameWrapper = null;
   let clippyJumpProgress = -1;
   let gameWindowOpacity = 0;
+  let gameWindowClippyCanvas = null;
+  let gameWindowClippyCtx = null;
   let persistentDesktopInstalled = false;
 
   // ── Overlay setup ──
@@ -936,6 +938,11 @@ setTimeout(() => {
     );
     persistentDesktop.hidden = false;
     document.body.classList.add('desktop-ready');
+    const wrapper = document.getElementById('wrapper');
+    if (wrapper) {
+      wrapper.style.visibility = 'hidden';
+      wrapper.style.opacity = '0';
+    }
     if (overlayEl) overlayEl.style.display = 'none';
     attachDesktopClicks();
     requestAnimationFrame(desktopLoop);
@@ -1290,7 +1297,10 @@ function renderDesktopLoading() {
     installPersistentDesktop();
     if (overlayEl) overlayEl.style.display = 'none';
     gameWrapper = document.getElementById('wrapper');
-    if (gameWrapper) gameWrapper.style.opacity = '0';
+    if (gameWrapper) {
+      gameWrapper.style.visibility = 'visible';
+      gameWrapper.style.opacity = '0';
+    }
     initGameState(false);
     introPlayerPos = ECS.get(gs.playerId, 'pos');
     if (introPlayerPos) { gunX = introPlayerPos.x; gunY = introPlayerPos.y; }
@@ -1304,6 +1314,19 @@ function renderDesktopLoading() {
     ECS.add(introEnemyId, 'hp', { hp: 3, maxHp: 3, hitFlash: 0 });
     ECS.add(introEnemyId, 'ai', {});
     clippyJumpProgress = -1;
+
+    if (overlayEl) {
+      overlayEl.style.display = 'block';
+      overlayEl.style.background = 'transparent';
+      overlayEl.style.pointerEvents = 'none';
+      container.style.display = 'none';
+      const crtEffects = overlayEl.querySelector('.intro-crt-effects');
+      if (crtEffects) crtEffects.style.display = 'none';
+      gameWindowClippyCanvas = document.createElement('canvas');
+      gameWindowClippyCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+      overlayEl.appendChild(gameWindowClippyCanvas);
+      gameWindowClippyCtx = gameWindowClippyCanvas.getContext('2d');
+    }
 
     attachKeys((e) => {
       if (stage !== 'GAME_WINDOW') return;
@@ -1371,27 +1394,57 @@ function renderDesktopLoading() {
       );
     }
     drawGameWindow();
+    drawGameWindowClippy();
     requestAnimationFrame(gameWindowLoop);
+  }
+
+  function drawGameWindowClippy() {
+    if (!gameWindowClippyCanvas || !gameWindowClippyCtx || !gameWrapper) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.round(window.innerWidth * dpr);
+    const height = Math.round(window.innerHeight * dpr);
+    if (gameWindowClippyCanvas.width !== width || gameWindowClippyCanvas.height !== height) {
+      gameWindowClippyCanvas.width = width;
+      gameWindowClippyCanvas.height = height;
+      gameWindowClippyCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    const c = gameWindowClippyCtx;
+    c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    const wrapperRect = gameWrapper.getBoundingClientRect();
+    const gameCanvasRect = canvas.getBoundingClientRect();
+    const side = window.innerWidth - wrapperRect.right >= wrapperRect.left ? 'right' : 'left';
+    const outsideX = side === 'right' ? wrapperRect.right + 90 : wrapperRect.left - 90;
+    const outsideY = Math.max(90, Math.min(window.innerHeight - 90, wrapperRect.bottom - 110));
+    const toScreen = (x, y) => ({
+      x: gameCanvasRect.left + x * gameCanvasRect.width / worldW,
+      y: gameCanvasRect.top + y * gameCanvasRect.height / worldH,
+    });
+
+    if (gameWindowPhase === 'clippy_jump' && clippyJumpProgress >= 0 && clippyJumpProgress <= 1) {
+      const t = clippyJumpProgress;
+      const target = toScreen(introEnemyX, introEnemyY);
+      const x = outsideX + (target.x - outsideX) * t;
+      const y = outsideY + (target.y - outsideY) * t - Math.sin(t * Math.PI) * 180;
+      drawClippyAt(c, x, y, 'jump', clippyAnimFrame);
+    } else if (gameWindowPhase === 'done') {
+      const target = toScreen(introEnemyX, introEnemyY);
+      drawClippyAt(c, target.x, target.y, clippyAnim, clippyAnimFrame);
+    } else {
+      drawClippyAt(c, outsideX, outsideY, clippyAnim, clippyAnimFrame);
+    }
+
+    if (clippyDialogVisible) {
+      const boxX = side === 'right' ? outsideX - 310 : outsideX + 40;
+      const boxY = Math.max(0, Math.min(window.innerHeight - 230, outsideY - 120));
+      drawClippyDialogBox(c, boxX, boxY, outsideX, outsideY);
+    }
   }
 
   function drawGameWindow() {
     if (!canvas.width || !canvas.height) return;
     draw();
-    const c = ctx;
-    const dpr = window.devicePixelRatio || 1;
-    c.save();
-    c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const clippyBaseX = worldW - 90, clippyBaseY = worldH - 90;
-    if (gameWindowPhase === 'clippy_jump' && clippyJumpProgress >= 0 && clippyJumpProgress <= 1) {
-      const t = clippyJumpProgress;
-      const jx = clippyBaseX + (introEnemyX - clippyBaseX) * t;
-      const jy = clippyBaseY + (introEnemyY - clippyBaseY) * t - Math.sin(t * Math.PI) * 180;
-      drawClippyAt(c, jx, jy, 'jump', clippyAnimFrame);
-    } else if (gameWindowPhase !== 'clippy_jump') {
-      drawClippyAt(c, clippyBaseX, clippyBaseY, clippyAnim, clippyAnimFrame);
-    }
-    if (clippyDialogVisible) drawClippyDialogBox(c, clippyBaseX - 330, clippyBaseY - 100, clippyBaseX, clippyBaseY);
-    c.restore();
   }
 
   // ================================================================
@@ -1616,7 +1669,10 @@ function renderDesktopLoading() {
     detachDesktopClicks();
     stopAllMusic();
     installPersistentDesktop();
-    if (gameWrapper) gameWrapper.style.opacity = '';
+    if (gameWrapper) {
+      gameWrapper.style.visibility = '';
+      gameWrapper.style.opacity = '';
+    }
     gameWrapper = null;
     introEnemyPos = null;
     introPlayerPos = null;
