@@ -308,7 +308,7 @@ function initGameState(applyIntroChoices = true) {
       "",
       "...",
       "User, it has come to my attention that paperclips are not very effective at killing viruses.",
-      "Thankfully, I have found a way to extract data from your computer and recompile it as targeted attack vector that creates a buffer overflow in targeted entities.",
+      "Thankfully, I have found a way to extract data from your computer and recompile it as a targeted attack vector that creates a buffer overflow in targeted entities.",
       "Or, in other words, a gun!",
       "It's time to kill some viruses!",
       "WASD to move · Mouse to aim · Click to shoot",
