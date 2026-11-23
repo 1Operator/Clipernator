@@ -226,7 +226,7 @@ function stopSound(key) {
   let desktopLoadLines = [];
   const DESKTOP_LOAD_LINES = [
     { text: 'Drawa Modular 97', color: '#ffffff', delay: 0 },
-    { text: 'Copyright Drawa Corporation 1981-1998', color: '#aaaaaa', delay: 0 },
+    { text: 'Copyright Drawa Corporation 1984-1997', color: '#aaaaaa', delay: 0 },
     { text: '', delay: 200 },
     { text: 'Loading system components...', color: '#00ff66', delay: 300 },
     { text: '  [OK] KERNEL32.DLL', color: '#00ff66', delay: 180 },
@@ -309,7 +309,7 @@ function stopSound(key) {
 
   const TERM_SEQUENCE = [
     { type: 'output', text: 'Drawa Modular [Version 10.0.19570.1000]', color: '#00ff66', delay: 0 },
-    { type: 'output', text: '(c) 1997 Corporation. All rights reserved.', color: '#00ff66', delay: 0 },
+    { type: 'output', text: '(c) 1984 Corporation. All rights reserved.', color: '#00ff66', delay: 0 },
     { type: 'prompt', text: '', delay: 400 },
     { type: 'input',  text: 'tasklist | findstr /i "blocking"', delay: 80 },
     { type: 'output', text: '', delay: 200 },
@@ -1163,7 +1163,7 @@ function renderDesktopLoading() {
       'INACCESSIBLE_BOOT_DEVICE', '',
       "If this is the first time you've seen this Stop error screen,",
       'restart your computer. If this screen appears again, follow these steps:',
-      '', 'Check for viruses on your computer. Remove party.exe if found.',
+      '', 'Check for viruses on your computer. Remove them if found.',
       'Check your hard drive configuration and restart.', '',
       'Run CHKDSK /F to check for hard drive corruption, and then restart.',
       '', 'Refer to your Getting Started manual for more information on',
