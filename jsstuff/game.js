@@ -1847,7 +1847,7 @@ window.addEventListener('load', () => {
     window._introPlayed = true;
     document.getElementById('overlay').style.display = 'none';
     INTRO.start((shortcutUsed) => {
-      _doStartGame(!shortcutUsed, shortcutUsed);
+      _doStartGame(shortcutUsed, shortcutUsed);
     });
   }
 });
