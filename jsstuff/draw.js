@@ -935,8 +935,22 @@ function drawPlayer(advanceVisualState = true) {
       const bx = Math.max(8, Math.min(worldW - bw - 8, ppos.x + 18));
       let by = ppos.y - bh - 38;
       if (by < 8) by = Math.min(worldH - bh - 8, ppos.y + 38);
+      by = Math.max(8, Math.min(worldH - bh - 8, by));
       const bubbleBelowPlayer = by > ppos.y;
       const tailBaseX = Math.max(bx + 14, Math.min(bx + bw - 14, ppos.x));
+      const playerOutsideWindow = ppos.x < 0 || ppos.x > worldW || ppos.y < 0 || ppos.y > worldH;
+      const pointerTargetX = Math.max(0, Math.min(worldW, ppos.x));
+      const pointerTargetY = Math.max(0, Math.min(worldH, ppos.y));
+      const tailBaseY = bubbleBelowPlayer ? by : by + bh;
+      let tailTipX = ppos.x;
+      let tailTipY = bubbleBelowPlayer ? by - 13 : by + bh + 13;
+      if (playerOutsideWindow) {
+        const dx = pointerTargetX - tailBaseX;
+        const dy = pointerTargetY - tailBaseY;
+        const distance = Math.hypot(dx, dy) || 1;
+        tailTipX = tailBaseX + dx / distance * 13;
+        tailTipY = tailBaseY + dy / distance * 13;
+      }
 
       ctx.fillStyle = '#ffffcc';
       ctx.strokeStyle = '#000000';
@@ -948,24 +962,24 @@ function drawPlayer(advanceVisualState = true) {
       ctx.beginPath();
       if (bubbleBelowPlayer) {
         ctx.moveTo(tailBaseX - 10, by);
-        ctx.lineTo(ppos.x, by - 13);
+        ctx.lineTo(tailTipX, tailTipY);
         ctx.lineTo(tailBaseX + 10, by);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(tailBaseX - 12, by + 1);
-        ctx.lineTo(ppos.x, by - 12);
+        ctx.lineTo(tailTipX, tailTipY);
         ctx.lineTo(tailBaseX + 12, by + 1);
         ctx.fillStyle = '#ffffcc';
         ctx.fill();
         ctx.fillRect(tailBaseX - 11, by, 22, 3);
       } else {
         ctx.moveTo(tailBaseX - 10, by + bh);
-        ctx.lineTo(ppos.x, by + bh + 13);
+        ctx.lineTo(tailTipX, tailTipY);
         ctx.lineTo(tailBaseX + 10, by + bh);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(tailBaseX - 12, by + bh - 1);
-        ctx.lineTo(ppos.x, by + bh + 12);
+        ctx.lineTo(tailTipX, tailTipY);
         ctx.lineTo(tailBaseX + 12, by + bh - 1);
         ctx.fillStyle = '#ffffcc';
         ctx.fill();

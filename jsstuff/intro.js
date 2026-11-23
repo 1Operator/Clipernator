@@ -1679,7 +1679,7 @@ function renderDesktopLoading() {
       if (overlayEl) { overlayEl.parentNode.removeChild(overlayEl); overlayEl = null; }
       container = null;
       bootInputEl = null;
-      if (onDone) onDone();
+      if (onDone) onDone(true);
       return;
     }
 
@@ -1689,7 +1689,7 @@ function renderDesktopLoading() {
       if (alpha >= 1) {
         clearInterval(fadeInterval);
         if (overlayEl) { overlayEl.parentNode.removeChild(overlayEl); overlayEl = null; }
-        if (onDone) onDone();
+        if (onDone) onDone(false);
       } else {
         const c = getCtx();
         if (c) { c.fillStyle = `rgba(0,0,0,${alpha})`; c.fillRect(0,0,960,600); }

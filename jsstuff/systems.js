@@ -2110,17 +2110,17 @@ if (gs.glowExplosionTimer > 0) gs.glowExplosionTimer--;
     }
   }
 
+  if (gs.gunRevealProgress !== null && gs.gunRevealProgress < 1) {
+    gs.gunRevealProgress = Math.min(1, gs.gunRevealProgress + 1 / 54);
+    if (gs.gunRevealProgress === 1) {
+      gs.gunAcquired = true;
+      gs.gunRevealGlow = 1;
+    }
+  }
+  if (gs.gunRevealGlow > 0) gs.gunRevealGlow = Math.max(0, gs.gunRevealGlow - 1 / 18);
+
   if (gs.clippyIntroLines && !gs.clippyIntroDone) {
     gs.clippyIntroTimer++;
-    if (gs.gunRevealProgress !== null && gs.gunRevealProgress < 1) {
-      gs.gunRevealProgress = Math.min(1, gs.gunRevealProgress + 1 / 54);
-      if (gs.gunRevealProgress === 1) {
-        gs.gunAcquired = true;
-        gs.gunRevealGlow = 1;
-      }
-    }
-    if (gs.gunRevealGlow > 0) gs.gunRevealGlow = Math.max(0, gs.gunRevealGlow - 1 / 18);
-
     const currentLine = gs.clippyIntroLine || 0;
     const lineDuration = gs.clippyIntroLineDurations?.[currentLine] ?? 210;
     if (gs.clippyIntroTimer >= lineDuration) {

@@ -1481,12 +1481,17 @@ function startGame() {
   _doStartGame();
 }
 
-   function _doStartGame(applyIntroChoices = true) {
+   function _doStartGame(applyIntroChoices = true, skipClippyDialogue = false) {
      gameRunning = true;
      isPaused = false;
      muzzleFlash = 0;
      meleeSwingTimer = 0;
      initGameState(applyIntroChoices);
+     if (skipClippyDialogue) {
+       gs.clippyIntroDone = true;
+       gs.gunAcquired = false;
+       gs.gunRevealProgress = 0;
+     }
      updateHUD();
      lastTime = performance.now();
      loop();
@@ -1841,8 +1846,8 @@ window.addEventListener('load', () => {
   if (typeof INTRO !== 'undefined' && !window._introPlayed) {
     window._introPlayed = true;
     document.getElementById('overlay').style.display = 'none';
-    INTRO.start(() => {
-      _doStartGame(false);
+    INTRO.start((shortcutUsed) => {
+      _doStartGame(!shortcutUsed, shortcutUsed);
     });
   }
 });
