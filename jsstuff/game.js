@@ -298,13 +298,27 @@ function initGameState(applyIntroChoices = true) {
     heldGiftBox: null,
     forkGrabbed: false,
 
-   // Show opening Clippy tip on the player sprite
-clippyIntroLines: [
-  "It looks like you started a new game!",
-  "WASD to move · Mouse to aim · Click to shoot",
-  "R to reload · Shift to dash · P to pause",
-  "Good luck... you'll need it.",
-], 
+    clippyIntroScripted: !applyIntroChoices,
+    clippyIntroLines: applyIntroChoices ? [
+      "It looks like you started a new game!",
+      "WASD to move · Mouse to aim · Click to shoot",
+      "R to reload · Shift to dash · P to pause",
+      "Good luck... you'll need it.",
+    ] : [
+      "It's time to kill some viruses!",
+      "...",
+      "User, it has come to my attention that paperclips are not very effective at killing viruses.",
+      "Thankfully, I have found a way to extract data from your computer and recompile it as targeted attack vector that creates a buffer overflow in targeted entities.",
+      "Or, in other words, a gun!",
+      "It looks like you started a new game!",
+      "WASD to move · Mouse to aim · Click to shoot",
+      "R to reload · Shift to dash · P to pause",
+      "Good luck... you'll need it.",
+    ],
+    clippyIntroLineDurations: applyIntroChoices ? null : [210, 60, 300, 480, 210, 210, 210, 210, 210],
+    gunAcquired: applyIntroChoices,
+    gunRevealProgress: null,
+    gunRevealGlow: 0,
 clippyIntroTimer: 0, clippyIntroLine: 0, clippyIntroDone: false,
 clippyPickupMsg: '',
 clippyPickupTimer: 0,
@@ -1467,12 +1481,12 @@ function startGame() {
   _doStartGame();
 }
 
-   function _doStartGame() {
+   function _doStartGame(applyIntroChoices = true) {
      gameRunning = true;
      isPaused = false;
      muzzleFlash = 0;
      meleeSwingTimer = 0;
-     initGameState();
+     initGameState(applyIntroChoices);
      updateHUD();
      lastTime = performance.now();
      loop();
@@ -1828,7 +1842,7 @@ window.addEventListener('load', () => {
     window._introPlayed = true;
     document.getElementById('overlay').style.display = 'none';
     INTRO.start(() => {
-      _doStartGame();
+      _doStartGame(false);
     });
   }
 });

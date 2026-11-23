@@ -1547,6 +1547,7 @@ function sysEnemyPlayerCollision() {
   for (const id of ECS.query('enemy','pos')) {
     const epos=ECS.get(id,'pos');
     const type = ECS.get(id, 'enemy').type;
+    if (gs.clippyIntroScripted && !gs.gunAcquired && type === 'utensil') continue;
     if (type === 'cakeBoss' && ECS.get(id, 'ai')?.antipieBoss) continue;
     const contactRadius = type === 'cakeBoss' ? 82 : 28;
     if (Math.hypot(ppos.x-epos.x,ppos.y-epos.y)<contactRadius) {
@@ -2109,17 +2110,31 @@ if (gs.glowExplosionTimer > 0) gs.glowExplosionTimer--;
     }
   }
 
- // Clippy intro sequence
-if (gs.clippyIntroLines && !gs.clippyIntroDone) {
-  gs.clippyIntroTimer++;
-  if (gs.clippyIntroTimer >= 210) { // ~3.5 sec per line
-    gs.clippyIntroTimer = 0;
-    gs.clippyIntroLine = (gs.clippyIntroLine || 0) + 1;
-    if (gs.clippyIntroLine >= gs.clippyIntroLines.length) {
-      gs.clippyIntroDone = true;
+  if (gs.clippyIntroLines && !gs.clippyIntroDone) {
+    gs.clippyIntroTimer++;
+    if (gs.gunRevealProgress !== null && gs.gunRevealProgress < 1) {
+      gs.gunRevealProgress = Math.min(1, gs.gunRevealProgress + 1 / 54);
+      if (gs.gunRevealProgress === 1) {
+        gs.gunAcquired = true;
+        gs.gunRevealGlow = 1;
+      }
+    }
+    if (gs.gunRevealGlow > 0) gs.gunRevealGlow = Math.max(0, gs.gunRevealGlow - 1 / 18);
+
+    const currentLine = gs.clippyIntroLine || 0;
+    const lineDuration = gs.clippyIntroLineDurations?.[currentLine] ?? 210;
+    if (gs.clippyIntroTimer >= lineDuration) {
+      gs.clippyIntroTimer = 0;
+      gs.clippyIntroLine = currentLine + 1;
+      if (gs.clippyIntroLine >= gs.clippyIntroLines.length) {
+        gs.clippyIntroDone = true;
+      } else if (gs.clippyIntroScripted && gs.clippyIntroLine === 1) {
+        spawnClippyIntroUtensils();
+      } else if (gs.clippyIntroScripted && gs.clippyIntroLine === 4) {
+        gs.gunRevealProgress = 0;
+      }
     }
   }
-}
 
   if (gs.hasShakeFizzlePop&&!gs.sfpFull) {
     gs.sfpMeter=Math.min(gs.sfpMax,gs.sfpMeter+1);
@@ -2311,6 +2326,7 @@ function sysOobCleanup() {
 
 function sysSpawner() {
   if (gs.antipieBossSequence) return;
+  if (gs.clippyIntroScripted && !gs.gunAcquired) return;
   gs.spawnTimer++;
   if (gs.spawnTimer>=gs.spawnInterval){gs.spawnTimer=0;spawnEnemy();}
 }
@@ -2502,6 +2518,44 @@ if (type === 'corRed') SFX.playAt('RedCORAppear', x, y, 0.65);
 if (type === 'corBlue') SFX.playAt('BlueCORAppear', x, y, 0.65);
 }
 
+function spawnClippyIntroUtensils() {
+  const playerPos = ECS.get(gs.playerId, 'pos');
+  const def = ENEMY_DEFS.utensil;
+  const subtypes = ['fork', 'knife', 'spoon'];
+  for (let i = 0; i < 4; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 100 + Math.random() * 80;
+    const x = Math.max(CFG.WALL_PAD + 35, Math.min(
+      worldW - CFG.WALL_PAD - 35,
+      playerPos.x + Math.cos(angle) * distance
+    ));
+    const y = Math.max(CFG.WALL_PAD + 35, Math.min(
+      worldH - CFG.WALL_PAD - 35,
+      playerPos.y + Math.sin(angle) * distance
+    ));
+    const id = ECS.createEntity();
+    const subtype = subtypes[Math.floor(Math.random() * subtypes.length)];
+    ECS.add(id, 'enemy', { type: 'utensil', subtype });
+    ECS.add(id, 'pos', { x, y, angle: 0 });
+    ECS.add(id, 'vel', { vx: 0, vy: 0 });
+    ECS.add(id, 'hp', { hp: 1, maxHp: 1, hitFlash: 0 });
+    ECS.add(id, 'physics', {
+      speed: (1.2 + Math.random() * 0.6 + gs.wave * 0.12) * def.speedMult,
+    });
+    taskManagerApplySpawnNerf(id, 'utensil');
+    ECS.add(id, 'ai', {
+      shootCooldown: 120,
+      ambushTimer: 0,
+      diveTimer: 0,
+      dashHit: false,
+      uLaunchTimer: 180,
+    });
+    gs.encounteredEnemyTypes.add('utensil');
+    spawnParticles(x, y, '#ff4400', 10);
+    SFX.playAt('utensilSpawn', x, y, 0.45);
+  }
+}
+
 function startAntipieBoss(centered = false) {
   if (!gameRunning || gs.floor !== 1 || gs.wave <= CFG.BOSS_WAVE || gs.bossActive) return;
 
@@ -2541,6 +2595,7 @@ function startAntipieBoss(centered = false) {
 }
 
 function shoot() {
+  if (!gs.gunAcquired) return;
   if (gs.ammo<=0||gs.reloading) return;
   gs.ammo--; muzzleFlash=10; updateHUD(); gunRecoil=1.0;
     SFX.playRandom(['shoot1','shoot2','shoot3','shoot4'], 0.55);
@@ -2601,6 +2656,7 @@ function shoot() {
 }
 
 function startReload() {
+  if (!gs.gunAcquired) return;
   if (gs.reloading||gs.ammo===emailAmmoCapacity()) return;
   notifyEmailReloaded();
   gs.reloading=true; gs.reloadTimer=CFG.RELOAD_FRAMES; showMsg('RELOADING...');

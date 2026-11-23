@@ -908,59 +908,77 @@ function drawPlayer(advanceVisualState = true) {
   const ppos = ECS.get(gs.playerId, 'pos');
   let {x, y} = ppos;
 
- // Clippy intro speech bubble on player
-if (gs.clippyIntroLines && !gs.clippyIntroDone) {
-  const line = gs.clippyIntroLines[gs.clippyIntroLine || 0];
-  if (line) {
-    const bx = ppos.x + 18;
-    const by = ppos.y - 90;
-    const bw = 200;
-    const bh = 48;
-    ctx.save();
-    // Bubble background
-    ctx.fillStyle = '#ffffcc';
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 6);
-    ctx.fill();
-    ctx.stroke();
-   // Tail pointing down-left toward player — draw outline then cover seam
-    ctx.beginPath();
-    ctx.moveTo(bx + 10, by + bh);
-    ctx.lineTo(bx, by + bh + 13);
-    ctx.lineTo(bx + 22, by + bh);
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Fill and cover the top seam
-    ctx.beginPath();
-    ctx.moveTo(bx + 8, by + bh - 1);
-    ctx.lineTo(bx, by + bh + 12);
-    ctx.lineTo(bx + 24, by + bh - 1);
-    ctx.fillStyle = '#ffffcc';
-    ctx.fill();
-    // Solid strip to kill any remaining seam pixel
-    ctx.fillRect(bx + 7, by + bh - 2, 18, 3);
-    // Text
-    ctx.fillStyle = '#000000';
-    ctx.font = '10px "MS Sans Serif", Arial, sans-serif';
-    ctx.textAlign = 'left';
-    // Word-wrap across 2 lines max
-    const words = line.split(' ');
-    let l1 = '', l2 = '';
-    let measuring = '';
-    for (const w of words) {
-      const test = measuring ? measuring + ' ' + w : w;
-      if (ctx.measureText(test).width < bw - 16) { measuring = test; }
-      else { l1 = measuring; measuring = w; }
+  if (gs.clippyIntroLines && !gs.clippyIntroDone) {
+    const line = gs.clippyIntroLines[gs.clippyIntroLine || 0];
+    if (line) {
+      ctx.save();
+      ctx.font = '10px "MS Sans Serif", Arial, sans-serif';
+      const maxBubbleWidth = Math.min(360, worldW - 16);
+      const wrappedLines = [];
+      for (const paragraph of line.split('\n')) {
+        let current = '';
+        for (const word of paragraph.split(' ')) {
+          const candidate = current ? `${current} ${word}` : word;
+          if (current && ctx.measureText(candidate).width > maxBubbleWidth - 16) {
+            wrappedLines.push(current);
+            current = word;
+          } else {
+            current = candidate;
+          }
+        }
+        wrappedLines.push(current);
+      }
+      const widestLine = Math.max(...wrappedLines.map(text => ctx.measureText(text).width));
+      const bw = Math.min(maxBubbleWidth, Math.max(200, widestLine + 16));
+      const lineHeight = 14;
+      const bh = wrappedLines.length * lineHeight + 16;
+      const bx = Math.max(8, Math.min(worldW - bw - 8, ppos.x + 18));
+      let by = ppos.y - bh - 38;
+      if (by < 8) by = Math.min(worldH - bh - 8, ppos.y + 38);
+      const bubbleBelowPlayer = by > ppos.y;
+
+      ctx.fillStyle = '#ffffcc';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      if (bubbleBelowPlayer) {
+        ctx.moveTo(bx + 10, by);
+        ctx.lineTo(bx, by - 13);
+        ctx.lineTo(bx + 22, by);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(bx + 8, by + 1);
+        ctx.lineTo(bx, by - 12);
+        ctx.lineTo(bx + 24, by + 1);
+        ctx.fillStyle = '#ffffcc';
+        ctx.fill();
+        ctx.fillRect(bx + 7, by, 18, 3);
+      } else {
+        ctx.moveTo(bx + 10, by + bh);
+        ctx.lineTo(bx, by + bh + 13);
+        ctx.lineTo(bx + 22, by + bh);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(bx + 8, by + bh - 1);
+        ctx.lineTo(bx, by + bh + 12);
+        ctx.lineTo(bx + 24, by + bh - 1);
+        ctx.fillStyle = '#ffffcc';
+        ctx.fill();
+        ctx.fillRect(bx + 7, by + bh - 2, 18, 3);
+      }
+
+      ctx.fillStyle = '#000000';
+      ctx.textAlign = 'left';
+      wrappedLines.forEach((text, index) => {
+        ctx.fillText(text, bx + 8, by + 17 + index * lineHeight);
+      });
+      ctx.restore();
     }
-    if (!l1) { l1 = measuring; measuring = ''; } else { l2 = measuring; }
-    ctx.fillText(l1, bx + 8, by + 19);
-    if (l2) ctx.fillText(l2, bx + 8, by + 34);
-    ctx.restore();
   }
-}
 
   if (gs.hasShakeFizzlePop) {
     const ratio = Math.max(0, Math.min(1, gs.sfpFull ? 1 : gs.sfpMeter / gs.sfpMax));
@@ -1085,18 +1103,70 @@ if (sfpRatio > 0 && playerRedCanvas) {
 ctx.restore();
   }
 
-  if (shotgunImg.complete && shotgunImg.naturalWidth > 0) {
-    ctx.save();
-    ctx.translate(gx, gy);
-    ctx.rotate(gunAngle);
-    if (aimingLeft) ctx.scale(1, -1);
-    ctx.drawImage(
-  shotgunImg,
-  0, 0, 1536, 1024,      // use full image, no crop
-  -GRIP_X, -GRIP_Y,
-  GUN_W, GUN_H
-);
-    ctx.restore();
+  if (gs.gunAcquired || gs.gunRevealProgress !== null) {
+    if (shotgunImg.complete && shotgunImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.translate(gx, gy);
+      ctx.rotate(gunAngle);
+      if (aimingLeft) ctx.scale(1, -1);
+      if (gs.gunRevealProgress === null || gs.gunRevealProgress >= 1) {
+        ctx.shadowColor = `rgba(255, 255, 255, ${gs.gunRevealGlow})`;
+        ctx.shadowBlur = 16 * gs.gunRevealGlow;
+        ctx.drawImage(shotgunImg, 0, 0, 1536, 1024, -GRIP_X, -GRIP_Y, GUN_W, GUN_H);
+      } else {
+        const progress = Math.max(0, Math.min(1, gs.gunRevealProgress));
+        const x0 = -GRIP_X, y0 = -GRIP_Y;
+        const corners = [
+          { x: x0, y: y0 },
+          { x: x0 + GUN_W, y: y0 },
+          { x: x0 + GUN_W, y: y0 + GUN_H },
+          { x: x0, y: y0 + GUN_H },
+        ];
+        const threshold = (GUN_W + GUN_H) * progress;
+        const visible = point => point.x + point.y - x0 - y0 <= threshold;
+        const polygon = [];
+        const edgePoints = [];
+        for (let i = 0; i < corners.length; i++) {
+          const start = corners[i];
+          const end = corners[(i + 1) % corners.length];
+          const startVisible = visible(start);
+          const endVisible = visible(end);
+          if (startVisible !== endVisible) {
+            const amount = (threshold - (start.x + start.y - x0 - y0))
+              / ((end.x - start.x) + (end.y - start.y));
+            const intersection = {
+              x: start.x + (end.x - start.x) * amount,
+              y: start.y + (end.y - start.y) * amount,
+            };
+            polygon.push(intersection);
+            edgePoints.push(intersection);
+          }
+          if (endVisible) polygon.push(end);
+        }
+        if (polygon.length) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(polygon[0].x, polygon[0].y);
+          polygon.slice(1).forEach(point => ctx.lineTo(point.x, point.y));
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(shotgunImg, 0, 0, 1536, 1024, x0, y0, GUN_W, GUN_H);
+          if (edgePoints.length === 2) {
+            ctx.beginPath();
+            ctx.moveTo(edgePoints[0].x, edgePoints[0].y);
+            ctx.lineTo(edgePoints[1].x, edgePoints[1].y);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 14;
+            ctx.globalAlpha = 1 - progress * 0.35;
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+    }
   }
 
   if (advanceVisualState && gunRecoil > 0) gunRecoil = Math.max(0, gunRecoil - 0.08);

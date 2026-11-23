@@ -56,6 +56,7 @@ function giftBoxWindupFrames(gs) {
 
 const BT_UTENSIL = new BTSelector(
   new BTAction((id, gs) => {
+    if (gs.clippyIntroScripted && !gs.gunAcquired) return BT.RUNNING;
     if (gs.frozen) return BT.RUNNING;
     const pos = ECS.get(id, 'pos');
     const vel = ECS.get(id, 'vel');
