@@ -1411,6 +1411,8 @@ function renderDesktopLoading() {
     const side = window.innerWidth - wrapperRect.right >= wrapperRect.left ? 'right' : 'left';
     const outsideX = side === 'right' ? wrapperRect.right + 110 : wrapperRect.left - 110;
     const outsideY = Math.max(90, Math.min(window.innerHeight - 90, wrapperRect.bottom - 110));
+    let clippyX = outsideX;
+    let clippyY = outsideY;
     const toScreen = (x, y) => ({
       x: gameCanvasRect.left + x * gameCanvasRect.width / worldW,
       y: gameCanvasRect.top + y * gameCanvasRect.height / worldH,
@@ -1419,17 +1421,17 @@ function renderDesktopLoading() {
     if (gameWindowPhase === 'clippy_jump' && clippyJumpProgress >= 0 && clippyJumpProgress <= 1) {
       const t = clippyJumpProgress;
       const target = toScreen(introEnemyX, introEnemyY);
-      const x = outsideX + (target.x - outsideX) * t;
-      const y = outsideY + (target.y - outsideY) * t - Math.sin(t * Math.PI) * 180;
-      drawClippyAt(c, x, y, 'jump', clippyAnimFrame, 1 - t * 0.85);
+      clippyX = outsideX + (target.x - outsideX) * t;
+      clippyY = outsideY + (target.y - outsideY) * t - Math.sin(t * Math.PI) * 180;
+      drawClippyAt(c, clippyX, clippyY, 'jump', clippyAnimFrame, 1 - t * 0.85);
     } else if (gameWindowPhase !== 'done') {
-      drawClippyAt(c, outsideX, outsideY, clippyAnim, clippyAnimFrame);
+      drawClippyAt(c, clippyX, clippyY, clippyAnim, clippyAnimFrame);
     }
 
     if (clippyDialogVisible) {
-      const boxX = side === 'right' ? outsideX - 310 : outsideX + 40;
-      const boxY = Math.max(0, Math.min(window.innerHeight - 230, outsideY - 120));
-      drawClippyDialogBox(c, boxX, boxY, outsideX, outsideY);
+      const boxX = side === 'right' ? clippyX - 310 : clippyX + 40;
+      const boxY = Math.max(0, Math.min(window.innerHeight - 230, clippyY - 120));
+      drawClippyDialogBox(c, boxX, boxY, clippyX, clippyY);
     }
   }
 

@@ -56,7 +56,6 @@ function giftBoxWindupFrames(gs) {
 
 const BT_UTENSIL = new BTSelector(
   new BTAction((id, gs) => {
-    if (gs.clippyIntroScripted && !gs.gunAcquired) return BT.RUNNING;
     if (gs.frozen) return BT.RUNNING;
     const pos = ECS.get(id, 'pos');
     const vel = ECS.get(id, 'vel');
@@ -94,6 +93,11 @@ vel.vx = (vel.vx || 0) * 0.88 + driftX * phy.speed;
 vel.vy = (vel.vy || 0) * 0.88 + driftY * phy.speed;
     const spd = Math.hypot(vel.vx, vel.vy);
     if (spd > phy.speed) { vel.vx = vel.vx / spd * phy.speed; vel.vy = vel.vy / spd * phy.speed; }
+
+    if (gs.clippyIntroScripted && !gs.gunAcquired) {
+      ai.uOrbitAngle += 0.045;
+      return BT.RUNNING;
+    }
 
     // ── Tick down player fork-grab ──
     if (ai.uForkGrabTimer > 0) {
