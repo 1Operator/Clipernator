@@ -913,7 +913,7 @@ function drawPlayer(advanceVisualState = true) {
     if (line) {
       ctx.save();
       ctx.font = '10px "MS Sans Serif", Arial, sans-serif';
-      const maxBubbleWidth = Math.min(360, worldW - 16);
+      const maxBubbleWidth = Math.min(260, worldW - 16);
       const wrappedLines = [];
       for (const paragraph of line.split('\n')) {
         let current = '';
@@ -936,6 +936,7 @@ function drawPlayer(advanceVisualState = true) {
       let by = ppos.y - bh - 38;
       if (by < 8) by = Math.min(worldH - bh - 8, ppos.y + 38);
       const bubbleBelowPlayer = by > ppos.y;
+      const tailBaseX = Math.max(bx + 14, Math.min(bx + bw - 14, ppos.x));
 
       ctx.fillStyle = '#ffffcc';
       ctx.strokeStyle = '#000000';
@@ -946,29 +947,29 @@ function drawPlayer(advanceVisualState = true) {
       ctx.stroke();
       ctx.beginPath();
       if (bubbleBelowPlayer) {
-        ctx.moveTo(bx + 10, by);
-        ctx.lineTo(bx, by - 13);
-        ctx.lineTo(bx + 22, by);
+        ctx.moveTo(tailBaseX - 10, by);
+        ctx.lineTo(ppos.x, by - 13);
+        ctx.lineTo(tailBaseX + 10, by);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(bx + 8, by + 1);
-        ctx.lineTo(bx, by - 12);
-        ctx.lineTo(bx + 24, by + 1);
+        ctx.moveTo(tailBaseX - 12, by + 1);
+        ctx.lineTo(ppos.x, by - 12);
+        ctx.lineTo(tailBaseX + 12, by + 1);
         ctx.fillStyle = '#ffffcc';
         ctx.fill();
-        ctx.fillRect(bx + 7, by, 18, 3);
+        ctx.fillRect(tailBaseX - 11, by, 22, 3);
       } else {
-        ctx.moveTo(bx + 10, by + bh);
-        ctx.lineTo(bx, by + bh + 13);
-        ctx.lineTo(bx + 22, by + bh);
+        ctx.moveTo(tailBaseX - 10, by + bh);
+        ctx.lineTo(ppos.x, by + bh + 13);
+        ctx.lineTo(tailBaseX + 10, by + bh);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(bx + 8, by + bh - 1);
-        ctx.lineTo(bx, by + bh + 12);
-        ctx.lineTo(bx + 24, by + bh - 1);
+        ctx.moveTo(tailBaseX - 12, by + bh - 1);
+        ctx.lineTo(ppos.x, by + bh + 12);
+        ctx.lineTo(tailBaseX + 12, by + bh - 1);
         ctx.fillStyle = '#ffffcc';
         ctx.fill();
-        ctx.fillRect(bx + 7, by + bh - 2, 18, 3);
+        ctx.fillRect(tailBaseX - 11, by + bh - 2, 22, 3);
       }
 
       ctx.fillStyle = '#000000';
